@@ -1,0 +1,1 @@
+Service layer for project data, leads, WhatsApp and optional AI integration.

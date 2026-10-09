@@ -1,0 +1,1329 @@
+
+@import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Manrope:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;500;600&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+/* =========================================================
+   VARDHA BUILDERS
+   ARCHITECTURAL DESIGN SYSTEM
+   ========================================================= */
+
+:root {
+  --bg: #f3f0e9;
+  --bg-soft: #e9e5dc;
+  --surface: #faf8f3;
+  --surface-2: #e2ded5;
+
+  --text: #191a18;
+  --text-soft: #575750;
+  --text-muted: #817e75;
+
+  --line: rgba(25, 26, 24, 0.14);
+  --line-strong: rgba(25, 26, 24, 0.23);
+
+  --gold: #a98245;
+  --gold-light: #c7a66d;
+  --gold-soft: rgba(169, 130, 69, 0.12);
+
+  --dark: #171817;
+  --dark-2: #222321;
+
+  --shadow-soft: 0 20px 60px rgba(20, 20, 18, 0.08);
+  --shadow-card: 0 25px 70px rgba(20, 20, 18, 0.11);
+
+  --radius: 0px;
+
+  color-scheme: light;
+}
+
+
+/* =========================================================
+   NIGHT THEME
+   ========================================================= */
+
+html.vardha-night {
+  --bg: #101211;
+  --bg-soft: #171918;
+  --surface: #1b1e1d;
+  --surface-2: #252826;
+
+  --text: #f4f0e7;
+  --text-soft: #bbb8af;
+  --text-muted: #89867e;
+
+  --line: rgba(255, 255, 255, 0.12);
+  --line-strong: rgba(255, 255, 255, 0.2);
+
+  --gold: #c6a264;
+  --gold-light: #ddbd7e;
+  --gold-soft: rgba(198, 162, 100, 0.13);
+
+  --dark: #080909;
+  --dark-2: #111312;
+
+  --shadow-soft: 0 20px 70px rgba(0, 0, 0, 0.3);
+  --shadow-card: 0 30px 90px rgba(0, 0, 0, 0.35);
+
+  color-scheme: dark;
+}
+
+
+/* =========================================================
+   RESET
+   ========================================================= */
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  margin: 0;
+  padding: 0;
+
+  background: var(--bg);
+  color: var(--text);
+
+  scroll-behavior: smooth;
+
+  transition:
+    background-color 0.6s ease,
+    color 0.6s ease;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+
+  min-width: 320px;
+
+  background:
+    radial-gradient(
+      circle at 20% 0%,
+      rgba(169, 130, 69, 0.045),
+      transparent 32%
+    ),
+    var(--bg);
+
+  color: var(--text);
+
+  font-family:
+    "Manrope",
+    Arial,
+    sans-serif;
+
+  font-weight: 400;
+  line-height: 1.5;
+
+  overflow-x: hidden;
+
+  transition:
+    background 0.6s ease,
+    color 0.6s ease;
+}
+
+html.vardha-night body {
+  background:
+    radial-gradient(
+      circle at 70% 0%,
+      rgba(198, 162, 100, 0.05),
+      transparent 30%
+    ),
+    var(--bg);
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+
+/* =========================================================
+   SELECTION
+   ========================================================= */
+
+::selection {
+  background: var(--gold);
+  color: #fff;
+}
+
+
+/* =========================================================
+   SCROLLBAR
+   ========================================================= */
+
+::-webkit-scrollbar {
+  width: 7px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-soft);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--gold);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--gold-light);
+}
+
+
+/* =========================================================
+   TYPOGRAPHY
+   ========================================================= */
+
+.font-display {
+  font-family: "Playfair Display", Georgia, serif;
+}
+
+.font-mono {
+  font-family: "DM Mono", monospace;
+}
+
+.display-xl {
+  font-size: clamp(4rem, 10vw, 10rem);
+  line-height: 0.84;
+  letter-spacing: -0.075em;
+  font-weight: 500;
+}
+
+.display-lg {
+  font-size: clamp(3rem, 7vw, 7rem);
+  line-height: 0.9;
+  letter-spacing: -0.06em;
+  font-weight: 500;
+}
+
+.display-md {
+  font-size: clamp(2.2rem, 4vw, 4.5rem);
+  line-height: 0.94;
+  letter-spacing: -0.045em;
+}
+
+.eyebrow {
+  font-family: "DM Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+
+/* =========================================================
+   ARCHITECTURAL GRID
+   ========================================================= */
+
+.arch-grid {
+  background-image:
+    linear-gradient(
+      to right,
+      var(--line) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      to bottom,
+      var(--line) 1px,
+      transparent 1px
+    );
+
+  background-size: 80px 80px;
+}
+
+.arch-grid-fine {
+  background-image:
+    linear-gradient(
+      to right,
+      var(--line) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      to bottom,
+      var(--line) 1px,
+      transparent 1px
+    );
+
+  background-size: 32px 32px;
+}
+
+
+/* =========================================================
+   SECTION
+   ========================================================= */
+
+.vardha-section {
+  position: relative;
+
+  background: var(--bg);
+  color: var(--text);
+
+  transition:
+    background 0.6s ease,
+    color 0.6s ease;
+}
+
+.vardha-section-soft {
+  background: var(--bg-soft);
+}
+
+.vardha-section-dark {
+  background: var(--dark);
+  color: #f4f1e9;
+}
+
+
+/* =========================================================
+   PREMIUM CARDS
+   ========================================================= */
+
+.vardha-card {
+  position: relative;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.65),
+      rgba(255, 255, 255, 0.28)
+    ),
+    var(--surface);
+
+  border: 1px solid var(--line);
+
+  box-shadow: var(--shadow-soft);
+
+  transition:
+    transform 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.5s ease,
+    border-color 0.5s ease,
+    background 0.5s ease;
+}
+
+html.vardha-night .vardha-card {
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.045),
+      rgba(255, 255, 255, 0.015)
+    ),
+    var(--surface);
+}
+
+.vardha-card:hover {
+  transform: translateY(-8px);
+
+  box-shadow: var(--shadow-card);
+
+  border-color: rgba(169, 130, 69, 0.35);
+}
+
+
+/* =========================================================
+   IMAGE TREATMENT
+   ========================================================= */
+
+.arch-image {
+  position: relative;
+  overflow: hidden;
+}
+
+.arch-image img {
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+
+  transition:
+    transform 1.2s cubic-bezier(0.22, 1, 0.36, 1),
+    filter 0.8s ease;
+}
+
+.arch-image:hover img {
+  transform: scale(1.045);
+}
+
+
+/* =========================================================
+   IMAGE OVERLAY
+   ========================================================= */
+
+.image-overlay {
+  position: absolute;
+  inset: 0;
+
+  background:
+    linear-gradient(
+      180deg,
+      transparent 35%,
+      rgba(0, 0, 0, 0.68) 100%
+    );
+
+  pointer-events: none;
+}
+
+
+/* =========================================================
+   GOLD LINE
+   ========================================================= */
+
+.gold-line {
+  width: 70px;
+  height: 1px;
+  background: var(--gold);
+}
+
+
+/* =========================================================
+   BUTTONS
+   ========================================================= */
+
+.vardha-btn {
+  position: relative;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 12px;
+
+  min-height: 48px;
+
+  padding: 0 24px;
+
+  border: 1px solid var(--text);
+
+  background: transparent;
+  color: var(--text);
+
+  font-family: "DM Mono", monospace;
+  font-size: 10px;
+
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+
+  overflow: hidden;
+
+  transition:
+    color 0.35s ease,
+    border-color 0.35s ease;
+}
+
+.vardha-btn::before {
+  content: "";
+
+  position: absolute;
+  inset: 0;
+
+  background: var(--text);
+
+  transform: translateY(101%);
+
+  transition:
+    transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+
+  z-index: 0;
+}
+
+.vardha-btn span {
+  position: relative;
+  z-index: 1;
+}
+
+.vardha-btn:hover {
+  color: var(--bg);
+}
+
+.vardha-btn:hover::before {
+  transform: translateY(0);
+}
+
+.vardha-btn-gold {
+  border-color: var(--gold);
+  background: var(--gold);
+  color: white;
+}
+
+.vardha-btn-gold::before {
+  background: var(--dark);
+}
+
+.vardha-btn-gold:hover {
+  color: white;
+}
+
+
+/* =========================================================
+   INPUTS
+   ========================================================= */
+
+.vardha-input {
+  width: 100%;
+  min-height: 54px;
+
+  border: 1px solid var(--line);
+
+  background: var(--surface);
+
+  padding: 0 16px;
+
+  color: var(--text);
+
+  outline: none;
+
+  transition:
+    border-color 0.3s ease,
+    box-shadow 0.3s ease,
+    background 0.3s ease;
+}
+
+.vardha-input::placeholder {
+  color: var(--text-muted);
+}
+
+.vardha-input:focus {
+  border-color: var(--gold);
+
+  box-shadow:
+    0 0 0 3px var(--gold-soft);
+}
+
+
+/* =========================================================
+   NAVBAR
+   ========================================================= */
+
+.vardha-nav {
+  color: var(--text);
+
+  transition:
+    background 0.5s ease,
+    color 0.5s ease,
+    border-color 0.5s ease;
+}
+
+.vardha-nav-scrolled {
+  background: rgba(243, 240, 233, 0.82);
+
+  border-bottom: 1px solid var(--line);
+
+  backdrop-filter: blur(18px);
+}
+
+html.vardha-night .vardha-nav-scrolled {
+  background: rgba(16, 18, 17, 0.84);
+}
+
+
+/* =========================================================
+   HERO
+   ========================================================= */
+
+.hero-light {
+  background:
+    radial-gradient(
+      circle at 70% 30%,
+      rgba(190, 167, 124, 0.22),
+      transparent 30%
+    ),
+    linear-gradient(
+      120deg,
+      #eeebe4 0%,
+      #f6f3ed 55%,
+      #e4dfd4 100%
+    );
+}
+
+html.vardha-night .hero-light {
+  background:
+    radial-gradient(
+      circle at 70% 25%,
+      rgba(181, 145, 78, 0.13),
+      transparent 32%
+    ),
+    #111413;
+}
+
+
+/* =========================================================
+   ARCHITECTURAL CORNERS
+   ========================================================= */
+
+.arch-corner {
+  position: absolute;
+
+  width: 50px;
+  height: 50px;
+
+  pointer-events: none;
+}
+
+.arch-corner::before,
+.arch-corner::after {
+  content: "";
+
+  position: absolute;
+
+  background: var(--gold);
+}
+
+.arch-corner::before {
+  width: 100%;
+  height: 1px;
+}
+
+.arch-corner::after {
+  width: 1px;
+  height: 100%;
+}
+
+.arch-corner-tl {
+  top: 0;
+  left: 0;
+}
+
+.arch-corner-tr {
+  top: 0;
+  right: 0;
+
+  transform: rotate(90deg);
+}
+
+.arch-corner-bl {
+  bottom: 0;
+  left: 0;
+
+  transform: rotate(-90deg);
+}
+
+.arch-corner-br {
+  bottom: 0;
+  right: 0;
+
+  transform: rotate(180deg);
+}
+
+
+/* =========================================================
+   PROJECT NUMBER
+   ========================================================= */
+
+.project-number {
+  font-family: "DM Mono", monospace;
+
+  font-size: 10px;
+
+  letter-spacing: 0.2em;
+
+  color: var(--gold);
+}
+
+
+/* =========================================================
+   MARQUEE
+   ========================================================= */
+
+.vardha-marquee {
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.vardha-marquee-track {
+  display: inline-flex;
+
+  width: max-content;
+
+  animation:
+    vardha-marquee 28s linear infinite;
+}
+
+@keyframes vardha-marquee {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+
+/* =========================================================
+   REVEAL ANIMATION
+   ========================================================= */
+
+.reveal {
+  opacity: 0;
+
+  transform: translateY(35px);
+}
+
+.reveal-visible {
+  opacity: 1;
+
+  transform: translateY(0);
+
+  transition:
+    opacity 0.9s ease,
+    transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+
+/* =========================================================
+   HORIZONTAL SCROLL
+   ========================================================= */
+
+.horizontal-scroll {
+  display: flex;
+
+  gap: 24px;
+
+  overflow-x: auto;
+
+  padding-bottom: 20px;
+
+  scroll-snap-type: x mandatory;
+
+  scrollbar-width: thin;
+
+  scrollbar-color:
+    var(--gold)
+    transparent;
+}
+
+.horizontal-scroll > * {
+  flex: 0 0 min(82vw, 650px);
+
+  scroll-snap-align: start;
+}
+
+
+/* =========================================================
+   3D SCENE CONTAINER
+   ========================================================= */
+
+.architecture-3d {
+  position: relative;
+
+  min-height: 600px;
+
+  overflow: hidden;
+
+  background:
+    radial-gradient(
+      circle at 50% 25%,
+      rgba(205, 191, 161, 0.32),
+      transparent 34%
+    ),
+    #c7c9c3;
+
+  border: 1px solid var(--line);
+}
+
+html.vardha-night .architecture-3d {
+  background:
+    radial-gradient(
+      circle at 50% 25%,
+      rgba(178, 143, 77, 0.11),
+      transparent 34%
+    ),
+    #111514;
+}
+
+
+/* =========================================================
+   BLUEPRINT
+   ========================================================= */
+
+.blueprint {
+  background-color: #e9e5db;
+
+  background-image:
+    linear-gradient(
+      rgba(79, 108, 119, 0.14) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(79, 108, 119, 0.14) 1px,
+      transparent 1px
+    );
+
+  background-size: 20px 20px;
+
+  color: #263c43;
+}
+
+html.vardha-night .blueprint {
+  background-color: #172126;
+
+  background-image:
+    linear-gradient(
+      rgba(122, 164, 177, 0.14) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(122, 164, 177, 0.14) 1px,
+      transparent 1px
+    );
+}
+
+
+/* =========================================================
+   FLOOR PLAN
+   ========================================================= */
+
+.floor-plan {
+  position: relative;
+
+  background:
+    linear-gradient(
+      rgba(75, 101, 107, 0.1) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(75, 101, 107, 0.1) 1px,
+      transparent 1px
+    );
+
+  background-size: 24px 24px;
+
+  border: 1px solid rgba(50, 70, 75, 0.25);
+}
+
+
+/* =========================================================
+   STATUS
+   ========================================================= */
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+
+  border-radius: 50%;
+
+  background: #7a9b72;
+
+  box-shadow:
+    0 0 0 5px rgba(122, 155, 114, 0.12),
+    0 0 18px rgba(122, 155, 114, 0.35);
+}
+
+
+/* =========================================================
+   CURSOR
+   ========================================================= */
+
+@media (pointer: fine) {
+  .cursor-hover {
+    cursor: crosshair;
+  }
+}
+
+
+/* =========================================================
+   PORTFOLIO
+   NEW
+   ========================================================= */
+
+.portfolio-hero {
+  isolation: isolate;
+}
+
+.portfolio-hero img {
+  will-change: transform;
+}
+
+.portfolio-hero-content {
+  will-change: transform, opacity;
+}
+
+
+/* =========================================================
+   PORTFOLIO IMAGE
+   ========================================================= */
+
+.portfolio-image {
+  will-change: transform;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+
+/* =========================================================
+   PORTFOLIO CARD DEPTH
+   ========================================================= */
+
+.portfolio-card {
+  transform-style: preserve-3d;
+  will-change: transform;
+
+  transition:
+    transform 0.3s ease-out,
+    opacity 0.6s ease;
+}
+
+
+/* =========================================================
+   PORTFOLIO FEATURED PROJECT
+   ========================================================= */
+
+.featured-project {
+  position: relative;
+}
+
+.featured-project img {
+  will-change: transform;
+}
+
+
+/* =========================================================
+   PORTFOLIO SCROLL PROGRESS
+   ========================================================= */
+
+.portfolio-progress {
+  position: fixed;
+
+  top: 0;
+  left: 0;
+
+  z-index: 9999;
+
+  width: 100%;
+  height: 2px;
+
+  pointer-events: none;
+}
+
+.portfolio-progress-bar {
+  height: 100%;
+
+  background: var(--gold);
+
+  transform-origin: left center;
+}
+
+
+/* =========================================================
+   PORTFOLIO MODAL
+   ========================================================= */
+
+.portfolio-modal {
+  position: fixed;
+
+  inset: 0;
+
+  z-index: 9990;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+
+  background: rgba(0, 0, 0, 0.88);
+
+  backdrop-filter: blur(16px);
+}
+
+.portfolio-modal-panel {
+  position: relative;
+
+  width: 100%;
+  max-width: 1400px;
+
+  max-height: 92vh;
+
+  overflow: hidden;
+
+  background: #111212;
+
+  box-shadow:
+    0 40px 120px rgba(0, 0, 0, 0.45);
+}
+
+
+/* =========================================================
+   PORTFOLIO MODAL IMAGE
+   ========================================================= */
+
+.portfolio-modal-image {
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+
+  transition:
+    transform 1s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.portfolio-modal-panel:hover
+.portfolio-modal-image {
+  transform: scale(1.015);
+}
+
+
+/* =========================================================
+   PORTFOLIO QUICK PREVIEW BUTTON
+   ========================================================= */
+
+.portfolio-preview-button {
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  width: 44px;
+  height: 44px;
+
+  border: 1px solid rgba(255, 255, 255, 0.25);
+
+  background: rgba(0, 0, 0, 0.18);
+
+  color: white;
+
+  backdrop-filter: blur(10px);
+
+  transition:
+    transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+    background 0.4s ease,
+    border-color 0.4s ease;
+}
+
+.portfolio-preview-button:hover {
+  transform: rotate(45deg);
+
+  background: var(--gold);
+
+  border-color: var(--gold);
+}
+
+
+/* =========================================================
+   PORTFOLIO FILTER
+   ========================================================= */
+
+.portfolio-filter {
+  position: relative;
+
+  overflow: hidden;
+
+  transition:
+    color 0.3s ease,
+    border-color 0.3s ease,
+    background 0.3s ease;
+}
+
+.portfolio-filter::before {
+  content: "";
+
+  position: absolute;
+
+  inset: 0;
+
+  background: var(--text);
+
+  transform: translateY(101%);
+
+  transition:
+    transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+
+  z-index: -1;
+}
+
+.portfolio-filter:hover::before {
+  transform: translateY(0);
+}
+
+.portfolio-filter:hover {
+  color: var(--bg);
+
+  border-color: var(--text);
+}
+
+
+/* =========================================================
+   PORTFOLIO TECHNICAL LABEL
+   ========================================================= */
+
+.portfolio-tech-label {
+  font-family: "DM Mono", monospace;
+
+  font-size: 8px;
+
+  line-height: 1;
+
+  letter-spacing: 0.3em;
+
+  text-transform: uppercase;
+
+  color: var(--text-muted);
+}
+
+
+/* =========================================================
+   PORTFOLIO STAT
+   ========================================================= */
+
+.portfolio-stat {
+  position: relative;
+
+  overflow: hidden;
+}
+
+.portfolio-stat::after {
+  content: "";
+
+  position: absolute;
+
+  left: 0;
+  bottom: 0;
+
+  width: 100%;
+  height: 1px;
+
+  background: var(--gold);
+
+  transform: scaleX(0);
+
+  transform-origin: left;
+
+  transition:
+    transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.portfolio-stat:hover::after {
+  transform: scaleX(1);
+}
+
+
+/* =========================================================
+   ARCHITECTURAL CROSSHAIR
+   ========================================================= */
+
+.arch-crosshair {
+  position: relative;
+
+  width: 32px;
+  height: 32px;
+}
+
+.arch-crosshair::before,
+.arch-crosshair::after {
+  content: "";
+
+  position: absolute;
+
+  background: var(--gold);
+}
+
+.arch-crosshair::before {
+  left: 50%;
+  top: 0;
+
+  width: 1px;
+  height: 100%;
+
+  transform: translateX(-50%);
+}
+
+.arch-crosshair::after {
+  top: 50%;
+  left: 0;
+
+  width: 100%;
+  height: 1px;
+
+  transform: translateY(-50%);
+}
+
+
+/* =========================================================
+   GOLD GLOW
+   ========================================================= */
+
+.gold-glow {
+  box-shadow:
+    0 0 0 1px rgba(169, 130, 69, 0.15),
+    0 0 50px rgba(169, 130, 69, 0.08);
+}
+
+
+/* =========================================================
+   IMAGE LOADING
+   ========================================================= */
+
+.image-loading {
+  background:
+    linear-gradient(
+      110deg,
+      var(--bg-soft) 8%,
+      var(--surface) 18%,
+      var(--bg-soft) 33%
+    );
+
+  background-size: 200% 100%;
+
+  animation:
+    image-shimmer 1.8s linear infinite;
+}
+
+@keyframes image-shimmer {
+  from {
+    background-position: 200% 0;
+  }
+
+  to {
+    background-position: -200% 0;
+  }
+}
+
+
+/* =========================================================
+   PORTFOLIO MARQUEE
+   ========================================================= */
+
+@keyframes portfolio-marquee {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.portfolio-marquee {
+  display: flex;
+
+  width: max-content;
+
+  animation:
+    portfolio-marquee 25s linear infinite;
+}
+
+
+/* =========================================================
+   FLOATING GOLD ORB
+   ========================================================= */
+
+.gold-orb {
+  position: absolute;
+
+  width: 350px;
+  height: 350px;
+
+  border-radius: 50%;
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(201, 166, 107, 0.16),
+      transparent 68%
+    );
+
+  filter: blur(10px);
+
+  pointer-events: none;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 768px) {
+  .display-xl {
+    font-size: clamp(3.2rem, 16vw, 6rem);
+  }
+
+  .display-lg {
+    font-size: clamp(2.7rem, 13vw, 5rem);
+  }
+
+  .arch-grid {
+    background-size: 45px 45px;
+  }
+
+  .architecture-3d {
+    min-height: 480px;
+  }
+
+  .portfolio-modal {
+    padding: 10px;
+  }
+
+  .portfolio-modal-panel {
+    max-height: 95vh;
+  }
+
+  .portfolio-marquee {
+    animation-duration: 20s;
+  }
+}
+
+
+/* =========================================================
+   SMALL MOBILE
+   ========================================================= */
+
+@media (max-width: 480px) {
+  .arch-grid {
+    background-size: 36px 36px;
+  }
+
+  .portfolio-card {
+    transform: none !important;
+  }
+
+  .portfolio-modal {
+    padding: 0;
+  }
+
+  .portfolio-modal-panel {
+    max-height: 100vh;
+  }
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .portfolio-card {
+    transform: none !important;
+  }
+}
+
