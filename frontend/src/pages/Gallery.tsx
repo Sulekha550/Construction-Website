@@ -51,25 +51,25 @@ const galleryPhotos = {
   steelStructure:
     "/images/Gallery/Gallery6.webp",
   crane:
-    "https://images.unsplash.com/photo-1541976590-713941681591?auto=format&fit=crop&w=1800&q=85",
+    "/images/Gallery/Gallery7.webp",
   buildingFrame:
-    "https://images.unsplash.com/photo-1590644365607-1c5a38e9a1e8?auto=format&fit=crop&w=1800&q=85",
+    "/images/Gallery/Gallery5.webp",
   concrete:
-    "https://images.unsplash.com/photo-1531834685032-c34bf0d84c77?auto=format&fit=crop&w=1800&q=85",
+    "/images/Gallery/Gallery8.webp",
   sitePlanning:
-    "https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1800&q=85",
+    "/images/Gallery/Gallery9.webp",
   materials:
-    "https://images.unsplash.com/photo-1513467655676-561b7d489a88?auto=format&fit=crop&w=1800&q=85",
+    "/images/Gallery/Gallery10.webp",
   architecture:
-    "https://images.unsplash.com/photo-1487958449943-2429e8be8625?auto=format&fit=crop&w=1800&q=85",
+    "/images/Gallery/Gallery11.webp",
   exterior:
-    "https://images.unsplash.com/photo-1511818966892-d7d671e672a2?auto=format&fit=crop&w=1800&q=85",
+    "/images/Gallery/Gallery8.webp",
   highRise:
-    "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1800&q=85",
+    "/images/Gallery/Gallery12.webp",
   finishing:
-    "https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1800&q=85",
+    "/images/Gallery/Gallery13.webp",
   completed:
-    "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1800&q=85",
+    "/images/Gallery/Gallery14.webp",
 };
 
 const categories: Category[] = [

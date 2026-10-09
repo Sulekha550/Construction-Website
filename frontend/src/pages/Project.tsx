@@ -1367,7 +1367,7 @@ export default function Portfolio() {
                   {String(Math.max(previewIndex + 1, 1)).padStart(2, "0")} /{" "}
                   {String(filteredProjects.length).padStart(2, "0")}
                 </span>
-              </div>
+              </div> 
 
               <div className="absolute bottom-6 left-5 right-5 sm:bottom-9 sm:left-8 sm:right-8 lg:bottom-12 lg:left-12 lg:right-12">
                 <div className="mb-3 flex items-center gap-3 text-white/55">

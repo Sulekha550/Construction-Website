@@ -108,7 +108,6 @@ type Plan = {
 
 /* =========================================================
    RESIDENCE DATA
-   Only 2 BHK, 3 BHK and 4 BHK
 ========================================================= */
 
 const plans: Plan[] = [
@@ -165,8 +164,14 @@ const plans: Plan[] = [
 type ViewMode = "2D" | "3D";
 
 /* =========================================================
-   INTERACTIVE FLOOR PLAN
-   Button works independently for every residence
+   INTERACTIVE FLOOR PLAN VIEWER
+
+   Behaviour:
+   1. Default view is 2D.
+   2. Hovering over the floor plan changes 2D to 3D.
+   3. Leaving the floor plan returns to 2D.
+   4. The toggle button manually switches between 2D and 3D.
+   5. On touch devices, the toggle button can be used instead.
 ========================================================= */
 
 function FloorPlanViewer({
@@ -181,71 +186,107 @@ function FloorPlanViewer({
   onOpen: () => void;
 }) {
   const [imageError, setImageError] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+
+  // When the saved view is 2D, hovering temporarily displays 3D.
+  // When the user manually selects 3D, it stays 3D.
+  const displayedView: ViewMode =
+    isHovered && viewMode === "2D" ? "3D" : viewMode;
 
   const currentImage =
-    viewMode === "2D" ? plan.image2D : plan.image3D;
+    displayedView === "2D" ? plan.image2D : plan.image3D;
 
   useEffect(() => {
     setImageError(false);
   }, [currentImage]);
 
+  // Prevent the hover preview from carrying over to another residence.
+  useEffect(() => {
+    setIsHovered(false);
+  }, [plan.id]);
+
+  const handleToggle = () => {
+    // Clear the temporary hover preview before changing the saved view.
+    setIsHovered(false);
+    onToggleView();
+  };
+
   return (
     <div className="overflow-hidden border border-white/10 bg-[#e8e5dc]">
-      <div className="relative flex min-h-[360px] items-center justify-center overflow-hidden sm:min-h-[460px] md:min-h-[580px]">
+      <div
+        className="relative flex min-h-[360px] items-center justify-center overflow-hidden sm:min-h-[460px] md:min-h-[580px]"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        {/* FLOOR PLAN IMAGE */}
         {!imageError ? (
           <img
-            key={`${plan.id}-${viewMode}`}
+            key={`${plan.id}-${displayedView}`}
             src={currentImage}
-            alt={`${plan.type} ${viewMode} architectural floor plan`}
+            alt={`${plan.type} ${displayedView} architectural floor plan`}
             onError={() => setImageError(true)}
             className="min-h-[360px] max-h-[620px] w-full object-contain p-4 transition-opacity duration-300 sm:p-8 md:p-12"
           />
         ) : (
           <div className="flex min-h-[360px] w-full flex-col items-center justify-center gap-3 px-6 text-center text-[#151613]">
             <Home size={30} />
+
             <p className="font-serif text-xl">
-              {plan.type} {viewMode} Plan
+              {plan.type} {displayedView} Plan
             </p>
+
             <p className="max-w-md text-sm text-black/55">
               Image not found. Check the filename and path in
               public/images/floorplans.
             </p>
+
             <p className="break-all text-xs text-black/45">
               {currentImage}
             </p>
           </div>
         )}
 
-        {/* Top-left label */}
-        <div className="absolute left-4 top-4 z-10 sm:left-6 sm:top-6">
+        {/* RESIDENCE LABEL */}
+        <div className="pointer-events-none absolute left-4 top-4 z-10 sm:left-6 sm:top-6">
           <div className="border border-black/10 bg-white/85 px-3 py-2.5 backdrop-blur-md">
             <p className="text-[8px] uppercase tracking-[0.2em] text-black/45">
               Residence {plan.id}
             </p>
+
             <p className="mt-1 font-serif text-lg text-black">
               {plan.type}
             </p>
           </div>
         </div>
 
-        {/* Current mode */}
-        <div className="absolute right-4 top-4 z-10 sm:right-6 sm:top-6">
+        {/* CURRENT VIEW LABEL */}
+        <div className="pointer-events-none absolute right-4 top-4 z-10 sm:right-6 sm:top-6">
           <div className="flex items-center gap-2 border border-black/10 bg-white/85 px-3 py-2.5 text-black/65 backdrop-blur-md">
             <Move3d size={13} />
+
             <span className="text-[8px] uppercase tracking-[0.15em]">
-              {viewMode === "2D" ? "2D Architectural" : "3D Spatial View"}
+              {displayedView === "2D"
+                ? "2D Architectural"
+                : "3D Spatial View"}
             </span>
           </div>
         </div>
 
-        {/* Toggle button */}
+        {/* 2D / 3D TOGGLE + FULLSCREEN */}
         <div className="absolute bottom-4 right-4 z-10 flex flex-wrap gap-2 sm:bottom-6 sm:right-6">
           <button
             type="button"
-            onClick={onToggleView}
+            onClick={handleToggle}
+            onMouseEnter={() => setIsHovered(false)}
+            aria-label={
+              viewMode === "2D"
+                ? `Switch ${plan.type} to 3D`
+                : `Switch ${plan.type} to 2D`
+            }
             className="flex min-h-11 items-center justify-center gap-2 bg-[#151613] px-4 py-3 text-[9px] uppercase tracking-[0.15em] text-white transition duration-300 hover:bg-[#c5a46d] hover:text-black sm:px-5"
           >
             <Move3d size={15} />
+
             {viewMode === "2D" ? "View 3D Plan" : "View 2D Plan"}
           </button>
 
@@ -259,13 +300,16 @@ function FloorPlanViewer({
           </button>
         </div>
 
-        {/* 2D / 3D status */}
-        <div className="absolute bottom-5 left-4 z-10 flex items-center gap-2 sm:bottom-7 sm:left-6">
+        {/* 2D / 3D STATUS INDICATOR */}
+        <div className="pointer-events-none absolute bottom-5 left-4 z-10 flex items-center gap-2 sm:bottom-7 sm:left-6">
           <span
             className={`h-1.5 w-1.5 rounded-full ${
-              viewMode === "2D" ? "bg-[#b18d4e]" : "bg-black/20"
+              displayedView === "2D"
+                ? "bg-[#b18d4e]"
+                : "bg-black/20"
             }`}
           />
+
           <span className="text-[8px] uppercase tracking-[0.15em] text-black/50">
             2D
           </span>
@@ -274,21 +318,25 @@ function FloorPlanViewer({
 
           <span
             className={`h-1.5 w-1.5 rounded-full ${
-              viewMode === "3D" ? "bg-[#b18d4e]" : "bg-black/20"
+              displayedView === "3D"
+                ? "bg-[#b18d4e]"
+                : "bg-black/20"
             }`}
           />
+
           <span className="text-[8px] uppercase tracking-[0.15em] text-black/50">
             3D
           </span>
         </div>
       </div>
 
-      {/* Plan details */}
+      {/* PLAN DETAILS */}
       <div className="grid border-t border-white/10 bg-[#191a16] sm:grid-cols-4">
         <div className="border-b border-white/10 p-5 sm:border-b-0 sm:border-r sm:p-6">
           <p className="text-[8px] uppercase tracking-[0.2em] text-[#c5a46d]">
             Residence
           </p>
+
           <p className="mt-2 font-serif text-xl text-white">
             {plan.type}
           </p>
@@ -298,9 +346,12 @@ function FloorPlanViewer({
           <p className="text-[8px] uppercase tracking-[0.2em] text-white/35">
             Approx. Area
           </p>
+
           <p className="mt-2 font-serif text-xl text-white">
             {plan.area}
-            <span className="ml-1 text-[9px] text-white/35">SQ.FT.</span>
+            <span className="ml-1 text-[9px] text-white/35">
+              SQ.FT.
+            </span>
           </p>
         </div>
 
@@ -308,6 +359,7 @@ function FloorPlanViewer({
           <p className="text-[8px] uppercase tracking-[0.2em] text-white/35">
             Bedrooms
           </p>
+
           <p className="mt-2 flex items-center gap-2 font-serif text-xl text-white">
             <BedDouble size={16} className="text-[#c5a46d]" />
             {plan.bedrooms}
@@ -318,6 +370,7 @@ function FloorPlanViewer({
           <p className="text-[8px] uppercase tracking-[0.2em] text-white/35">
             Bathrooms
           </p>
+
           <p className="mt-2 flex items-center gap-2 font-serif text-xl text-white">
             <Home size={15} className="text-[#c5a46d]" />
             {plan.bathrooms}
@@ -387,6 +440,7 @@ function FullscreenPlan({
   onPrevious: () => void;
 }) {
   const [viewMode, setViewMode] = useState<ViewMode>(initialView);
+  const [imageError, setImageError] = useState(false);
 
   const currentImage =
     viewMode === "2D" ? plan.image2D : plan.image3D;
@@ -396,7 +450,12 @@ function FullscreenPlan({
   }, [plan.id, initialView]);
 
   useEffect(() => {
+    setImageError(false);
+  }, [currentImage]);
+
+  useEffect(() => {
     const previousOverflow = document.body.style.overflow;
+
     document.body.style.overflow = "hidden";
 
     return () => {
@@ -420,11 +479,13 @@ function FullscreenPlan({
 
   return (
     <div className="fixed inset-0 z-[100] flex flex-col bg-[#11120f]/[0.98] text-white backdrop-blur-xl">
+      {/* MODAL HEADER */}
       <header className="relative z-20 flex items-center justify-between gap-4 border-b border-white/10 px-5 py-4 md:px-8">
         <div>
           <p className="text-[8px] uppercase tracking-[0.25em] text-[#c5a46d]">
             Vardha Builders · Residence Plans
           </p>
+
           <h2 className="mt-1 font-serif text-lg md:text-xl">
             {plan.type} — {plan.title}
           </h2>
@@ -440,15 +501,34 @@ function FullscreenPlan({
         </button>
       </header>
 
+      {/* FULLSCREEN IMAGE */}
       <div className="flex min-h-0 flex-1 items-center justify-center overflow-hidden px-5 py-5 md:px-16">
-        <img
-          key={`${plan.id}-${viewMode}`}
-          src={currentImage}
-          alt={`${plan.type} ${viewMode} floor plan`}
-          className="max-h-full max-w-full object-contain"
-        />
+        {!imageError ? (
+          <img
+            key={`${plan.id}-${viewMode}`}
+            src={currentImage}
+            alt={`${plan.type} ${viewMode} floor plan`}
+            onError={() => setImageError(true)}
+            className="max-h-full max-w-full object-contain"
+          />
+        ) : (
+          <div className="flex flex-col items-center gap-3 text-center text-white/60">
+            <Home size={32} />
+
+            <p className="font-serif text-xl">
+              {plan.type} {viewMode} Plan
+            </p>
+
+            <p className="text-sm">
+              Image could not be loaded. Please check the image path.
+            </p>
+
+            <p className="break-all text-xs">{currentImage}</p>
+          </div>
+        )}
       </div>
 
+      {/* MODAL FOOTER */}
       <footer className="relative z-20 flex flex-col justify-between gap-4 border-t border-white/10 px-5 py-4 sm:flex-row sm:items-center md:px-8">
         <div className="flex flex-wrap items-center gap-4 text-[9px] uppercase tracking-[0.12em] text-white/55">
           <span>{plan.area} SQ.FT.</span>
@@ -460,11 +540,14 @@ function FullscreenPlan({
           <button
             type="button"
             onClick={() =>
-              setViewMode((previous) => (previous === "2D" ? "3D" : "2D"))
+              setViewMode((previous) =>
+                previous === "2D" ? "3D" : "2D"
+              )
             }
             className="flex h-10 items-center gap-2 border border-white/20 px-4 text-[9px] uppercase tracking-[0.12em] transition hover:bg-[#c5a46d] hover:text-black"
           >
             <Move3d size={14} />
+
             View {viewMode === "2D" ? "3D" : "2D"}
           </button>
 
@@ -532,6 +615,7 @@ export default function FloorPlans() {
   const nextPlan = useCallback(() => {
     setViewerPlanId((currentId) => {
       const index = plans.findIndex((plan) => plan.id === currentId);
+
       return plans[(index + 1 + plans.length) % plans.length].id;
     });
   }, []);
@@ -539,11 +623,14 @@ export default function FloorPlans() {
   const previousPlan = useCallback(() => {
     setViewerPlanId((currentId) => {
       const index = plans.findIndex((plan) => plan.id === currentId);
+
       return plans[(index - 1 + plans.length) % plans.length].id;
     });
   }, []);
 
-  /* GSAP animations */
+  /* =========================================================
+     GSAP ANIMATIONS
+  ========================================================= */
 
   useEffect(() => {
     const context = gsap.context(() => {
@@ -671,6 +758,7 @@ export default function FloorPlans() {
                 className="group flex shrink-0 items-center gap-3 text-[9px] uppercase tracking-[0.2em]"
               >
                 Explore Plans
+
                 <span className="flex h-10 w-10 items-center justify-center border border-white/30 transition group-hover:bg-white group-hover:text-black">
                   <ArrowDown size={14} />
                 </span>
@@ -682,9 +770,11 @@ export default function FloorPlans() {
         <div className="absolute bottom-0 left-0 right-0 z-20 border-t border-white/10">
           <div className="mx-auto flex max-w-[1500px] items-center justify-between px-6 py-4 text-[8px] uppercase tracking-[0.18em] text-white/40 md:px-12 lg:px-20">
             <span>01 — Residential Planning</span>
+
             <span className="hidden md:block">
               Architecture / Function / Light
             </span>
+
             <span>Scroll to explore</span>
           </div>
         </div>
@@ -700,6 +790,7 @@ export default function FloorPlans() {
             <p className="text-[9px] uppercase tracking-[0.25em] text-[#a58a59]">
               01 / Planning Philosophy
             </p>
+
             <div className="mt-7 h-px w-16 bg-[#c5a46d]" />
           </div>
 
@@ -756,7 +847,7 @@ export default function FloorPlans() {
             </p>
           </div>
 
-          {/* Only 2 BHK, 3 BHK, 4 BHK */}
+          {/* 2 BHK / 3 BHK / 4 BHK SELECTOR */}
           <div className="mb-7 grid grid-cols-3 border-y border-white/10">
             {plans.map((plan) => {
               const isActive = activePlanId === plan.id;
@@ -789,7 +880,7 @@ export default function FloorPlans() {
             })}
           </div>
 
-          {/* Selected residence details */}
+          {/* SELECTED RESIDENCE DETAILS */}
           <div className="grid gap-7 lg:grid-cols-[1.3fr_0.7fr]">
             <div className="reveal-section min-w-0">
               <FloorPlanViewer
@@ -807,6 +898,7 @@ export default function FloorPlans() {
                   <span className="text-[8px] uppercase tracking-[0.22em] text-[#c5a46d]">
                     Residence {selectedPlan.id}
                   </span>
+
                   <span className="font-serif text-2xl text-white/15 sm:text-3xl">
                     {selectedPlan.type}
                   </span>
@@ -839,6 +931,7 @@ export default function FloorPlans() {
                     <p className="text-[8px] uppercase tracking-[0.16em] text-white/30">
                       Area
                     </p>
+
                     <p className="mt-2 font-serif text-xl">
                       {selectedPlan.area}
                       <span className="ml-1 text-[9px] text-white/35">
@@ -851,6 +944,7 @@ export default function FloorPlans() {
                     <p className="text-[8px] uppercase tracking-[0.16em] text-white/30">
                       Layout
                     </p>
+
                     <p className="mt-2 font-serif text-xl">
                       {selectedPlan.type}
                     </p>
@@ -863,6 +957,7 @@ export default function FloorPlans() {
                   className="group mt-2 flex min-h-12 w-full items-center justify-between border border-white/15 px-5 py-3.5 text-[9px] uppercase tracking-[0.16em] transition hover:bg-[#c5a46d] hover:text-black"
                 >
                   Open Fullscreen Plan
+
                   <Maximize2
                     size={15}
                     className="transition group-hover:scale-110"
@@ -875,6 +970,7 @@ export default function FloorPlans() {
                   className="group mt-3 flex min-h-12 w-full items-center justify-between bg-[#c5a46d] px-5 py-3.5 text-[9px] uppercase tracking-[0.16em] text-black transition hover:bg-[#d5b77f]"
                 >
                   {selectedView === "2D" ? "Switch to 3D" : "Switch to 2D"}
+
                   <ArrowRight
                     size={15}
                     className="transition group-hover:translate-x-1"
@@ -904,6 +1000,7 @@ export default function FloorPlans() {
           ].map(([number, label]) => (
             <div key={label} className="px-5 py-7 md:px-6 md:py-9">
               <p className="font-serif text-3xl md:text-4xl">{number}</p>
+
               <p className="mt-2 text-[8px] uppercase tracking-[0.16em] text-black/45">
                 {label}
               </p>
@@ -1066,6 +1163,7 @@ export default function FloorPlans() {
             className="group flex min-h-14 items-center justify-between gap-8 border border-black/30 px-5 text-[9px] uppercase tracking-[0.16em] transition hover:bg-black hover:text-white"
           >
             Talk to Vardha
+
             <ArrowRight
               size={16}
               className="transition group-hover:translate-x-1"
@@ -1081,7 +1179,9 @@ export default function FloorPlans() {
       <footer className="bg-[#10110f] px-6 py-7 text-white md:px-12 lg:px-20">
         <div className="mx-auto flex max-w-[1500px] flex-col justify-between gap-3 text-[8px] uppercase tracking-[0.18em] text-white/35 md:flex-row">
           <span>© {new Date().getFullYear()} Vardha Builders</span>
+
           <span>Building Dreams. Creating Landmarks.</span>
+
           <Link to="/" className="transition hover:text-white">
             Back to Home
           </Link>
