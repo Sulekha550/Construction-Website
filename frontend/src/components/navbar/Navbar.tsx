@@ -19,6 +19,8 @@ const navItems = [
 ];
 
 const getInitialTheme = () => {
+  if (typeof window === "undefined") return false;
+
   const savedTheme = localStorage.getItem("vardha-theme");
 
   if (savedTheme === "dark") return true;
@@ -37,7 +39,7 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [nightMode, setNightMode] = useState(getInitialTheme);
 
-  // Apply theme across the application.
+  // Apply theme.
   useEffect(() => {
     const root = document.documentElement;
 
@@ -67,7 +69,7 @@ export default function Navbar() {
     };
   }, []);
 
-  // Prevent background scrolling when mobile menu is open.
+  // Prevent background scrolling when menu is open.
   useEffect(() => {
     document.body.style.overflow = menuOpen ? "hidden" : "";
 
@@ -76,12 +78,12 @@ export default function Navbar() {
     };
   }, [menuOpen]);
 
-  // Close menu when route changes.
+  // Close menu on route change.
   useEffect(() => {
     setMenuOpen(false);
   }, [location.pathname]);
 
-  // Escape key closes mobile menu.
+  // Escape closes the menu.
   useEffect(() => {
     if (!menuOpen) return;
 
@@ -97,6 +99,23 @@ export default function Navbar() {
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [menuOpen]);
+
+  // Close mobile menu if viewport becomes desktop-sized.
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(min-width: 1024px)");
+
+    const handleResize = () => {
+      if (mediaQuery.matches) {
+        setMenuOpen(false);
+      }
+    };
+
+    mediaQuery.addEventListener("change", handleResize);
+
+    return () => {
+      mediaQuery.removeEventListener("change", handleResize);
+    };
+  }, []);
 
   const closeMenu = () => setMenuOpen(false);
 
@@ -125,7 +144,7 @@ export default function Navbar() {
       >
         <div
           className={`
-            mx-auto flex max-w-[1600px] items-center
+            mx-auto flex max-w-[1600px] w-full items-center
             justify-between gap-2 px-3 sm:px-6 lg:px-12
             transition-all duration-500
             ${scrolled ? "h-[68px] sm:h-[72px]" : "h-[76px] sm:h-[82px]"}
@@ -162,7 +181,7 @@ export default function Navbar() {
           {/* DESKTOP NAVIGATION */}
           <nav
             aria-label="Main navigation"
-            className="hidden items-center gap-4 lg:flex xl:gap-7"
+            className="hidden items-center gap-4 min-[1024px]:flex xl:gap-7"
           >
             {navItems.map((item) => {
               const active = isActive(item.path);
@@ -195,8 +214,8 @@ export default function Navbar() {
           </nav>
 
           {/* HEADER ACTIONS */}
-          <div className="flex shrink-0 items-center gap-2 sm:gap-3">
-            {/* THEME TOGGLE: DESKTOP + MOBILE */}
+          <div className="flex shrink-0 items-center gap-1.5 sm:gap-3">
+            {/* THEME TOGGLE */}
             <button
               type="button"
               onClick={toggleTheme}
@@ -208,7 +227,7 @@ export default function Navbar() {
               aria-pressed={nightMode}
               title={nightMode ? "Light theme" : "Dark theme"}
               className="
-                flex h-10 w-10 items-center justify-center
+                flex h-9 w-9 shrink-0 items-center justify-center
                 rounded-full border border-white/20
                 bg-white/5 text-vardha-gold backdrop-blur-md
                 transition duration-300
@@ -231,7 +250,8 @@ export default function Navbar() {
                 hidden items-center gap-2 bg-vardha-gold
                 px-4 py-3 text-[9px] font-semibold
                 uppercase tracking-[0.12em] text-black
-                transition hover:bg-white md:flex xl:px-5
+                transition hover:bg-white
+                min-[1024px]:flex xl:px-5
               "
             >
               Get In Touch
@@ -250,7 +270,7 @@ export default function Navbar() {
                 items-center justify-center rounded-full
                 border border-white/20 bg-[#111]/95 text-white
                 transition hover:border-vardha-gold hover:text-vardha-gold
-                sm:h-11 sm:w-11 lg:hidden
+                sm:h-11 sm:w-11 min-[1024px]:hidden
               "
             >
               {menuOpen ? (
