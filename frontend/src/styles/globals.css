@@ -44,7 +44,8 @@
    NIGHT THEME
    ========================================================= */
 
-html.vardha-night {
+html.vardha-night,
+html.dark {
   --bg: #101211;
   --bg-soft: #171918;
   --surface: #1b1e1d;

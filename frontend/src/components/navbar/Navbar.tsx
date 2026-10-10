@@ -12,7 +12,7 @@ import { Link, useLocation } from "react-router-dom";
 const navItems = [
   { label: "Home", path: "/" },
   { label: "About", path: "/about" },
-  { label: "Portfolio", path: "/portfolio" },
+  { label: "Projects", path: "/portfolio" },
   { label: "Floor Plans", path: "/floor-plans" },
   { label: "Gallery", path: "/gallery" },
   { label: "Contact", path: "/contact" },
@@ -69,6 +69,18 @@ export default function Navbar() {
     };
   }, [menuOpen]);
 
+  useEffect(() => {
+    const saved = localStorage.getItem("vardha-theme");
+    const isDark =
+      saved === "dark" ||
+      (!saved &&
+        (document.documentElement.classList.contains("vardha-night") ||
+          window.matchMedia("(prefers-color-scheme: dark)").matches));
+    setNightMode(isDark);
+    document.documentElement.classList.toggle("vardha-night", isDark);
+    document.documentElement.classList.toggle("dark", isDark);
+  }, []);
+
   const closeMenu = () => setMenuOpen(false);
 
   const isActive = (path: string) =>
@@ -78,13 +90,10 @@ export default function Navbar() {
 
   const handleNightMode = () => {
     const nextMode = !nightMode;
-
     setNightMode(nextMode);
-
-    document.documentElement.classList.toggle(
-      "vardha-night",
-      nextMode
-    );
+    localStorage.setItem("vardha-theme", nextMode ? "dark" : "light");
+    document.documentElement.classList.toggle("vardha-night", nextMode);
+    document.documentElement.classList.toggle("dark", nextMode);
   };
 
   return (
@@ -384,19 +393,29 @@ export default function Navbar() {
                 Premium residential &amp; commercial spaces.
               </p>
 
-              <Link
-                to="/contact"
-                tabIndex={menuOpen ? 0 : -1}
-                onClick={closeMenu}
-                className="group mt-4 inline-flex items-center gap-2 text-[9px] uppercase tracking-[0.2em] text-vardha-gold transition-colors duration-300 hover:text-white sm:mt-5"
-              >
-                Book a site visit
+              <div className="mt-4 flex items-center justify-between">
+                <button
+                  type="button"
+                  onClick={handleNightMode}
+                  className="flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-3 py-1.5 text-[9px] uppercase tracking-wider text-white"
+                >
+                  {nightMode ? <Moon size={13} className="text-vardha-gold" /> : <Sun size={13} className="text-vardha-gold" />}
+                  <span>{nightMode ? "Dark Theme" : "Light Theme"}</span>
+                </button>
 
-                <ArrowUpRight
-                  size={13}
-                  className="transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-                />
-              </Link>
+                <Link
+                  to="/contact"
+                  tabIndex={menuOpen ? 0 : -1}  
+                  onClick={closeMenu}
+                  className="group inline-flex items-center gap-2 text-[9px] uppercase tracking-[0.2em] text-vardha-gold transition-colors duration-300 hover:text-white"
+                >
+                  Book a site visit
+                  <ArrowUpRight
+                    size={13}
+                    className="transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                  />
+                </Link>
+              </div>
             </div>
           </div>
         </aside>

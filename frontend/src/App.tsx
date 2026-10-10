@@ -9,7 +9,7 @@ import PageTransition from "./components/common/PageTransition";
 import Home from "./pages/Home";
 import About from "./pages/About";
 import Portfolio from "./pages/Project";
-// import ProjectDetails from "./pages/ProjectDetails";
+import ProjectDetails from "./pages/ProjectDetails";
 import FloorPlans from "./pages/FloorPlans";
 import Gallery from "./pages/Gallery";
 import Contact from "./pages/Contact";
@@ -27,15 +27,12 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/portfolio" element={<Portfolio />} />
 
-          {/* Individual project pages */}
-          {/* <Route path="/portfolio/:id" element={<ProjectDetails />} /> */}
+          {/* Individual project pages open in full screen view */}
+          <Route path="/portfolio/:id" element={<Portfolio />} />
+          <Route path="/projects/:id" element={<Portfolio />} />
 
           {/* Backwards-compatible project URLs */}
           <Route path="/projects" element={<Navigate to="/portfolio" replace />} />
-          <Route
-            path="/projects/:id"
-            element={<Navigate to="/portfolio" replace />}
-          />
 
           {/* Supporting pages */}
           <Route path="/about" element={<About />} />

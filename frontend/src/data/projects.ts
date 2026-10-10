@@ -6,180 +6,161 @@ export type ProjectStat = {
 export type Project = {
   id: string;
   slug: string;
-
   title: string;
   name: string;
-
+  badge: string;
   location: string;
-  category: string;
+  category: "Residential" | "Commercial & Residential" | "Villas" | string;
+  type: string;
+  area: string;
   status: string;
   year: string;
-
+  configuration: string;
+  highlights: string[];
   description: string;
-
   image: string;
   gallery: string[];
-
   amenities: string[];
   stats: ProjectStat[];
   tags: string[];
+  price?: string;
 };
 
 export const projects: Project[] = [
   {
-    id: "project-one",
-    slug: "project-one",
-
-    title: "Green Residences",
-    name: "Green Residences",
-
+    id: "palm-paradise",
+    slug: "palm-paradise",
+    title: "Paalm Paradise",
+    name: "Paalm Paradise",
+    badge: "BY ALS",
     location: "Gorakhpur, Uttar Pradesh",
     category: "Residential",
-    status: "Upcoming",
+    type: "Flats",
+    area: "1800-3200 sq.ft",
+    status: "By ALS",
     year: "2026",
-
+    configuration: "3 & 4 BHK Luxury Flats",
+    highlights: [
+      "Designed By ALS",
+      "1800–3200 sq.ft Spacious Layouts",
+      "Prime Gorakhpur Location",
+      "Earthquake Resistant RCC Structure",
+    ],
     description:
-      "A premium residential development designed around contemporary architecture, comfortable living and thoughtfully planned spaces.",
-
-    image: "/images/projects/green.webp",
-
+      "A premier luxury residential development featuring contemporary architecture, sprawling high-ceiling layouts, panoramic balconies, and world-class living amenities in Gorakhpur.",
+    image: "/images/projects/palm-paradise.webp",
     gallery: [
-      "/images/projects/green.webp",
-      "/images/projects/central-tower.webp",
       "/images/projects/palm-paradise.webp",
+      "/images/Home/Home5.webp",
+      "/images/Gallery/Gallery1.webp",
+      "/images/floorplans/3bhk3dform.webp",
     ],
-
     amenities: [
-      "Landscape",
-      "Parking",
-      "24×7 Security",
-      "Modern Architecture",
+      "Landscaped Podium Gardens",
+      "Dedicated Covered Parking",
+      "Multi-tier 24×7 Security",
+      "High-Speed Automatic Elevators",
+      "Clubhouse & Fitness Center",
+      "100% Power Backup",
     ],
-
     stats: [
-      {
-        label: "Typology",
-        value: "Residential",
-      },
-      {
-        label: "Status",
-        value: "Upcoming",
-      },
-      {
-        label: "Year",
-        value: "2026",
-      },
+      { label: "Type", value: "Flats" },
+      { label: "Area", value: "1800-3200 sq.ft" },
+      { label: "Status", value: "By ALS" },
+      { label: "Possession", value: "2026" },
     ],
-
-    tags: [
-      "Residential",
-      "Premium",
-      "Architecture",
-    ],
+    tags: ["Flats", "Luxury", "Residential", "By ALS"],
+    price: "Pricing on Request",
   },
-
   {
-    id: "project-two",
-    slug: "project-two",
-
+    id: "central-tower",
+    slug: "central-tower",
     title: "Central Tower",
     name: "Central Tower",
-
-    location: "Gorakhpur, Uttar Pradesh",
-    category: "Commercial",
-    status: "Ongoing",
+    badge: "BY ALS",
+    location: "Golghar , Gorakhpur",
+    category: "Commercial & Residential",
+    type: "Flats",
+    area: "2400-4000 sq.ft",
+    status: "By ALS",
     year: "2026",
-
+    configuration: "Prestigious Flats & Retail Suites",
+    highlights: [
+      "Heart of Golghar Business District",
+      "2400–4000 sq.ft Palatial Residences",
+      "High-Street Commercial Visibility",
+      "Double-Height Designer Lobby",
+    ],
     description:
-      "A contemporary commercial development combining strong architectural presence, functional spaces and a refined urban identity.",
-
+      "Positioned at the vibrant core of Golghar, Central Tower combines landmark modern architecture, elite residential flats with expansive carpet areas, and premium commercial prestige.",
     image: "/images/projects/central-tower.webp",
-
     gallery: [
       "/images/projects/central-tower.webp",
-      "/images/projects/green.webp",
-      "/images/projects/palm-paradise.webp",
+      "/images/Home/Home4.webp",
+      "/images/Gallery/Gallery6.webp",
+      "/images/floorplans/4bhk3dform.webp",
     ],
-
     amenities: [
-      "Parking",
-      "24×7 Access",
-      "Security",
-      "Contemporary Design",
+      "Prime Golghar Epicenter",
+      "Multi-Level Secure Parking",
+      "Grand Reception Lobby",
+      "24×7 High-Tech Surveillance",
+      "Dedicated High-Speed Lifts",
+      "Advanced Fire Safety Systems",
     ],
-
     stats: [
-      {
-        label: "Typology",
-        value: "Commercial",
-      },
-      {
-        label: "Status",
-        value: "Ongoing",
-      },
-      {
-        label: "Year",
-        value: "2026",
-      },
+      { label: "Type", value: "Flats" },
+      { label: "Area", value: "2400-4000 sq.ft" },
+      { label: "Status", value: "By ALS" },
+      { label: "Location", value: "Golghar, GKP" },
     ],
-
-    tags: [
-      "Commercial",
-      "Business",
-      "Modern",
-    ],
+    tags: ["Flats", "Commercial", "Prime Golghar", "By ALS"],
+    price: "Pricing on Request",
   },
-
   {
-    id: "project-three",
-    slug: "project-three",
-
-    title: "Palm Paradise",
-    name: "Palm Paradise",
-
-    location: "Uttar Pradesh",
-    category: "Villa",
-    status: "Ongoing",
+    id: "adhvik-skyline",
+    slug: "adhvik-skyline",
+    title: "Adhvik Skyline",
+    name: "Adhvik Skyline",
+    badge: "READY TO MOVE",
+    location: "Gorakhpur, Uttar Pradesh",
+    category: "Villas",
+    type: "Villas",
+    area: "1200-1800 sq.ft",
+    status: "Ready to Move",
     year: "2026",
-
+    configuration: "Independent Architectural Luxury Villas",
+    highlights: [
+      "Ready To Move In Today",
+      "1200–1800 sq.ft Private Villas",
+      "Landscaped Private Terraces",
+      "Exclusive Gated Enclave",
+    ],
     description:
-      "An elegant villa development focused on spacious living, landscaped surroundings and a premium contemporary lifestyle.",
-
-    image: "/images/projects/palm-paradise.webp",
-
+      "An upscale architectural enclave of private luxury villas offering immediate possession, expansive sunlit living spaces, private terrace gardens, and an elite tranquil community environment.",
+    image: "/images/projects/green.webp",
     gallery: [
-      "/images/projects/palm-paradise.webp",
       "/images/projects/green.webp",
-      "/images/projects/central-tower.webp",
+      "/images/Home/Home6.webp",
+      "/images/Gallery/Gallery8.webp",
+      "/images/floorplans/2bhkk 3d.webp",
     ],
-
     amenities: [
-      "Landscape",
-      "Private Parking",
-      "24×7 Security",
-      "Premium Interiors",
+      "Private Landscaped Terraces",
+      "Turnkey Ready Possession",
+      "Gated Security Enclave",
+      "Individual Dedicated Parking",
+      "24×7 Power & Water Supply",
+      "Modern Green Architecture",
     ],
-
     stats: [
-      {
-        label: "Typology",
-        value: "Villa",
-      },
-      {
-        label: "Status",
-        value: "Ongoing",
-      },
-      {
-        label: "Year",
-        value: "2026",
-      },
+      { label: "Type", value: "Villas" },
+      { label: "Area", value: "1200-1800 sq.ft" },
+      { label: "Status", value: "Ready to Move" },
+      { label: "Typology", value: "Private Villas" },
     ],
-
-    tags: [
-      "Villa",
-      "Luxury",
-      "Residential",
-    ],
+    tags: ["Villas", "Ready to Move", "Luxury", "Gated Community"],
+    price: "Pricing on Request",
   },
 ];
 

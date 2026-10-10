@@ -1,5 +1,4 @@
-
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 
 import {
@@ -11,9 +10,11 @@ import {
   Compass,
   Layers3,
   MapPin,
+  Maximize2,
   MoveRight,
   Ruler,
   Sparkles,
+  X,
 } from "lucide-react";
 
 import gsap from "gsap";
@@ -30,40 +31,35 @@ const images = {
   site: "/images/Home/Home2.webp",
   engineer: "/images/Home/Home3.webp",
   structure: "/images/Home/Home4.webp",
-  residence: "/images/Home/Home5.webp",
-  interior: "/images/Home/Home6.webp",
+  residence: "/images/projects/palm-paradise.webp",
+  interior: "/images/ai/ai-interior-hero.jpg",
   crane: "/images/Home/Home7.webp",
   detail: "/images/Home/Home8.webp",
 };
 
+
 /* =========================================================
-   PROJECTS
+   FINISHED INTERIOR VIEWS (SECTION 09)
 ========================================================= */
 
-const projects = [
+const interiorViews = [
   {
-    number: "01",
-    type: "RESIDENTIAL DEVELOPMENT",
-    title: "Vardha Residences",
-    subtitle: "Premium Residential Development",
-    location: "Gorakhpur, Uttar Pradesh",
-    image: images.residence,
+    title: "Grand Living Suite",
+    desc: "Expansive double-height living spaces with natural light orientation, acoustic isolation, and architectural volume.",
+    image: "/images/ai/ai-interior-hero.jpg",
+    tag: "01 / 03 · Grand Lounge",
   },
   {
-    number: "02",
-    type: "VILLA DEVELOPMENT",
-    title: "The Courtyard",
-    subtitle: "Contemporary Villa Development",
-    location: "Uttar Pradesh",
-    image: images.structure,
+    title: "Designer Culinary Island",
+    desc: "Bespoke modular kitchen layouts with natural stone counters, integrated cabinetry, and contemporary dining flow.",
+    image: "/images/ai/ai-interior-kitchen.jpg",
+    tag: "02 / 03 · Culinary Studio",
   },
   {
-    number: "03",
-    type: "URBAN DEVELOPMENT",
-    title: "Vardha Heights",
-    subtitle: "Modern Urban Residences",
-    location: "Gorakhpur, Uttar Pradesh",
-    image: images.site,
+    title: "Panoramic Skyline Terrace",
+    desc: "Floor-to-ceiling glass expanses providing scenic skyline vistas, seamless outdoor living, and private terrace access.",
+    image: "/images/ai/ai-interior-living.jpg",
+    tag: "03 / 03 · Panoramic Suite",
   },
 ];
 
@@ -130,19 +126,44 @@ function Reveal({
 
 /* =========================================================
    HOME PAGE
-   Navbar and Footer are provided globally by App.tsx.
 ========================================================= */
 
 export default function Home() {
   const pageRef = useRef<HTMLDivElement>(null);
+  const [activeInteriorIndex, setActiveInteriorIndex] = useState(0);
+  const [lightboxImage, setLightboxImage] = useState<{
+    src: string;
+    title: string;
+    subtitle?: string;
+  } | null>(null);
+
+  /* LOCK SCROLL ON LIGHTBOX */
+  useEffect(() => {
+    if (lightboxImage) {
+      document.body.style.overflow = "hidden";
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === "Escape") setLightboxImage(null);
+      };
+      window.addEventListener("keydown", handleKeyDown);
+      return () => {
+        document.body.style.overflow = "";
+        window.removeEventListener("keydown", handleKeyDown);
+      };
+    }
+  }, [lightboxImage]);
 
   useEffect(() => {
     const root = pageRef.current;
-
     if (!root) return;
 
+    const reduceMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+
+    if (reduceMotion) return;
+
     const ctx = gsap.context(() => {
-      /* GENERAL REVEALS */
+      /* SECTION REVEALS */
 
       gsap.utils
         .toArray<HTMLElement>(".home-reveal")
@@ -248,7 +269,7 @@ export default function Home() {
             {
               scaleX: 1,
               duration: 1,
-              ease: "power3.out",
+              ease: "power3.inOut",
               scrollTrigger: {
                 trigger: line,
                 start: "top 90%",
@@ -258,25 +279,25 @@ export default function Home() {
           );
         });
 
-      /* SERVICE ITEMS */
+      /* SERVICE CARDS */
 
       gsap.utils
         .toArray<HTMLElement>(".service-card")
-        .forEach((item, index) => {
+        .forEach((card, index) => {
           gsap.fromTo(
-            item,
+            card,
             {
-              y: 35,
+              y: 30,
               opacity: 0,
             },
             {
               y: 0,
               opacity: 1,
               duration: 0.8,
-              delay: index * 0.08,
+              delay: index * 0.1,
               ease: "power3.out",
               scrollTrigger: {
-                trigger: item,
+                trigger: card,
                 start: "top 88%",
                 once: true,
               },
@@ -288,21 +309,21 @@ export default function Home() {
 
       gsap.utils
         .toArray<HTMLElement>(".project-card")
-        .forEach((item, index) => {
+        .forEach((card, index) => {
           gsap.fromTo(
-            item,
+            card,
             {
-              y: 40,
+              y: 35,
               opacity: 0,
             },
             {
               y: 0,
               opacity: 1,
-              duration: 0.8,
-              delay: index * 0.1,
+              duration: 0.9,
+              delay: index * 0.12,
               ease: "power3.out",
               scrollTrigger: {
-                trigger: item,
+                trigger: card,
                 start: "top 88%",
                 once: true,
               },
@@ -310,7 +331,7 @@ export default function Home() {
           );
         });
 
-      /* PROCESS */
+      /* PROCESS ITEMS */
 
       gsap.utils
         .toArray<HTMLElement>(".process-item")
@@ -329,54 +350,53 @@ export default function Home() {
               ease: "power3.out",
               scrollTrigger: {
                 trigger: item,
-                start: "top 90%",
+                start: "top 88%",
                 once: true,
               },
             }
           );
         });
 
-      /* STATS */
+      /* STAT ITEMS */
 
       gsap.utils
         .toArray<HTMLElement>(".stat-item")
-        .forEach((item, index) => {
+        .forEach((stat, index) => {
           gsap.fromTo(
-            item,
+            stat,
             {
-              y: 30,
+              y: 25,
               opacity: 0,
             },
             {
               y: 0,
               opacity: 1,
-              duration: 0.7,
-              delay: index * 0.08,
+              duration: 0.8,
+              delay: index * 0.1,
               ease: "power3.out",
               scrollTrigger: {
-                trigger: item,
-                start: "top 90%",
+                trigger: stat,
+                start: "top 88%",
                 once: true,
               },
             }
           );
         });
+
+      const timer = setTimeout(() => {
+        ScrollTrigger.refresh();
+      }, 300);
+
+      return () => clearTimeout(timer);
     }, root);
 
-    const refreshTimer = window.setTimeout(() => {
-      ScrollTrigger.refresh();
-    }, 500);
-
-    return () => {
-      window.clearTimeout(refreshTimer);
-      ctx.revert();
-    };
+    return () => ctx.revert();
   }, []);
 
   return (
     <main
       ref={pageRef}
-      className="min-h-screen overflow-hidden bg-[var(--bg)] text-[var(--text)]"
+      className="bg-[var(--bg)] text-[var(--text)] transition-colors duration-500"
     >
       {/* =====================================================
           01 — HERO
@@ -484,17 +504,17 @@ export default function Home() {
 
       <section
         id="intro"
-        className="bg-[#f5f6f7] px-6 py-20 md:px-12 md:py-28 lg:px-20"
+        className="bg-[#f5f6f7] px-6 py-20 transition-colors duration-500 dark:bg-[#111312] md:px-12 md:py-28 lg:px-20"
       >
         <div className="mx-auto max-w-[1500px]">
           <div className="mb-10 flex items-center justify-between">
-            <span className="font-mono text-[9px] tracking-[0.3em] text-[#7b8490]">
+            <span className="font-mono text-[9px] tracking-[0.3em] text-[#7b8490] dark:text-[#8e8b83]">
               02 / THE VARDHA APPROACH
             </span>
             <Building2 size={18} strokeWidth={1} className="text-[#b08a4a]" />
           </div>
 
-          <div className="home-line mb-14 h-px w-full bg-[#dfe4e8]" />
+          <div className="home-line mb-14 h-px w-full bg-[#dfe4e8] dark:bg-white/10" />
 
           <div className="grid gap-14 lg:grid-cols-[0.75fr_1.25fr] lg:gap-16">
             <Reveal>
@@ -504,19 +524,21 @@ export default function Home() {
             </Reveal>
 
             <Reveal>
-              <h2 className="font-display text-[clamp(2.4rem,4.2vw,4.5rem)] leading-[0.98] tracking-[-0.045em] text-[#172033]">
+              <h2 className="font-display text-[clamp(2.4rem,4.2vw,4.5rem)] leading-[0.98] tracking-[-0.045em] text-[#172033] dark:text-[#f4f0e7]">
                 From ground
                 <br />
-                <span className="text-[#9ba3ac]">to vision.</span>
+                <span className="text-[#9ba3ac] dark:text-[#7a7872]">
+                  to vision.
+                </span>
               </h2>
 
-              <p className="mt-7 max-w-3xl text-[13px] leading-7 text-[#626b77] md:text-[14px] md:leading-8">
+              <p className="mt-7 max-w-3xl text-[13px] leading-7 text-[#626b77] dark:text-[#a8a59d] md:text-[14px] md:leading-8">
                 Construction is more than putting materials together. It is
                 a process of planning, engineering, craftsmanship and
                 careful execution.
               </p>
 
-              <p className="mt-5 max-w-3xl text-[13px] leading-7 text-[#626b77] md:text-[14px] md:leading-8">
+              <p className="mt-5 max-w-3xl text-[13px] leading-7 text-[#626b77] dark:text-[#a8a59d] md:text-[14px] md:leading-8">
                 At Vardha Builders, every project moves from an idea through
                 architecture, structure and construction to create spaces
                 that are practical, distinctive and built for the future.
@@ -530,9 +552,18 @@ export default function Home() {
           03 — CONSTRUCTION FEATURE
       ====================================================== */}
 
-      <section className="bg-[#f5f6f7] px-6 pb-24 md:px-12 md:pb-32 lg:px-20">
+      <section className="bg-[#f5f6f7] px-6 pb-24 transition-colors duration-500 dark:bg-[#111312] md:px-12 md:pb-32 lg:px-20">
         <div className="mx-auto grid max-w-[1500px] gap-5 lg:grid-cols-[1.35fr_0.65fr]">
-          <div className="group relative min-h-[500px] overflow-hidden md:min-h-[650px]">
+          <div
+            onClick={() =>
+              setLightboxImage({
+                src: images.site,
+                title: "Built From The Ground Up",
+                subtitle: "Modern Construction Site & Structural Execution",
+              })
+            }
+            className="group relative min-h-[500px] cursor-pointer overflow-hidden rounded-2xl md:min-h-[650px]"
+          >
             <img
               src={images.site}
               alt="Modern construction site"
@@ -553,25 +584,29 @@ export default function Home() {
                 the ground up.
               </h3>
             </div>
+
+            <div className="absolute right-6 top-6 flex h-9 w-9 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-md opacity-0 transition-opacity group-hover:opacity-100">
+              <Maximize2 size={14} />
+            </div>
           </div>
 
-          <div className="flex min-h-[500px] flex-col justify-between bg-white p-8 md:min-h-[650px] md:p-11 lg:p-12">
+          <div className="flex min-h-[500px] flex-col justify-between rounded-2xl border border-[var(--line)] bg-white p-8 transition-colors duration-500 dark:bg-[#181a19] md:min-h-[650px] md:p-11 lg:p-12">
             <div>
-              <span className="font-mono text-[9px] tracking-[0.3em] text-[#7b8490]">
+              <span className="font-mono text-[9px] tracking-[0.3em] text-[#7b8490] dark:text-[#8e8b83]">
                 VARDHA / CONSTRUCTION
               </span>
-              <div className="mt-7 h-px bg-[#e0e4e8]" />
+              <div className="mt-7 h-px bg-[#e0e4e8] dark:bg-white/10" />
             </div>
 
             <div>
-              <p className="font-display text-[clamp(1.7rem,2.8vw,2.8rem)] leading-[1.05] text-[#172033]">
+              <p className="font-display text-[clamp(1.7rem,2.8vw,2.8rem)] leading-[1.05] text-[#172033] dark:text-[#f4f0e7]">
                 Strong structures.
                 <span className="text-[#b08a4a]"> Thoughtful spaces.</span>
               </p>
 
               <div className="mt-8 flex items-center gap-4">
                 <span className="h-px w-10 bg-[#b08a4a]" />
-                <span className="text-[9px] uppercase tracking-[0.2em] text-[#7b8490]">
+                <span className="text-[9px] uppercase tracking-[0.2em] text-[#7b8490] dark:text-[#8e8b83]">
                   Vardha Builders
                 </span>
               </div>
@@ -584,18 +619,18 @@ export default function Home() {
           04 — WHAT WE DO
       ====================================================== */}
 
-      <section className="bg-white px-6 py-24 md:px-12 md:py-32 lg:px-20">
+      <section className="bg-white px-6 py-24 transition-colors duration-500 dark:bg-[#161817] md:px-12 md:py-32 lg:px-20">
         <div className="mx-auto max-w-[1500px]">
           <div className="grid gap-12 lg:grid-cols-[0.65fr_1.35fr] lg:gap-14">
             <Reveal>
-              <span className="font-mono text-[9px] tracking-[0.3em] text-[#7b8490]">
+              <span className="font-mono text-[9px] tracking-[0.3em] text-[#7b8490] dark:text-[#8e8b83]">
                 04 / WHAT WE DO
               </span>
 
-              <h2 className="mt-7 font-display text-[clamp(2.4rem,4.2vw,4.5rem)] leading-[0.92] tracking-[-0.045em] text-[#172033]">
+              <h2 className="mt-7 font-display text-[clamp(2.4rem,4.2vw,4.5rem)] leading-[0.92] tracking-[-0.045em] text-[#172033] dark:text-[#f4f0e7]">
                 How we
                 <br />
-                <span className="text-[#9ba3ac]">build.</span>
+                <span className="text-[#9ba3ac] dark:text-[#7a7872]">build.</span>
               </h2>
             </Reveal>
 
@@ -606,7 +641,7 @@ export default function Home() {
                 return (
                   <div
                     key={service.number}
-                    className="service-card group border-t border-[#dfe4e8] py-8 transition-all duration-500 hover:px-3"
+                    className="service-card group border-t border-[#dfe4e8] py-8 transition-all duration-500 hover:px-3 dark:border-white/10"
                   >
                     <div className="grid gap-5 md:grid-cols-[60px_55px_1fr] md:items-start">
                       <span className="font-mono text-[10px] text-[#b08a4a]">
@@ -616,15 +651,15 @@ export default function Home() {
                       <Icon
                         size={22}
                         strokeWidth={1}
-                        className="text-[#172033] transition-colors duration-300 group-hover:text-[#b08a4a]"
+                        className="text-[#172033] transition-colors duration-300 group-hover:text-[#b08a4a] dark:text-[#f4f0e7]"
                       />
 
                       <div>
-                        <h3 className="font-display text-[20px] tracking-[-0.03em] text-[#172033] md:text-[21px]">
+                        <h3 className="font-display text-[20px] tracking-[-0.03em] text-[#172033] transition-colors group-hover:text-[#b08a4a] dark:text-[#f4f0e7] md:text-[21px]">
                           {service.title}
                         </h3>
 
-                        <p className="mt-3 max-w-xl text-[12px] leading-6 text-[#707985] md:text-[13px] md:leading-7">
+                        <p className="mt-3 max-w-xl text-[12px] leading-6 text-[#707985] dark:text-[#a8a59d] md:text-[13px] md:leading-7">
                           {service.description}
                         </p>
                       </div>
@@ -633,7 +668,7 @@ export default function Home() {
                 );
               })}
 
-              <div className="border-t border-[#dfe4e8]" />
+              <div className="border-t border-[#dfe4e8] dark:border-white/10" />
             </div>
           </div>
         </div>
@@ -643,134 +678,55 @@ export default function Home() {
           05 — ENGINEERING
       ====================================================== */}
 
-      <section className="relative min-h-[650px] overflow-hidden">
+      <section
+        onClick={() =>
+          setLightboxImage({
+            src: images.engineer,
+            title: "Built With Structural Integrity",
+            subtitle: "Architecture, Structure & Precision Engineering",
+          })
+        }
+        className="group relative min-h-[650px] cursor-pointer overflow-hidden"
+      >
         <img
           src={images.engineer}
           alt="Architecture and engineering"
           loading="lazy"
           decoding="async"
-          className="home-image absolute inset-0 h-full w-full object-cover"
+          className="home-image absolute inset-0 h-full w-full object-cover transition-transform duration-[1.5s] group-hover:scale-105"
         />
 
-        <div className="absolute inset-0 bg-black/55" />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/35 to-transparent" />
+        <div className="absolute inset-0 bg-[#071122]/55" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#071122]/90 via-[#071122]/20 to-transparent" />
 
-        <div className="relative z-10 flex min-h-[650px] items-center px-6 md:px-12 lg:px-20">
+        <div className="relative z-10 flex min-h-[650px] items-end px-6 pb-16 md:px-12 md:pb-20 lg:px-20">
           <div className="mx-auto w-full max-w-[1500px]">
             <Reveal className="max-w-[680px] text-white">
               <span className="font-mono text-[9px] uppercase tracking-[0.3em] text-[#d2b477]">
-                05 / PEOPLE BEHIND THE BUILD
+                05 / ENGINEERING & PRECISION
               </span>
 
-              <h2 className="mt-7 font-display text-[clamp(2.4rem,4.2vw,4.5rem)] leading-[0.9] tracking-[-0.045em]">
-                Precision begins
+              <h2 className="mt-7 font-display text-[clamp(2.4rem,4.2vw,4.5rem)] leading-[0.92] tracking-[-0.045em]">
+                Built with
                 <br />
-                <span className="italic text-white/60">with people.</span>
+                <span className="italic text-white/60">integrity.</span>
               </h2>
 
-              <p className="mt-8 max-w-xl text-[13px] leading-7 text-white/65 md:text-[14px] md:leading-8">
-                Engineers, architects, site teams and skilled craftsmen work
-                together to turn drawings into real structures.
+              <p className="mt-7 max-w-xl text-[13px] leading-7 text-white/65 md:text-[14px] md:leading-8">
+                Behind every surface is structure. Behind every structure is
+                engineering. We approach every phase with precision so that
+                the result is solid, safe and dependable.
               </p>
-
-              <Link
-                to="/about"
-                className="mt-9 inline-flex items-center gap-4 border-b border-white/30 pb-3 text-[9px] uppercase tracking-[0.2em] transition-colors hover:border-[#d2b477] hover:text-[#d2b477]"
-              >
-                Our Approach
-                <ArrowRight size={15} strokeWidth={1.5} />
-              </Link>
             </Reveal>
           </div>
         </div>
-      </section>
 
-      {/* =====================================================
-          06 — SELECTED PROJECTS
-      ====================================================== */}
-
-      <section className="bg-[#f5f6f7] px-6 py-24 md:px-12 md:py-32 lg:px-20">
-        <div className="mx-auto max-w-[1500px]">
-          <div className="flex flex-col justify-between gap-8 md:flex-row md:items-end">
-            <Reveal>
-              <span className="font-mono text-[9px] tracking-[0.3em] text-[#7b8490]">
-                06 / SELECTED PROJECTS
-              </span>
-
-              <h2 className="mt-6 font-display text-[clamp(2.4rem,4.2vw,4.5rem)] leading-[0.9] tracking-[-0.045em] text-[#172033]">
-                Places we
-                <br />
-                <span className="text-[#9aa2ab]">are building.</span>
-              </h2>
-            </Reveal>
-
-            <Link
-              to="/portfolio"
-              className="group flex w-fit items-center gap-3 text-[9px] uppercase tracking-[0.22em] text-[#172033] transition-colors hover:text-[#c7944a]"
-            >
-              View all projects
-              <MoveRight
-                size={15}
-                strokeWidth={1.3}
-                className="transition-transform group-hover:translate-x-1"
-              />
-            </Link>
-          </div>
-
-          <div className="home-line mt-10 h-px w-full bg-[#dfe4e8]" />
-
-          <div className="mt-8 grid gap-5 lg:grid-cols-3">
-            {projects.map((project) => (
-              <Link
-                key={project.number}
-                to="/portfolio"
-                className="project-card group"
-              >
-                <div className="relative aspect-[0.9] overflow-hidden bg-[#d9dde1]">
-                  <img
-                    src={project.image}
-                    alt={project.title}
-                    loading="lazy"
-                    decoding="async"
-                    className="home-image h-full w-full object-cover transition-transform duration-[1.3s] group-hover:scale-105"
-                  />
-
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#071122]/90 via-transparent to-transparent" />
-
-                  <div className="absolute left-5 top-5">
-                    <span className="border border-white/20 bg-black/20 px-3 py-2 text-[8px] uppercase tracking-[0.2em] text-white backdrop-blur-md">
-                      {project.type}
-                    </span>
-                  </div>
-
-                  <div className="absolute bottom-5 left-5 right-5 text-white">
-                    <div className="flex items-end justify-between gap-4">
-                      <div>
-                        <h3 className="font-display text-[24px] leading-none tracking-[-0.04em] md:text-[26px]">
-                          {project.title}
-                        </h3>
-
-                        <p className="mt-2 text-[9px] uppercase tracking-[0.16em] text-white/65">
-                          {project.subtitle}
-                        </p>
-                      </div>
-
-                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-[#172033] transition-transform duration-300 group-hover:-translate-y-1 group-hover:translate-x-1">
-                        <ArrowUpRight size={15} strokeWidth={1.5} />
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-4 flex items-center gap-2 px-1 text-[9px] uppercase tracking-[0.18em] text-[#7b8490]">
-                  <MapPin size={11} strokeWidth={1.3} />
-                  {project.location}
-                </div>
-              </Link>
-            ))}
-          </div>
+        <div className="absolute right-8 top-8 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-md opacity-0 transition-opacity group-hover:opacity-100">
+          <Maximize2 size={15} />
         </div>
       </section>
+
+
 
       {/* =====================================================
           07 — ARCHITECTURAL EXPERIENCE
@@ -820,13 +776,22 @@ export default function Home() {
           08 — VISION TO REALITY
       ====================================================== */}
 
-      <section className="relative min-h-[650px] overflow-hidden">
+      <section
+        onClick={() =>
+          setLightboxImage({
+            src: images.crane,
+            title: "Ideas Become Places",
+            subtitle: "Planning, Engineering, Structure & Finishing",
+          })
+        }
+        className="group relative min-h-[650px] cursor-pointer overflow-hidden"
+      >
         <img
           src={images.crane}
           alt="Architectural development"
           loading="lazy"
           decoding="async"
-          className="home-image absolute inset-0 h-full w-full object-cover"
+          className="home-image absolute inset-0 h-full w-full object-cover transition-transform duration-[1.5s] group-hover:scale-105"
         />
 
         <div className="absolute inset-0 bg-black/55" />
@@ -853,42 +818,94 @@ export default function Home() {
             </Reveal>
           </div>
         </div>
+
+        <div className="absolute right-8 top-8 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-md opacity-0 transition-opacity group-hover:opacity-100">
+          <Maximize2 size={15} />
+        </div>
       </section>
 
       {/* =====================================================
-          09 — FINISHED SPACE
+          09 — THE FINISHED SPACE (CLICK OPENS IN-PAGE LIGHTBOX)
       ====================================================== */}
 
-      <section className="bg-white px-6 py-24 md:px-12 md:py-32 lg:px-20">
+      <section className="bg-white px-6 py-24 transition-colors duration-500 dark:bg-[#161817] md:px-12 md:py-32 lg:px-20">
         <div className="mx-auto max-w-[1500px]">
           <div className="grid items-center gap-14 lg:grid-cols-2 lg:gap-16">
+            {/* LEFT: LUXURY ARCHITECTURAL VISUAL STAGE */}
             <div className="relative">
-              <div className="aspect-[4/5] overflow-hidden">
+              <div
+                onClick={() =>
+                  setLightboxImage({
+                    src: interiorViews[activeInteriorIndex].image,
+                    title: interiorViews[activeInteriorIndex].title,
+                    subtitle: interiorViews[activeInteriorIndex].desc,
+                  })
+                }
+                className="group relative aspect-[4/3] cursor-pointer overflow-hidden rounded-2xl border border-[var(--line)] bg-black shadow-2xl transition-all duration-700 hover:border-[#c7944a]"
+              >
                 <img
-                  src={images.interior}
-                  alt="Contemporary interior"
+                  key={interiorViews[activeInteriorIndex].image}
+                  src={interiorViews[activeInteriorIndex].image}
+                  alt={interiorViews[activeInteriorIndex].title}
                   loading="lazy"
                   decoding="async"
-                  className="home-image h-full w-full object-cover transition-transform duration-[1.5s] hover:scale-105"
+                  className="home-image h-full w-full object-cover transition-transform duration-[1.5s] group-hover:scale-105"
                 />
+
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-75" />
+
+                {/* TOP LEFT FLOATING STATUS BADGE */}
+                <div className="absolute left-5 top-5">
+                  <span className="rounded-full border border-white/25 bg-black/40 px-3.5 py-1.5 font-mono text-[8px] uppercase tracking-[0.22em] text-white backdrop-blur-md">
+                    {interiorViews[activeInteriorIndex].tag}
+                  </span>
+                </div>
+
+                {/* TOP RIGHT EXPAND ICON */}
+                <div className="absolute right-5 top-5 flex h-9 w-9 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-md opacity-0 transition-opacity group-hover:opacity-100">
+                  <Maximize2 size={14} />
+                </div>
+
+                {/* BOTTOM CAPTION */}
+                <div className="absolute bottom-5 left-5 right-5 text-white">
+                  <p className="font-mono text-[8px] uppercase tracking-[0.25em] text-[#d2a155]">
+                    Vardha Interior Experience
+                  </p>
+                  <h3 className="mt-1 font-display text-2xl font-semibold">
+                    {interiorViews[activeInteriorIndex].title}
+                  </h3>
+                  <p className="mt-1.5 max-w-md text-xs leading-5 text-white/70">
+                    {interiorViews[activeInteriorIndex].desc}
+                  </p>
+                </div>
               </div>
 
-              <div className="absolute -bottom-7 -right-4 hidden bg-white p-6 shadow-2xl md:block lg:-right-7">
-                <div className="font-mono text-[8px] uppercase tracking-[0.25em] text-[#7b8490]">
-                  Detail
-                </div>
-                <div className="mt-2 font-display text-2xl text-[#172033] md:text-3xl">
-                  01 / 04
-                </div>
+              {/* INTERACTIVE MULTI-VIEW SELECTOR BUTTONS */}
+              <div className="mt-4 flex flex-wrap gap-2">
+                {interiorViews.map((item, idx) => (
+                  <button
+                    key={item.title}
+                    type="button"
+                    onClick={() => setActiveInteriorIndex(idx)}
+                    className={`rounded-full px-4 py-2 font-mono text-[8px] uppercase tracking-wider transition-all ${
+                      activeInteriorIndex === idx
+                        ? "bg-[#c7944a] text-black font-bold shadow-md"
+                        : "border border-[var(--line)] bg-[var(--surface-2)] text-[var(--text-soft)] hover:border-[#c7944a]"
+                    }`}
+                  >
+                    {item.title}
+                  </button>
+                ))}
               </div>
             </div>
 
+            {/* RIGHT: EDITORIAL PHILOSOPHY & STATS */}
             <Reveal>
-              <span className="font-mono text-[9px] tracking-[0.3em] text-[#7b8490]">
+              <span className="font-mono text-[9px] tracking-[0.3em] text-[#7b8490] dark:text-[#8e8b83]">
                 09 / THE FINISHED SPACE
               </span>
 
-              <h2 className="mt-7 font-display text-[clamp(2.4rem,4.2vw,4.5rem)] leading-[0.9] tracking-[-0.045em] text-[#172033]">
+              <h2 className="mt-6 font-display text-[clamp(2.4rem,4.2vw,4.5rem)] leading-[0.9] tracking-[-0.045em] text-[#172033] dark:text-[#f4f0e7]">
                 Construction
                 <br />
                 becomes
@@ -896,43 +913,60 @@ export default function Home() {
                 <span className="text-[#b08a4a]">experience.</span>
               </h2>
 
-              <p className="mt-8 max-w-xl text-[13px] leading-7 text-[#68727d] md:text-[14px] md:leading-8">
+              <p className="mt-7 max-w-xl text-[13px] leading-7 text-[#68727d] dark:text-[#a8a59d] md:text-[14px] md:leading-8">
                 The final measure of construction is how naturally people
                 inhabit the space. Materials, light, proportion and planning
                 come together to create environments that feel complete.
               </p>
 
-              <div className="mt-9 grid grid-cols-2 gap-6 border-t border-[#e0e4e8] pt-6">
+              <div className="mt-9 grid grid-cols-2 gap-6 border-t border-[#e0e4e8] pt-6 dark:border-white/10">
                 <div>
-                  <div className="font-display text-xl text-[#172033] md:text-2xl">
+                  <div className="font-display text-xl text-[#172033] dark:text-[#f4f0e7] md:text-2xl">
                     Structure
                   </div>
-                  <p className="mt-2 text-[10px] text-[#7b8490]">
+                  <p className="mt-2 text-[10px] text-[#7b8490] dark:text-[#8e8b83]">
                     Built to last
                   </p>
                 </div>
 
                 <div>
-                  <div className="font-display text-xl text-[#172033] md:text-2xl">
+                  <div className="font-display text-xl text-[#172033] dark:text-[#f4f0e7] md:text-2xl">
                     Detail
                   </div>
-                  <p className="mt-2 text-[10px] text-[#7b8490]">
+                  <p className="mt-2 text-[10px] text-[#7b8490] dark:text-[#8e8b83]">
                     Carefully finished
                   </p>
                 </div>
               </div>
 
-              <Link
-                to="/about"
-                className="group mt-9 inline-flex items-center gap-3 text-[9px] uppercase tracking-[0.2em] text-[#172033] transition-colors hover:text-[#c7944a]"
-              >
-                Discover our philosophy
-                <ArrowRight
-                  size={15}
-                  strokeWidth={1.3}
-                  className="transition-transform group-hover:translate-x-1"
-                />
-              </Link>
+              <div className="mt-9 flex flex-wrap items-center gap-4">
+                <Link
+                  to="/about"
+                  className="group inline-flex items-center gap-3 rounded-full bg-[var(--dark)] px-6 py-3 font-mono text-[9px] uppercase tracking-[0.2em] text-white transition-colors hover:bg-[#c7944a] hover:text-black dark:bg-white dark:text-black dark:hover:bg-[#c7944a]"
+                >
+                  Discover our philosophy
+                  <ArrowRight
+                    size={14}
+                    strokeWidth={1.3}
+                    className="transition-transform group-hover:translate-x-1"
+                  />
+                </Link>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setLightboxImage({
+                      src: interiorViews[activeInteriorIndex].image,
+                      title: interiorViews[activeInteriorIndex].title,
+                      subtitle: interiorViews[activeInteriorIndex].desc,
+                    })
+                  }
+                  className="inline-flex items-center gap-2 font-mono text-[9px] uppercase tracking-[0.2em] text-[#b08a4a] hover:underline"
+                >
+                  View Full Resolution
+                  <Maximize2 size={13} />
+                </button>
+              </div>
             </Reveal>
           </div>
         </div>
@@ -942,21 +976,21 @@ export default function Home() {
           10 — CONSTRUCTION DETAIL
       ====================================================== */}
 
-      <section className="bg-[#f5f6f7] px-6 py-24 md:px-12 md:py-32 lg:px-20">
+      <section className="bg-[#f5f6f7] px-6 py-24 transition-colors duration-500 dark:bg-[#111312] md:px-12 md:py-32 lg:px-20">
         <div className="mx-auto max-w-[1500px]">
           <div className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr]">
             <Reveal className="flex flex-col justify-center">
-              <span className="font-mono text-[9px] tracking-[0.3em] text-[#7b8490]">
+              <span className="font-mono text-[9px] tracking-[0.3em] text-[#7b8490] dark:text-[#8e8b83]">
                 10 / THE DETAILS MATTER
               </span>
 
-              <h2 className="mt-7 font-display text-[clamp(2.4rem,4.2vw,4.5rem)] leading-[0.9] tracking-[-0.045em] text-[#172033]">
+              <h2 className="mt-7 font-display text-[clamp(2.4rem,4.2vw,4.5rem)] leading-[0.9] tracking-[-0.045em] text-[#172033] dark:text-[#f4f0e7]">
                 Quality lives
                 <br />
                 <span className="text-[#b08a4a]">in the details.</span>
               </h2>
 
-              <p className="mt-7 max-w-xl text-[13px] leading-7 text-[#68727d] md:text-[14px] md:leading-8">
+              <p className="mt-7 max-w-xl text-[13px] leading-7 text-[#68727d] dark:text-[#a8a59d] md:text-[14px] md:leading-8">
                 From structural decisions to material selection and
                 finishing, the smallest details shape the quality,
                 character and longevity of a building.
@@ -964,13 +998,22 @@ export default function Home() {
 
               <div className="mt-9 flex items-center gap-4">
                 <span className="h-px w-12 bg-[#b08a4a]" />
-                <span className="text-[9px] uppercase tracking-[0.2em] text-[#7b8490]">
+                <span className="text-[9px] uppercase tracking-[0.2em] text-[#7b8490] dark:text-[#8e8b83]">
                   Precision / Material / Craft
                 </span>
               </div>
             </Reveal>
 
-            <div className="group relative min-h-[500px] overflow-hidden md:min-h-[620px]">
+            <div
+              onClick={() =>
+                setLightboxImage({
+                  src: images.detail,
+                  title: "Built With Intention",
+                  subtitle: "Architectural Interior Detail & Material Craftsmanship",
+                })
+              }
+              className="group relative min-h-[500px] cursor-pointer overflow-hidden rounded-2xl border border-[var(--line)] md:min-h-[620px]"
+            >
               <img
                 src={images.detail}
                 alt="Architectural interior detail"
@@ -989,6 +1032,10 @@ export default function Home() {
                   Built with intention.
                 </div>
               </div>
+
+              <div className="absolute right-6 top-6 flex h-9 w-9 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-md opacity-0 transition-opacity group-hover:opacity-100">
+                <Maximize2 size={14} />
+              </div>
             </div>
           </div>
         </div>
@@ -998,21 +1045,23 @@ export default function Home() {
           11 — PROCESS
       ====================================================== */}
 
-      <section className="bg-[#f5f6f7] px-6 py-24 md:px-12 md:py-32 lg:px-20">
+      <section className="bg-[#f5f6f7] px-6 py-24 transition-colors duration-500 dark:bg-[#111312] md:px-12 md:py-32 lg:px-20">
         <div className="mx-auto max-w-[1500px]">
           <div className="grid gap-12 lg:grid-cols-[0.7fr_1.3fr]">
             <Reveal>
-              <span className="font-mono text-[9px] tracking-[0.3em] text-[#7b8490]">
+              <span className="font-mono text-[9px] tracking-[0.3em] text-[#7b8490] dark:text-[#8e8b83]">
                 11 / OUR PROCESS
               </span>
 
-              <h2 className="mt-7 font-display text-[clamp(2.4rem,4.2vw,4.5rem)] leading-[0.9] tracking-[-0.045em] text-[#172033]">
+              <h2 className="mt-7 font-display text-[clamp(2.4rem,4.2vw,4.5rem)] leading-[0.9] tracking-[-0.045em] text-[#172033] dark:text-[#f4f0e7]">
                 From vision
                 <br />
-                <span className="text-[#9aa3ad]">to reality.</span>
+                <span className="text-[#9aa3ad] dark:text-[#7a7872]">
+                  to reality.
+                </span>
               </h2>
 
-              <p className="mt-7 max-w-md text-[13px] leading-7 text-[#68727d]">
+              <p className="mt-7 max-w-md text-[13px] leading-7 text-[#68727d] dark:text-[#a8a59d]">
                 A connected construction process keeps every stage clear,
                 coordinated and focused on quality.
               </p>
@@ -1022,14 +1071,14 @@ export default function Home() {
               {process.map((step, index) => (
                 <div
                   key={step}
-                  className="process-item group flex items-center justify-between border-t border-[#dfe4e8] py-7 transition-all duration-300 hover:px-3"
+                  className="process-item group flex items-center justify-between border-t border-[#dfe4e8] py-7 transition-all duration-300 hover:px-3 dark:border-white/10"
                 >
                   <div className="flex items-center gap-6">
                     <span className="font-mono text-[9px] text-[#c7944a]">
                       0{index + 1}
                     </span>
 
-                    <span className="font-display text-xl text-[#172033] md:text-2xl">
+                    <span className="font-display text-xl text-[#172033] transition-colors group-hover:text-[#c7944a] dark:text-[#f4f0e7] md:text-2xl">
                       {step}
                     </span>
                   </div>
@@ -1037,12 +1086,12 @@ export default function Home() {
                   <Check
                     size={17}
                     strokeWidth={1.3}
-                    className="text-[#b3bbc3] transition-colors group-hover:text-[#c7944a]"
+                    className="text-[#b3bbc3] transition-colors group-hover:text-[#c7944a] dark:text-[#6c6962]"
                   />
                 </div>
               ))}
 
-              <div className="border-t border-[#dfe4e8]" />
+              <div className="border-t border-[#dfe4e8] dark:border-white/10" />
             </div>
           </div>
         </div>
@@ -1052,15 +1101,15 @@ export default function Home() {
           12 — NUMBERS
       ====================================================== */}
 
-      <section className="bg-white px-6 py-24 md:px-12 md:py-32 lg:px-20">
+      <section className="bg-white px-6 py-24 transition-colors duration-500 dark:bg-[#161817] md:px-12 md:py-32 lg:px-20">
         <div className="mx-auto max-w-[1500px]">
-          <div className="mb-12">
-            <span className="font-mono text-[9px] tracking-[0.3em] text-[#7b8490]">
+          <div className="mb-12 text-center">
+            <span className="font-mono text-[9px] uppercase tracking-[0.3em] text-[#7b8490] dark:text-[#8e8b83]">
               12 / AT A GLANCE
             </span>
           </div>
 
-          <div className="home-line h-px w-full bg-[#dfe4e8]" />
+          <div className="home-line mx-auto h-px w-full bg-[#dfe4e8] dark:bg-white/10" />
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4">
             {[
@@ -1068,16 +1117,18 @@ export default function Home() {
               ["10+", "Years of Vision"],
               ["25+", "Projects"],
               ["1000+", "Families"],
-            ].map(([number, label]) => (
+            ].map(([number, label], index) => (
               <div
                 key={label}
-                className="stat-item border-b border-[#dfe4e8] p-7 sm:border-r lg:border-b-0"
+                className={`stat-item flex flex-col items-center justify-center border-b border-[#dfe4e8] p-8 text-center transition-colors dark:border-white/10 sm:border-r ${
+                  index === 3 ? "lg:border-r-0" : ""
+                } lg:border-b-0`}
               >
-                <div className="font-display text-[clamp(2.3rem,4vw,4rem)] tracking-[-0.045em] text-[#172033]">
+                <div className="font-display text-[clamp(2.5rem,4.2vw,4.2rem)] font-semibold tracking-[-0.045em] text-[#172033] dark:text-[#f4f0e7]">
                   {number}
                 </div>
 
-                <p className="mt-4 text-[9px] uppercase tracking-[0.25em] text-[#7b8490]">
+                <p className="mt-3 text-[9px] uppercase tracking-[0.25em] text-[#7b8490] dark:text-[#8e8b83]">
                   {label}
                 </p>
               </div>
@@ -1123,7 +1174,7 @@ export default function Home() {
 
             <Link
               to="/contact"
-              className="group flex h-14 w-fit items-center gap-5 bg-[#c7944a] px-7 text-[9px] uppercase tracking-[0.25em] text-white transition-all duration-300 hover:-translate-y-1 hover:bg-[#d2a155]"
+              className="group flex h-14 w-fit items-center gap-5 rounded-full bg-[#c7944a] px-8 text-[9px] uppercase tracking-[0.25em] text-white transition-all duration-300 hover:-translate-y-1 hover:bg-[#d2a155]"
             >
               Start a Project
               <ArrowUpRight
@@ -1136,7 +1187,60 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Global Footer is rendered in App.tsx. */}
+      {/* =====================================================
+          FULL-SCREEN IN-PAGE IMAGE LIGHTBOX
+          (User stays on the Home page, NO navigation to any other page)
+      ====================================================== */}
+      {lightboxImage && (
+        <div
+          className="fixed inset-0 z-[200] flex items-center justify-center bg-black/90 p-4 backdrop-blur-xl sm:p-8"
+          onClick={() => setLightboxImage(null)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Image viewer"
+        >
+          <div
+            className="relative flex max-h-[95vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-white/20 bg-[#0d0e0f] text-white shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* CLOSE BUTTON */}
+            <button
+              type="button"
+              onClick={() => setLightboxImage(null)}
+              aria-label="Close image viewer"
+              className="absolute right-4 top-4 z-30 flex h-10 w-10 items-center justify-center rounded-full border border-white/25 bg-black/60 text-white transition hover:bg-[#c7944a] hover:text-black"
+            >
+              <X size={18} />
+            </button>
+
+            {/* FULL RESOLUTION IMAGE STAGE */}
+            <div className="relative flex max-h-[75vh] min-h-[300px] items-center justify-center overflow-hidden bg-black p-2">
+              <img
+                src={lightboxImage.src}
+                alt={lightboxImage.title}
+                className="max-h-[72vh] w-auto max-w-full rounded-lg object-contain"
+              />
+            </div>
+
+            {/* CAPTION BAR */}
+            <div className="flex flex-col justify-between gap-2 border-t border-white/10 bg-[#121415] px-6 py-4 sm:flex-row sm:items-center">
+              <div>
+                <h4 className="font-display text-xl font-semibold text-white">
+                  {lightboxImage.title}
+                </h4>
+                {lightboxImage.subtitle && (
+                  <p className="mt-0.5 text-xs text-white/60">
+                    {lightboxImage.subtitle}
+                  </p>
+                )}
+              </div>
+              <span className="font-mono text-[9px] uppercase tracking-wider text-[#c7944a]">
+                Vardha Builders · Architectural Showcase
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
