@@ -281,12 +281,18 @@ function GalleryPhoto({
   image,
   title,
   className = "",
+  priority = false,
 }: {
   image: string;
   title: string;
   className?: string;
+  priority?: boolean;
 }) {
   const [imageFailed, setImageFailed] = useState(false);
+
+  useEffect(() => {
+    setImageFailed(false);
+  }, [image]);
 
   return (
     <div
@@ -296,7 +302,8 @@ function GalleryPhoto({
         <img
           src={image}
           alt={title}
-          loading="lazy"
+          loading={priority ? "eager" : "lazy"}
+          fetchPriority={priority ? "high" : "auto"}
           onError={() => setImageFailed(true)}
           className="absolute inset-0 h-full w-full object-cover"
         />
@@ -341,7 +348,7 @@ export default function Gallery() {
 
       setScrollProgress(
         scrollableHeight > 0
-          ? (window.scrollY / scrollableHeight) * 100
+          ? Math.min(100, (window.scrollY / scrollableHeight) * 100)
           : 0,
       );
 
@@ -403,23 +410,25 @@ export default function Gallery() {
           "-=0.3",
         );
 
-      gsap.utils.toArray<HTMLElement>(".gallery-reveal").forEach((element) => {
-        gsap.fromTo(
-          element,
-          { y: 25, opacity: 0 },
-          {
-            y: 0,
-            opacity: 1,
-            duration: 0.7,
-            ease: "power3.out",
-            scrollTrigger: {
-              trigger: element,
-              start: "top 90%",
-              once: true,
+      gsap.utils
+        .toArray<HTMLElement>(".gallery-reveal")
+        .forEach((element) => {
+          gsap.fromTo(
+            element,
+            { y: 25, opacity: 0 },
+            {
+              y: 0,
+              opacity: 1,
+              duration: 0.7,
+              ease: "power3.out",
+              scrollTrigger: {
+                trigger: element,
+                start: "top 90%",
+                once: true,
+              },
             },
-          },
-        );
-      });
+          );
+        });
 
       gsap.utils
         .toArray<HTMLElement>(".gallery-grid-card")
@@ -545,37 +554,43 @@ export default function Gallery() {
         />
       </div>
 
-      {/* Hero */}
+      {/* Full-screen hero */}
       <section
         ref={heroRef}
-        className="relative flex min-h-screen min-h-[100svh] w-full items-end overflow-hidden"
+        className="relative flex min-h-[100svh] w-full items-end overflow-hidden bg-[#0d0e0d]"
       >
+        {/* Full-screen background */}
         <div className="gallery-hero-image absolute inset-0 scale-[1.03]">
           <GalleryPhoto
             image={galleryPhotos.hero}
             title="Construction at Vardha Builders"
-            className="opacity-75"
+            className="opacity-80"
+            priority
           />
         </div>
 
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0d0e0d] via-[#0d0e0d]/45 to-[#0d0e0d]/10" />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0d0e0d]/65 via-transparent to-transparent" />
+        {/* Readability overlays */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0d0e0d] via-[#0d0e0d]/40 to-[#0d0e0d]/10" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0d0e0d]/75 via-[#0d0e0d]/25 to-transparent" />
 
-        <div className="relative z-10 mx-auto w-full max-w-[1800px] px-6 pb-10 pt-32 md:px-12 md:pb-14 lg:px-20">
+        {/* Hero content */}
+        <div className="relative z-10 mx-auto flex min-h-[100svh] w-full max-w-[1800px] flex-col justify-end px-5 pb-7 pt-28 sm:px-7 sm:pb-9 sm:pt-32 md:px-10 md:pb-12 lg:px-16 lg:pb-14 xl:px-20">
           <div className="max-w-[900px]">
-            <div className="gallery-hero-eyebrow mb-6 flex items-center gap-3">
-              <span className="h-px w-7 bg-[var(--gallery-accent)]" />
-              <span className="text-[9px] uppercase tracking-[0.22em] text-[#ded1b8] md:text-[10px]">
+            <div className="gallery-hero-eyebrow mb-5 flex items-center gap-3 sm:mb-6">
+              <span className="h-px w-8 bg-[var(--gallery-accent)]" />
+
+              <span className="text-[9px] uppercase tracking-[0.2em] text-[#ded1b8] sm:text-[10px] sm:tracking-[0.24em]">
                 Vardha Builders · Project Gallery
               </span>
             </div>
 
-            <h1 className="font-display text-[clamp(2.5rem,4.8vw,5rem)] font-medium leading-[0.9] tracking-[-0.055em] text-white">
+            <h1 className="font-display text-[clamp(3rem,8vw,7.5rem)] font-medium leading-[0.9] tracking-[-0.06em] text-white">
               <span className="block overflow-hidden pb-1">
                 <span className="gallery-hero-title-line block">
                   The Art of
                 </span>
               </span>
+
               <span className="block overflow-hidden pb-1">
                 <span className="gallery-hero-title-line block text-[var(--gallery-accent)]">
                   Building.
@@ -583,71 +598,85 @@ export default function Gallery() {
               </span>
             </h1>
 
-            <p className="gallery-hero-description mt-6 max-w-[390px] text-[12px] leading-6 text-white/75 md:mt-7 md:text-[13px] md:leading-7">
+            <p className="gallery-hero-description mt-5 max-w-[470px] text-[12px] leading-6 text-white/80 sm:mt-6 sm:text-[13px] sm:leading-7 md:text-[14px]">
               A closer look at the process, people and precision behind
               creating spaces designed for the way we live.
             </p>
 
-            <div className="gallery-hero-meta mt-7 flex flex-wrap items-center gap-x-7 gap-y-4 md:mt-8">
+            <div className="gallery-hero-meta mt-6 flex flex-wrap items-center gap-x-6 gap-y-4 sm:mt-8 sm:gap-x-8">
               <button
                 type="button"
                 onClick={scrollToGallery}
-                className="group inline-flex items-center gap-3 border border-[var(--gallery-accent)] px-4 py-3 text-[9px] uppercase tracking-[0.16em] text-white transition-colors duration-300 hover:bg-[var(--gallery-accent)] hover:text-[#171816] md:text-[10px]"
+                className="group inline-flex min-h-12 items-center gap-4 border border-[var(--gallery-accent)] px-5 py-3 text-[9px] uppercase tracking-[0.15em] text-white transition-all duration-300 hover:bg-[var(--gallery-accent)] hover:text-[#171816] sm:px-6 sm:text-[10px]"
               >
                 Explore Gallery
+
                 <ArrowDown
-                  size={13}
+                  size={14}
                   className="transition-transform duration-300 group-hover:translate-y-1"
                 />
               </button>
 
-              <span className="text-[9px] tracking-[0.1em] text-white/65 md:text-[10px]">
+              <span className="text-[9px] tracking-[0.12em] text-white/70 sm:text-[10px]">
                 01 — 16 / Selected Moments
               </span>
             </div>
           </div>
 
-          <div className="mt-12 flex items-end justify-between border-t border-white/25 pt-4 md:mt-16">
-            <span className="text-[8px] uppercase tracking-[0.18em] text-white/65 md:text-[9px]">
+          {/* Bottom information */}
+          <div className="mt-10 flex items-end justify-between border-t border-white/30 pt-4 sm:mt-12 sm:pt-5 lg:mt-14">
+            <span className="text-[8px] uppercase tracking-[0.16em] text-white/70 sm:text-[9px] sm:tracking-[0.2em]">
               Built with intention
             </span>
-            <span className="text-[8px] uppercase tracking-[0.18em] text-white/65 md:text-[9px]">
+
+            <span className="text-right text-[8px] uppercase tracking-[0.16em] text-white/70 sm:text-[9px] sm:tracking-[0.2em]">
               Gorakhpur · India
             </span>
           </div>
         </div>
 
-        <div className="absolute right-6 top-1/2 hidden -translate-y-1/2 [writing-mode:vertical-rl] lg:block">
-          <span className="text-[9px] uppercase tracking-[0.25em] text-white/65">
+        {/* Vertical side label */}
+        <div className="absolute right-7 top-1/2 hidden -translate-y-1/2 [writing-mode:vertical-rl] lg:block xl:right-10">
+          <span className="text-[9px] uppercase tracking-[0.24em] text-white/70">
             Architecture in Motion · Vardha
           </span>
         </div>
+
+        {/* Scroll indicator */}
+        <button
+          type="button"
+          onClick={scrollToGallery}
+          aria-label="Scroll to gallery"
+          className="absolute bottom-[115px] right-7 hidden h-11 w-11 items-center justify-center rounded-full border border-white/30 text-white/80 transition-all duration-300 hover:border-[var(--gallery-accent)] hover:text-[var(--gallery-accent)] lg:flex xl:right-10"
+        >
+          <ArrowDown size={15} />
+        </button>
       </section>
 
       {/* Introduction */}
-      <section className="bg-[var(--gallery-bg)] px-6 py-20 text-[var(--gallery-text)] md:px-12 md:py-24 lg:px-20 lg:py-28">
-        <div className="mx-auto grid max-w-[1500px] gap-9 md:grid-cols-12 md:gap-10">
+      <section className="bg-[var(--gallery-bg)] px-5 py-14 text-[var(--gallery-text)] sm:px-7 sm:py-16 md:px-10 md:py-20 lg:px-16 lg:py-24 xl:px-20">
+        <div className="mx-auto grid max-w-[1450px] gap-7 md:grid-cols-12 md:gap-9 lg:gap-12">
           <div className="gallery-reveal md:col-span-4">
-            <span className="flex items-center gap-3 text-[9px] uppercase tracking-[0.22em] text-[var(--gallery-accent)]">
+            <span className="flex items-center gap-3 text-[9px] uppercase tracking-[0.2em] text-[var(--gallery-accent)]">
               <span className="h-px w-6 bg-[var(--gallery-accent)]" />
               A visual journal
             </span>
 
-            <p className="mt-5 max-w-[280px] text-[11px] leading-6 text-[var(--gallery-muted)] md:text-[12px]">
+            <p className="mt-4 max-w-[280px] text-[11px] leading-6 text-[var(--gallery-muted)] sm:mt-5 sm:text-[12px]">
               From the first stages of planning to the final finishing
               touches, every detail contributes to the finished space.
             </p>
           </div>
 
           <div className="gallery-reveal md:col-span-8">
-            <h2 className="font-display text-[clamp(1.8rem,3.8vw,3.8rem)] leading-[1.04] tracking-[-0.035em]">
+            <h2 className="font-display text-[clamp(1.8rem,4vw,3.65rem)] leading-[1.04] tracking-[-0.04em]">
               More than structures.
               <span className="block text-[var(--gallery-accent)]">
                 A process shaped by purpose.
               </span>
             </h2>
 
-            <p className="mt-6 max-w-[570px] text-[12px] leading-6 text-[var(--gallery-muted)] md:mt-7 md:text-[13px] md:leading-7">
+            <p className="mt-5 max-w-[570px] text-[12px] leading-6 text-[var(--gallery-muted)] sm:mt-6 sm:text-[13px] sm:leading-7">
               Every project has a story. It begins with an idea, grows through
               planning and engineering, and takes shape through the people who
               bring it to life. Our gallery brings these moments together in
@@ -661,28 +690,29 @@ export default function Gallery() {
       <section
         ref={galleryRef}
         id="gallery"
-        className="scroll-mt-16 bg-[var(--gallery-bg)] px-6 pb-20 text-[var(--gallery-text)] md:px-12 md:pb-24 lg:px-20 lg:pb-28"
+        className="scroll-mt-16 bg-[var(--gallery-bg)] px-5 pb-16 text-[var(--gallery-text)] sm:px-7 sm:pb-20 md:px-10 md:pb-24 lg:px-16 lg:pb-24 xl:px-20"
       >
-        <div className="mx-auto max-w-[1800px]">
-          <div className="gallery-reveal mb-8 flex flex-col justify-between gap-5 border-b border-[var(--gallery-border)] pb-7 md:mb-10 md:flex-row md:items-end">
+        <div className="mx-auto max-w-[1600px]">
+          <div className="gallery-reveal mb-7 flex flex-col justify-between gap-4 border-b border-[var(--gallery-border)] pb-6 sm:mb-8 md:flex-row md:items-end md:gap-6 md:pb-7">
             <div>
-              <span className="mb-4 flex items-center gap-3 text-[9px] uppercase tracking-[0.22em] text-[var(--gallery-accent)]">
+              <span className="mb-3 flex items-center gap-3 text-[9px] uppercase tracking-[0.2em] text-[var(--gallery-accent)] sm:mb-4">
                 <span className="h-px w-6 bg-[var(--gallery-accent)]" />
                 The collection
               </span>
 
-              <h2 className="font-display text-[clamp(1.9rem,3.8vw,3.8rem)] leading-[0.96] tracking-[-0.04em]">
+              <h2 className="font-display text-[clamp(1.9rem,4vw,3.65rem)] leading-[0.98] tracking-[-0.04em]">
                 Inside the process.
               </h2>
             </div>
 
-            <p className="max-w-[320px] text-[11px] leading-6 text-[var(--gallery-muted)] md:text-[12px]">
+            <p className="max-w-[320px] text-[11px] leading-6 text-[var(--gallery-muted)] sm:text-[12px]">
               Explore construction, engineering, architecture and the details
               that make every project distinct.
             </p>
           </div>
 
-          <div className="gallery-reveal mb-7 flex flex-wrap items-center gap-2 md:mb-9 md:gap-2.5">
+          {/* Category filters */}
+          <div className="gallery-reveal mb-6 flex flex-wrap items-center gap-2 sm:mb-8 md:gap-2.5">
             {categories.map((category) => {
               const isActive = activeCategory === category;
 
@@ -692,7 +722,7 @@ export default function Gallery() {
                   type="button"
                   onClick={() => setActiveCategory(category)}
                   aria-pressed={isActive}
-                  className={`border px-3.5 py-2 text-[8px] uppercase tracking-[0.12em] transition-all duration-300 md:px-4 md:text-[9px] ${
+                  className={`min-h-9 border px-3 py-2 text-[8px] uppercase tracking-[0.1em] transition-all duration-300 sm:px-3.5 sm:text-[9px] sm:tracking-[0.12em] ${
                     isActive
                       ? "border-[var(--gallery-accent)] bg-[var(--gallery-accent)] text-white"
                       : "border-[var(--gallery-border)] text-[var(--gallery-muted)] hover:border-[var(--gallery-accent)] hover:text-[var(--gallery-accent)]"
@@ -703,25 +733,26 @@ export default function Gallery() {
               );
             })}
 
-            <span className="ml-auto text-[8px] uppercase tracking-[0.12em] text-[var(--gallery-muted)] md:text-[9px]">
+            <span className="ml-auto self-center text-[8px] uppercase tracking-[0.1em] text-[var(--gallery-muted)] sm:text-[9px] sm:tracking-[0.12em]">
               {String(filteredImages.length).padStart(2, "0")} Images
             </span>
           </div>
 
+          {/* Gallery grid */}
           {filteredImages.length > 0 ? (
-            <div className="columns-1 gap-4 sm:columns-2 lg:columns-3 xl:columns-4">
+            <div className="columns-1 gap-3.5 sm:columns-2 sm:gap-4 lg:columns-3 xl:columns-4">
               {filteredImages.map((image) => (
                 <button
                   key={image.id}
                   type="button"
                   onClick={() => setActiveImage(image)}
                   aria-label={`Open image: ${image.title}`}
-                  className={`gallery-grid-card group mb-4 block w-full break-inside-avoid text-left ${
+                  className={`gallery-grid-card group mb-3.5 block w-full break-inside-avoid text-left sm:mb-4 ${
                     image.size === "tall"
-                      ? "h-[340px] md:h-[410px]"
+                      ? "h-[340px] sm:h-[370px] lg:h-[400px]"
                       : image.size === "wide"
-                        ? "h-[260px] md:h-[300px]"
-                        : "h-[260px] md:h-[310px]"
+                        ? "h-[245px] sm:h-[265px] lg:h-[285px]"
+                        : "h-[260px] sm:h-[280px] lg:h-[300px]"
                   }`}
                 >
                   <div className="relative h-full w-full overflow-hidden bg-[var(--gallery-card)]">
@@ -731,38 +762,39 @@ export default function Gallery() {
 
                     <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/5 to-black/10 opacity-90 transition-opacity duration-500 group-hover:opacity-100" />
 
-                    <div className="absolute left-3 top-3 flex items-center gap-2 md:left-4 md:top-4">
+                    <div className="absolute left-3 top-3 flex items-center gap-2 sm:left-4 sm:top-4">
                       <span className="border border-white/30 bg-black/20 px-2 py-1 text-[8px] tracking-[0.1em] text-white/90 backdrop-blur-sm">
                         {image.number}
                       </span>
 
-                      <span className="bg-black/70 px-2 py-1 text-[7px] uppercase tracking-[0.12em] text-[#e1c99e] backdrop-blur-sm md:text-[8px]">
+                      <span className="bg-black/70 px-2 py-1 text-[7px] uppercase tracking-[0.1em] text-[#e1c99e] backdrop-blur-sm sm:text-[8px] sm:tracking-[0.12em]">
                         {image.category}
                       </span>
                     </div>
 
-                    <div className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center border border-white/35 bg-black/20 text-white opacity-0 backdrop-blur-sm transition-all duration-300 group-hover:opacity-100 md:right-4 md:top-4">
+                    <div className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center border border-white/35 bg-black/20 text-white opacity-100 backdrop-blur-sm transition-all duration-300 sm:right-4 sm:top-4 sm:opacity-0 sm:group-hover:opacity-100">
                       <Expand size={12} strokeWidth={1.5} />
                     </div>
 
-                    <div className="absolute inset-x-0 bottom-0 p-4 md:p-5">
-                      <div className="mb-2 flex items-center gap-1.5 text-[8px] uppercase tracking-[0.12em] text-white/70">
+                    <div className="absolute inset-x-0 bottom-0 p-3.5 sm:p-4 lg:p-5">
+                      <div className="mb-2 flex items-center gap-1.5 text-[8px] uppercase tracking-[0.1em] text-white/70">
                         <MapPin size={10} />
                         {image.location}
                       </div>
 
-                      <h3 className="font-display text-[clamp(1.05rem,1.5vw,1.5rem)] leading-[1.04] tracking-[-0.03em] text-white">
+                      <h3 className="font-display text-[clamp(1.05rem,1.5vw,1.4rem)] leading-[1.08] tracking-[-0.03em] text-white">
                         {image.title}
                       </h3>
 
-                      <p className="mt-2 max-w-[320px] text-[10px] leading-[1.6] text-white/75 md:text-[11px]">
+                      <p className="mt-2 max-w-[320px] text-[10px] leading-[1.6] text-white/75 sm:text-[11px]">
                         {image.description}
                       </p>
 
                       <div className="mt-3 flex items-center justify-between border-t border-white/25 pt-2.5">
-                        <span className="text-[7px] uppercase tracking-[0.15em] text-white/70 md:text-[8px]">
+                        <span className="text-[7px] uppercase tracking-[0.13em] text-white/70 sm:text-[8px] sm:tracking-[0.15em]">
                           View photograph
                         </span>
+
                         <ArrowUpRight
                           size={13}
                           className="text-[#d2b47c] transition-transform duration-300 group-hover:-translate-y-1 group-hover:translate-x-1"
@@ -776,9 +808,11 @@ export default function Gallery() {
           ) : (
             <div className="flex min-h-[220px] flex-col items-center justify-center border border-[var(--gallery-border)] text-center">
               <Building2 size={26} className="text-[var(--gallery-accent)]" />
+
               <p className="mt-4 text-[12px] text-[var(--gallery-muted)]">
                 No photographs found in this category.
               </p>
+
               <button
                 type="button"
                 onClick={() => setActiveCategory("All")}
@@ -789,11 +823,12 @@ export default function Gallery() {
             </div>
           )}
 
-          <div className="gallery-reveal mt-8 flex items-center justify-between border-t border-[var(--gallery-border)] pt-4">
-            <span className="text-[8px] uppercase tracking-[0.15em] text-[var(--gallery-muted)] md:text-[9px]">
+          <div className="gallery-reveal mt-7 flex items-center justify-between border-t border-[var(--gallery-border)] pt-4 sm:mt-8">
+            <span className="text-[8px] uppercase tracking-[0.12em] text-[var(--gallery-muted)] sm:text-[9px] sm:tracking-[0.15em]">
               Vardha Builders · Visual archive
             </span>
-            <span className="text-[8px] uppercase tracking-[0.15em] text-[var(--gallery-muted)] md:text-[9px]">
+
+            <span className="text-[8px] uppercase tracking-[0.12em] text-[var(--gallery-muted)] sm:text-[9px] sm:tracking-[0.15em]">
               {String(filteredImages.length).padStart(2, "0")} selected
             </span>
           </div>
@@ -801,16 +836,16 @@ export default function Gallery() {
       </section>
 
       {/* Construction stages */}
-      <section className="bg-[var(--gallery-surface)] px-6 py-20 text-[var(--gallery-text)] md:px-12 md:py-24 lg:px-20 lg:py-28">
+      <section className="bg-[var(--gallery-surface)] px-5 py-14 text-[var(--gallery-text)] sm:px-7 sm:py-16 md:px-10 md:py-20 lg:px-16 lg:py-24 xl:px-20">
         <div className="mx-auto max-w-[1500px]">
-          <div className="gallery-reveal mb-10 grid gap-6 md:mb-14 md:grid-cols-12 md:items-end">
+          <div className="gallery-reveal mb-8 grid gap-5 sm:mb-10 md:grid-cols-12 md:items-end md:gap-7 lg:mb-12">
             <div className="md:col-span-8">
-              <span className="mb-4 flex items-center gap-3 text-[9px] uppercase tracking-[0.22em] text-[var(--gallery-accent)]">
+              <span className="mb-3 flex items-center gap-3 text-[9px] uppercase tracking-[0.2em] text-[var(--gallery-accent)] sm:mb-4">
                 <span className="h-px w-6 bg-[var(--gallery-accent)]" />
                 From vision to reality
               </span>
 
-              <h2 className="font-display text-[clamp(2rem,3.8vw,4rem)] leading-[0.96] tracking-[-0.04em]">
+              <h2 className="font-display text-[clamp(2rem,4vw,3.8rem)] leading-[0.98] tracking-[-0.04em]">
                 Every stage
                 <span className="block text-[var(--gallery-accent)]">
                   has a purpose.
@@ -818,16 +853,16 @@ export default function Gallery() {
               </h2>
             </div>
 
-            <p className="text-[11px] leading-6 text-[var(--gallery-muted)] md:col-span-4 md:text-[12px]">
+            <p className="text-[11px] leading-6 text-[var(--gallery-muted)] sm:text-[12px] md:col-span-4">
               Building is a sequence of connected decisions. Each stage helps
               shape the quality and character of the final result.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4 lg:gap-5">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-7 lg:grid-cols-4 lg:gap-5">
             {processStages.map((stage) => (
               <article key={stage.number} className="gallery-reveal group">
-                <div className="relative h-[250px] overflow-hidden bg-[var(--gallery-card)] md:h-[285px]">
+                <div className="relative h-[245px] overflow-hidden bg-[var(--gallery-card)] sm:h-[265px] lg:h-[280px]">
                   <div className="absolute inset-0 transition-transform duration-700 group-hover:scale-[1.04]">
                     <GalleryPhoto image={stage.image} title={stage.title} />
                   </div>
@@ -845,11 +880,11 @@ export default function Gallery() {
                 </div>
 
                 <div className="border-b border-[var(--gallery-border)] py-4">
-                  <h3 className="font-display text-[clamp(1.25rem,1.8vw,1.7rem)] leading-none tracking-[-0.03em]">
+                  <h3 className="font-display text-[clamp(1.25rem,1.8vw,1.6rem)] leading-none tracking-[-0.03em]">
                     {stage.title}
                   </h3>
 
-                  <p className="mt-3 text-[11px] leading-6 text-[var(--gallery-muted)] md:text-[12px]">
+                  <p className="mt-3 text-[11px] leading-6 text-[var(--gallery-muted)] sm:text-[12px]">
                     {stage.description}
                   </p>
                 </div>
@@ -860,15 +895,15 @@ export default function Gallery() {
       </section>
 
       {/* Approach */}
-      <section className="bg-[var(--gallery-bg)] px-6 py-20 text-[var(--gallery-text)] md:px-12 md:py-24 lg:px-20 lg:py-28">
-        <div className="mx-auto grid max-w-[1500px] gap-9 lg:grid-cols-2 lg:items-center lg:gap-16">
+      <section className="bg-[var(--gallery-bg)] px-5 py-14 text-[var(--gallery-text)] sm:px-7 sm:py-16 md:px-10 md:py-20 lg:px-16 lg:py-24 xl:px-20">
+        <div className="mx-auto grid max-w-[1500px] gap-8 sm:gap-10 lg:grid-cols-2 lg:items-center lg:gap-14">
           <div className="gallery-reveal">
-            <span className="mb-4 flex items-center gap-3 text-[9px] uppercase tracking-[0.22em] text-[var(--gallery-accent)]">
+            <span className="mb-3 flex items-center gap-3 text-[9px] uppercase tracking-[0.2em] text-[var(--gallery-accent)] sm:mb-4">
               <span className="h-px w-6 bg-[var(--gallery-accent)]" />
               Our approach
             </span>
 
-            <h2 className="font-display text-[clamp(2rem,3.8vw,4rem)] leading-[0.96] tracking-[-0.04em]">
+            <h2 className="font-display text-[clamp(2rem,4vw,3.8rem)] leading-[0.98] tracking-[-0.04em]">
               Designed with
               <span className="block text-[var(--gallery-accent)]">
                 intention.
@@ -876,7 +911,7 @@ export default function Gallery() {
               Built with care.
             </h2>
 
-            <p className="mt-6 max-w-[480px] text-[12px] leading-6 text-[var(--gallery-muted)] md:mt-7 md:text-[13px] md:leading-7">
+            <p className="mt-5 max-w-[480px] text-[12px] leading-6 text-[var(--gallery-muted)] sm:mt-6 sm:text-[13px] sm:leading-7">
               We believe the value of a building lies in more than its
               appearance. Planning, material choices, craftsmanship and
               attention to detail all contribute to spaces people can enjoy
@@ -885,9 +920,10 @@ export default function Gallery() {
 
             <Link
               to="/about"
-              className="group mt-7 inline-flex items-center gap-3 border-b border-[var(--gallery-accent)] pb-2.5 text-[9px] uppercase tracking-[0.17em] text-[var(--gallery-accent)] transition-colors hover:opacity-75"
+              className="group mt-6 inline-flex min-h-10 items-center gap-3 border-b border-[var(--gallery-accent)] pb-2 text-[9px] uppercase tracking-[0.16em] text-[var(--gallery-accent)] transition-colors hover:opacity-75 sm:mt-7 sm:tracking-[0.17em]"
             >
               Discover Vardha
+
               <ArrowRight
                 size={13}
                 className="transition-transform duration-300 group-hover:translate-x-1"
@@ -895,8 +931,8 @@ export default function Gallery() {
             </Link>
           </div>
 
-          <div className="gallery-reveal relative">
-            <div className="relative h-[340px] overflow-hidden sm:h-[420px] lg:h-[500px]">
+          <div className="gallery-reveal relative mt-1 sm:mt-2 lg:mt-0">
+            <div className="relative h-[320px] overflow-hidden sm:h-[400px] lg:h-[460px] xl:h-[490px]">
               <GalleryPhoto
                 image={galleryPhotos.architecture}
                 title="Modern architectural design"
@@ -904,12 +940,13 @@ export default function Gallery() {
 
               <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
 
-              <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between border-t border-white/40 pt-3 text-white md:bottom-6 md:left-6 md:right-6">
+              <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between border-t border-white/40 pt-3 text-white sm:bottom-6 sm:left-6 sm:right-6">
                 <div>
-                  <span className="text-[8px] uppercase tracking-[0.17em] text-white/80">
+                  <span className="text-[8px] uppercase tracking-[0.15em] text-white/80 sm:tracking-[0.17em]">
                     The Vardha perspective
                   </span>
-                  <p className="mt-1.5 font-display text-xl tracking-[-0.03em] md:text-2xl">
+
+                  <p className="mt-1.5 font-display text-xl tracking-[-0.03em] sm:text-2xl">
                     Form follows purpose.
                   </p>
                 </div>
@@ -920,10 +957,11 @@ export default function Gallery() {
               </div>
             </div>
 
-            <div className="absolute -bottom-4 -left-2 hidden border border-[var(--gallery-accent)] bg-[var(--gallery-surface)] px-4 py-3 sm:block md:-left-5 md:px-5 md:py-4">
+            <div className="absolute -bottom-4 left-3 hidden border border-[var(--gallery-accent)] bg-[var(--gallery-surface)] px-4 py-3 sm:block md:left-5 md:px-5 md:py-4">
               <span className="block text-[8px] uppercase tracking-[0.17em] text-[var(--gallery-muted)]">
                 Our guiding principle
               </span>
+
               <span className="mt-1.5 block font-display text-lg tracking-[-0.03em] md:text-xl">
                 Quality in every detail.
               </span>
@@ -933,8 +971,8 @@ export default function Gallery() {
       </section>
 
       {/* Stats */}
-      <section className="border-y border-[var(--gallery-border)] bg-[var(--gallery-surface)] px-6 py-14 text-[var(--gallery-text)] md:px-12 md:py-16 lg:px-20">
-        <div className="mx-auto grid max-w-[1500px] grid-cols-2 gap-x-5 gap-y-8 md:grid-cols-4 md:gap-7">
+      <section className="border-y border-[var(--gallery-border)] bg-[var(--gallery-surface)] px-5 py-12 text-[var(--gallery-text)] sm:px-7 sm:py-14 md:px-10 md:py-16 lg:px-16 xl:px-20">
+        <div className="mx-auto grid max-w-[1500px] grid-cols-2 gap-x-5 gap-y-7 sm:gap-y-8 md:grid-cols-4 md:gap-7">
           {[
             { value: "01", label: "Vision", detail: "A clear purpose" },
             { value: "02", label: "Precision", detail: "Considered planning" },
@@ -942,15 +980,15 @@ export default function Gallery() {
             { value: "04", label: "Delivery", detail: "A completed vision" },
           ].map((item) => (
             <div key={item.value} className="gallery-reveal">
-              <span className="font-display text-[clamp(2.2rem,4vw,3.8rem)] leading-none tracking-[-0.04em] text-[var(--gallery-accent)]">
+              <span className="font-display text-[clamp(2.2rem,4vw,3.6rem)] leading-none tracking-[-0.04em] text-[var(--gallery-accent)]">
                 {item.value}
               </span>
 
-              <h3 className="mt-3 text-[9px] font-medium uppercase tracking-[0.14em] md:text-[10px]">
+              <h3 className="mt-3 text-[9px] font-medium uppercase tracking-[0.14em] sm:text-[10px]">
                 {item.label}
               </h3>
 
-              <p className="mt-1.5 text-[10px] leading-5 text-[var(--gallery-muted)] md:text-[11px]">
+              <p className="mt-1.5 text-[10px] leading-5 text-[var(--gallery-muted)] sm:text-[11px]">
                 {item.detail}
               </p>
             </div>
@@ -959,25 +997,26 @@ export default function Gallery() {
       </section>
 
       {/* Final CTA */}
-      <section className="relative overflow-hidden bg-[var(--gallery-bg)] px-6 py-20 text-[var(--gallery-text)] md:px-12 md:py-24 lg:px-20 lg:py-32">
-        <div className="absolute right-[-10%] top-1/2 h-[260px] w-[260px] -translate-y-1/2 rounded-full border border-[var(--gallery-accent)]/20 md:h-[420px] md:w-[420px]" />
-        <div className="absolute right-[-4%] top-1/2 h-[190px] w-[190px] -translate-y-1/2 rounded-full border border-[var(--gallery-accent)]/20 md:h-[310px] md:w-[310px]" />
+      <section className="relative overflow-hidden bg-[var(--gallery-bg)] px-5 py-16 text-[var(--gallery-text)] sm:px-7 sm:py-20 md:px-10 md:py-24 lg:px-16 lg:py-28 xl:px-20">
+        <div className="pointer-events-none absolute right-[-18%] top-1/2 h-[240px] w-[240px] -translate-y-1/2 rounded-full border border-[var(--gallery-accent)]/20 sm:right-[-10%] sm:h-[340px] sm:w-[340px] md:h-[420px] md:w-[420px]" />
+
+        <div className="pointer-events-none absolute right-[-9%] top-1/2 h-[170px] w-[170px] -translate-y-1/2 rounded-full border border-[var(--gallery-accent)]/20 sm:right-[-4%] sm:h-[250px] sm:w-[250px] md:h-[310px] md:w-[310px]" />
 
         <div className="gallery-reveal relative z-10 mx-auto max-w-[1500px]">
-          <span className="mb-5 flex items-center gap-3 text-[9px] uppercase tracking-[0.22em] text-[var(--gallery-accent)]">
+          <span className="mb-4 flex items-center gap-3 text-[9px] uppercase tracking-[0.2em] text-[var(--gallery-accent)] sm:mb-5">
             <span className="h-px w-6 bg-[var(--gallery-accent)]" />
             Your next chapter
           </span>
 
-          <h2 className="max-w-[900px] font-display text-[clamp(2.4rem,4.8vw,5.2rem)] leading-[0.92] tracking-[-0.05em]">
+          <h2 className="max-w-[850px] font-display text-[clamp(2.4rem,5.2vw,4.8rem)] leading-[0.95] tracking-[-0.05em]">
             Have a vision?
             <span className="block text-[var(--gallery-accent)]">
               Let's build it.
             </span>
           </h2>
 
-          <div className="mt-7 flex flex-col gap-6 md:mt-8 md:flex-row md:items-end md:justify-between">
-            <p className="max-w-[390px] text-[12px] leading-6 text-[var(--gallery-muted)] md:text-[13px] md:leading-7">
+          <div className="mt-6 flex flex-col gap-5 sm:mt-7 md:flex-row md:items-end md:justify-between md:gap-7">
+            <p className="max-w-[390px] text-[12px] leading-6 text-[var(--gallery-muted)] sm:text-[13px] sm:leading-7">
               Explore our projects or get in touch to discuss your requirements
               with Vardha Builders.
             </p>
@@ -985,9 +1024,10 @@ export default function Gallery() {
             <div className="flex flex-wrap gap-2.5">
               <Link
                 to="/portfolio"
-                className="group inline-flex items-center gap-4 border border-[var(--gallery-accent)] bg-[var(--gallery-accent)] px-4 py-3 text-[8px] uppercase tracking-[0.14em] text-white transition-colors duration-300 hover:bg-transparent hover:text-[var(--gallery-accent)] md:px-5 md:text-[9px]"
+                className="group inline-flex min-h-11 items-center gap-3 border border-[var(--gallery-accent)] bg-[var(--gallery-accent)] px-4 py-3 text-[8px] uppercase tracking-[0.12em] text-white transition-colors duration-300 hover:bg-transparent hover:text-[var(--gallery-accent)] sm:gap-4 sm:px-5 sm:text-[9px] sm:tracking-[0.14em]"
               >
                 Explore Projects
+
                 <ArrowUpRight
                   size={13}
                   className="transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1"
@@ -996,9 +1036,10 @@ export default function Gallery() {
 
               <Link
                 to="/contact"
-                className="group inline-flex items-center gap-4 border border-[var(--gallery-border)] px-4 py-3 text-[8px] uppercase tracking-[0.14em] text-[var(--gallery-text)] transition-colors duration-300 hover:border-[var(--gallery-accent)] hover:text-[var(--gallery-accent)] md:px-5 md:text-[9px]"
+                className="group inline-flex min-h-11 items-center gap-3 border border-[var(--gallery-border)] px-4 py-3 text-[8px] uppercase tracking-[0.12em] text-[var(--gallery-text)] transition-colors duration-300 hover:border-[var(--gallery-accent)] hover:text-[var(--gallery-accent)] sm:gap-4 sm:px-5 sm:text-[9px] sm:tracking-[0.14em]"
               >
                 Contact Us
+
                 <ArrowRight
                   size={13}
                   className="transition-transform duration-300 group-hover:translate-x-1"
@@ -1007,11 +1048,12 @@ export default function Gallery() {
             </div>
           </div>
 
-          <div className="mt-12 flex items-center justify-between border-t border-[var(--gallery-border)] pt-4 md:mt-16">
-            <span className="text-[8px] uppercase tracking-[0.17em] text-[var(--gallery-muted)] md:text-[9px]">
+          <div className="mt-10 flex items-center justify-between border-t border-[var(--gallery-border)] pt-4 sm:mt-12 md:mt-14">
+            <span className="text-[8px] uppercase tracking-[0.15em] text-[var(--gallery-muted)] sm:text-[9px] sm:tracking-[0.17em]">
               Vardha Builders
             </span>
-            <span className="text-[8px] uppercase tracking-[0.17em] text-[var(--gallery-muted)] md:text-[9px]">
+
+            <span className="text-right text-[8px] uppercase tracking-[0.15em] text-[var(--gallery-muted)] sm:text-[9px] sm:tracking-[0.17em]">
               Built with intention.
             </span>
           </div>
@@ -1024,14 +1066,14 @@ export default function Gallery() {
           role="dialog"
           aria-modal="true"
           aria-label={`Viewing ${activeImage.title}`}
-          className="fixed inset-0 z-[200] flex items-center justify-center bg-[#080908]/95 p-4 backdrop-blur-md md:p-7"
+          className="fixed inset-0 z-[200] flex items-center justify-center bg-[#080908]/95 p-3 backdrop-blur-md sm:p-4 md:p-7"
           onClick={() => setActiveImage(null)}
         >
           <button
             type="button"
             onClick={() => setActiveImage(null)}
             aria-label="Close gallery preview"
-            className="absolute right-4 top-4 z-20 flex h-10 w-10 items-center justify-center border border-white/20 bg-black/30 text-white transition-colors hover:border-[#c5a46d] hover:text-[#c5a46d] md:right-7 md:top-7"
+            className="absolute right-3 top-3 z-20 flex h-10 w-10 items-center justify-center border border-white/20 bg-black/30 text-white transition-colors hover:border-[#c5a46d] hover:text-[#c5a46d] sm:right-5 sm:top-5 md:right-7 md:top-7"
           >
             <X size={17} />
           </button>
@@ -1043,7 +1085,7 @@ export default function Gallery() {
               navigateImage("previous");
             }}
             aria-label="Previous image"
-            className="absolute left-2 top-1/2 z-20 flex h-9 w-9 -translate-y-1/2 items-center justify-center border border-white/20 bg-black/30 text-white transition-colors hover:border-[#c5a46d] hover:text-[#c5a46d] md:left-6 md:h-11 md:w-11"
+            className="absolute left-1 top-1/2 z-20 flex h-9 w-9 -translate-y-1/2 items-center justify-center border border-white/20 bg-black/30 text-white transition-colors hover:border-[#c5a46d] hover:text-[#c5a46d] sm:left-3 md:left-6 md:h-11 md:w-11"
           >
             <ArrowLeft size={16} />
           </button>
@@ -1056,12 +1098,12 @@ export default function Gallery() {
               <img
                 src={activeImage.image}
                 alt={activeImage.title}
-                className="mx-auto max-h-[64svh] min-h-[220px] w-full object-contain md:max-h-[70svh]"
+                className="mx-auto max-h-[56svh] min-h-[200px] w-full object-contain sm:max-h-[64svh] md:max-h-[70svh]"
               />
             </div>
 
-            <div className="flex flex-col justify-between gap-3 border-t border-white/20 bg-[#10110f] py-4 text-white md:flex-row md:items-end md:py-5">
-              <div>
+            <div className="flex flex-col justify-between gap-3 border-t border-white/20 bg-[#10110f] px-3 py-3 text-white sm:px-4 sm:py-4 md:flex-row md:items-end md:gap-5 md:px-5 md:py-5">
+              <div className="min-w-0">
                 <div className="mb-2 flex items-center gap-3">
                   <span className="text-[8px] tracking-[0.14em] text-[#c5a46d]">
                     {activeImage.number}
@@ -1074,23 +1116,23 @@ export default function Gallery() {
                   </span>
                 </div>
 
-                <h3 className="font-display text-[clamp(1.4rem,2.5vw,2.4rem)] leading-none tracking-[-0.04em]">
+                <h3 className="font-display text-[clamp(1.25rem,2.5vw,2.3rem)] leading-tight tracking-[-0.04em]">
                   {activeImage.title}
                 </h3>
 
-                <p className="mt-2 max-w-[560px] text-[11px] leading-5 text-white/65 md:text-[12px] md:leading-6">
+                <p className="mt-2 max-w-[560px] text-[11px] leading-5 text-white/65 sm:text-[12px] sm:leading-6">
                   {activeImage.description}
                 </p>
 
                 <div className="mt-2 flex items-center gap-2 text-[9px] text-white/55">
-                  <MapPin size={11} className="text-[#c5a46d]" />
+                  <MapPin size={11} className="shrink-0 text-[#c5a46d]" />
                   {activeImage.location}
                 </div>
               </div>
 
-              <div className="flex shrink-0 items-center gap-3">
-                <span className="text-[9px] tracking-[0.12em] text-white/65">
-                  {String(activeImageIndex + 1).padStart(2, "0")} /{" "}
+              <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+                <span className="mr-1 text-[9px] tracking-[0.12em] text-white/65">
+                  {String(Math.max(activeImageIndex + 1, 1)).padStart(2, "0")} /{" "}
                   {String(filteredImages.length).padStart(2, "0")}
                 </span>
 
@@ -1122,7 +1164,7 @@ export default function Gallery() {
               navigateImage("next");
             }}
             aria-label="Next image"
-            className="absolute right-2 top-1/2 z-20 flex h-9 w-9 -translate-y-1/2 items-center justify-center border border-white/20 bg-black/30 text-white transition-colors hover:border-[#c5a46d] hover:text-[#c5a46d] md:right-6 md:h-11 md:w-11"
+            className="absolute right-1 top-1/2 z-20 flex h-9 w-9 -translate-y-1/2 items-center justify-center border border-white/20 bg-black/30 text-white transition-colors hover:border-[#c5a46d] hover:text-[#c5a46d] sm:right-3 md:right-6 md:h-11 md:w-11"
           >
             <ArrowRight size={16} />
           </button>
@@ -1134,7 +1176,7 @@ export default function Gallery() {
         type="button"
         onClick={scrollToTop}
         aria-label="Back to top"
-        className={`fixed bottom-4 right-4 z-[90] flex h-10 w-10 items-center justify-center border border-[var(--gallery-accent)] bg-[var(--gallery-surface)] text-[var(--gallery-accent)] transition-all duration-300 hover:bg-[var(--gallery-accent)] hover:text-white md:bottom-7 md:right-7 ${
+        className={`fixed bottom-4 right-4 z-[90] flex h-10 w-10 items-center justify-center border border-[var(--gallery-accent)] bg-[var(--gallery-surface)] text-[var(--gallery-accent)] transition-all duration-300 hover:bg-[var(--gallery-accent)] hover:text-white sm:bottom-5 sm:right-5 md:bottom-7 md:right-7 ${
           showTopButton
             ? "translate-y-0 opacity-100"
             : "pointer-events-none translate-y-4 opacity-0"

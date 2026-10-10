@@ -252,9 +252,9 @@ export default function Portfolio() {
     window.history.replaceState(null, "", "/portfolio");
   };
 
-  const scrollToTop = () => {
+  const scrollToTop = () => {  
     window.scrollTo({ top: 0, behavior: "smooth" });
-  };
+  }; 
 
   const handleWhatsApp = (project: Project, e?: MouseEvent) => {
     if (e) e.stopPropagation();
@@ -315,7 +315,7 @@ export default function Portfolio() {
 
         {/* HERO CENTER CONTENT */}
 
-        <div className="relative z-10 mx-auto w-full max-w-7xl px-6 py-8 sm:px-8 sm:py-10 lg:px-12">
+        <div className="relative z-10 mx-auto w-full max-w-7xl px-6 py-8 sm: px-8 sm:py-10 lg:px-12">
           <div className="max-w-5xl">
             <p className="project-hero-reveal font-mono text-[10px] uppercase tracking-[0.3em] text-[#c9a66b]">
               Signature Developments · 2026
