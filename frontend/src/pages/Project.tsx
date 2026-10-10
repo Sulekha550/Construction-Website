@@ -1,3 +1,4 @@
+
 import {
   useEffect,
   useMemo,
@@ -8,14 +9,12 @@ import {
 import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   ArrowDown,
-  ArrowRight,
   ArrowUpRight,
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
   Compass,
   FileText,
-  Home,
   Layers,
   MapPin,
   Maximize2,
@@ -33,10 +32,6 @@ import projects, { type Project } from "../data/projects";
 
 gsap.registerPlugin(ScrollTrigger);
 
-/* =========================================================
-   CATEGORY FILTERS
-========================================================= */
-
 const filters = [
   { id: "all", label: "All Projects" },
   { id: "flats", label: "Flats & Apartments" },
@@ -52,7 +47,8 @@ export default function Portfolio() {
   const heroImageRef = useRef<HTMLImageElement>(null);
 
   const [activeFilter, setActiveFilter] = useState("all");
-  const [fullScreenProject, setFullScreenProject] = useState<Project | null>(null);
+  const [fullScreenProject, setFullScreenProject] =
+    useState<Project | null>(null);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [showTopButton, setShowTopButton] = useState(false);
   const [selectedGalleryIndex, setSelectedGalleryIndex] = useState(0);
@@ -70,6 +66,7 @@ export default function Portfolio() {
           (normalized.includes("central") && p.id === "central-tower") ||
           (normalized.includes("adhvik") && p.id === "adhvik-skyline")
       );
+
       if (match) {
         setFullScreenProject(match);
         setSelectedGalleryIndex(0);
@@ -81,9 +78,13 @@ export default function Portfolio() {
 
   const filteredProjects = useMemo(() => {
     if (activeFilter === "all") return projects;
+
     if (activeFilter === "flats") {
-      return projects.filter((p) => p.type.toLowerCase().includes("flat"));
+      return projects.filter((p) =>
+        p.type.toLowerCase().includes("flat")
+      );
     }
+
     if (activeFilter === "villas") {
       return projects.filter(
         (p) =>
@@ -91,9 +92,13 @@ export default function Portfolio() {
           p.category.toLowerCase().includes("villa")
       );
     }
+
     if (activeFilter === "ready") {
-      return projects.filter((p) => p.status.toLowerCase().includes("ready"));
+      return projects.filter((p) =>
+        p.status.toLowerCase().includes("ready")
+      );
     }
+
     return projects;
   }, [activeFilter]);
 
@@ -104,22 +109,21 @@ export default function Portfolio() {
       const scrollTop = window.scrollY;
       const height =
         document.documentElement.scrollHeight - window.innerHeight;
+
       setScrollProgress(height > 0 ? (scrollTop / height) * 100 : 0);
       setShowTopButton(scrollTop > 600);
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
+
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   /* LOCK SCROLL ON FULL-SCREEN */
 
   useEffect(() => {
-    if (fullScreenProject) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
+    document.body.style.overflow = fullScreenProject ? "hidden" : "";
+
     return () => {
       document.body.style.overflow = "";
     };
@@ -139,18 +143,32 @@ export default function Portfolio() {
         closeFullScreen();
       } else if (e.key === "ArrowRight") {
         const next = (currentIndex + 1) % projects.length;
+
         setFullScreenProject(projects[next]);
         setSelectedGalleryIndex(0);
-        window.history.replaceState(null, "", `/portfolio/${projects[next].id}`);
+
+        window.history.replaceState(
+          null,
+          "",
+          `/portfolio/${projects[next].id}`
+        );
       } else if (e.key === "ArrowLeft") {
-        const prev = (currentIndex - 1 + projects.length) % projects.length;
+        const prev =
+          (currentIndex - 1 + projects.length) % projects.length;
+
         setFullScreenProject(projects[prev]);
         setSelectedGalleryIndex(0);
-        window.history.replaceState(null, "", `/portfolio/${projects[prev].id}`);
+
+        window.history.replaceState(
+          null,
+          "",
+          `/portfolio/${projects[prev].id}`
+        );
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
+
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [fullScreenProject]);
 
@@ -176,8 +194,7 @@ export default function Portfolio() {
         }
       );
 
-      gsap
-        .utils
+      gsap.utils
         .toArray<HTMLElement>(".project-card-anim")
         .forEach((card, idx) => {
           gsap.fromTo(
@@ -206,6 +223,7 @@ export default function Portfolio() {
 
   const handleCardMouseMove = (event: MouseEvent<HTMLDivElement>) => {
     if (window.innerWidth < 1024) return;
+
     const card = event.currentTarget;
     const rect = card.getBoundingClientRect();
     const x = ((event.clientX - rect.left) / rect.width - 0.5) * 2;
@@ -218,19 +236,20 @@ export default function Portfolio() {
     event.currentTarget.style.transform = "";
   };
 
-  /* OPEN PROJECT IN FULL SCREEN (DOES NOT GO TO HERO) */
+  /* OPEN PROJECT IN FULL SCREEN */
 
   const openFullScreen = (project: Project) => {
     setFullScreenProject(project);
     setSelectedGalleryIndex(0);
+
     window.history.replaceState(null, "", `/portfolio/${project.id}`);
   };
 
-  /* CLOSE FULL SCREEN (STAYS EXACTLY ON PROJECT SECTION) */
+  /* CLOSE FULL SCREEN */
 
   const closeFullScreen = () => {
     setFullScreenProject(null);
-    window.history.replaceState(null, "", `/portfolio`);
+    window.history.replaceState(null, "", "/portfolio");
   };
 
   const scrollToTop = () => {
@@ -239,9 +258,11 @@ export default function Portfolio() {
 
   const handleWhatsApp = (project: Project, e?: MouseEvent) => {
     if (e) e.stopPropagation();
+
     const text = encodeURIComponent(
       `Hello Vardha Builders, I am inquiring about ${project.title} (${project.location}). Please share availability and floor plans.`
     );
+
     window.open(`https://wa.me/919999999999?text=${text}`, "_blank");
   };
 
@@ -250,7 +271,8 @@ export default function Portfolio() {
       ref={pageRef}
       className="min-h-screen bg-[var(--bg)] text-[var(--text)] transition-colors duration-500"
     >
-      {/* 2PX PROGRESS BAR */}
+      {/* SCROLL PROGRESS BAR */}
+
       <div className="fixed left-0 top-0 z-[110] h-[2px] w-full bg-black/10">
         <div
           className="h-full bg-[var(--gold)] transition-all duration-150"
@@ -258,30 +280,33 @@ export default function Portfolio() {
         />
       </div>
 
-      {/* =========================================================
-         FULLPAGE HERO SECTION (100dvh / FULLSCREEN)
-      ========================================================= */}
-      <section className="relative h-[100dvh] min-h-[100dvh] w-full overflow-hidden bg-[#0a0b0b] text-white flex flex-col justify-between">
+      {/* HERO SECTION */}
+
+      <section className="relative flex min-h-[100svh] flex-col justify-between overflow-hidden bg-[#0a0b0b] text-white">
         <div className="absolute inset-0">
           <img
             ref={heroImageRef}
             src="/images/projects/central-tower.webp"
             alt="Vardha Builders Architecture"
-            className="h-full w-full object-cover opacity-45 mix-blend-luminosity scale-105 transition-transform duration-1000"
+            className="h-full w-full scale-105 object-cover opacity-45 mix-blend-luminosity transition-transform duration-1000"
           />
+
           <div className="absolute inset-0 bg-gradient-to-b from-[#0a0b0b]/90 via-[#0a0b0b]/60 to-[#0a0b0b]" />
           <div className="arch-grid absolute inset-0 opacity-[0.06]" />
         </div>
 
         {/* HERO TOP BAR */}
-        <div className="relative z-10 mx-auto w-full max-w-7xl px-6 pt-28 sm:px-8 sm:pt-32 lg:px-12">
-          <div className="project-hero-reveal flex items-center justify-between">
+
+        <div className="relative z-10 mx-auto w-full max-w-7xl px-6 pt-24 sm:px-8 sm:pt-28 lg:px-12 lg:pt-32">
+          <div className="project-hero-reveal flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <span className="h-px w-8 bg-[#c9a66b]" />
+
               <span className="font-mono text-[9px] uppercase tracking-[0.3em] text-[#d4b57b]">
                 Vardha Builders · Portfolio
               </span>
             </div>
+
             <span className="hidden font-mono text-[8px] uppercase tracking-[0.25em] text-white/40 md:inline">
               Gorakhpur, Uttar Pradesh
             </span>
@@ -289,34 +314,39 @@ export default function Portfolio() {
         </div>
 
         {/* HERO CENTER CONTENT */}
-        <div className="relative z-10 mx-auto w-full max-w-7xl px-6 py-6 sm:px-8 lg:px-12">
-          <div className="max-w-4xl">
+
+        <div className="relative z-10 mx-auto w-full max-w-7xl px-6 py-8 sm:px-8 sm:py-10 lg:px-12">
+          <div className="max-w-5xl">
             <p className="project-hero-reveal font-mono text-[10px] uppercase tracking-[0.3em] text-[#c9a66b]">
               Signature Developments · 2026
             </p>
-            <h1 className="project-hero-reveal mt-2 font-display text-[clamp(2.4rem,5.2vw,4.9rem)] font-medium leading-[0.96] tracking-[-0.035em]">
+
+            <h1 className="project-hero-reveal mt-3 font-display text-[clamp(2.8rem,6.2vw,6.2rem)] font-medium leading-[0.92] tracking-[-0.06em]">
               Architectural Eminence &
               <br />
               <span className="italic text-white/60">
                 Premium Living Spaces.
               </span>
             </h1>
-            <p className="project-hero-reveal mt-5 max-w-2xl text-xs leading-5 text-white/65 sm:text-sm sm:leading-6">
-              Discover a curated portfolio of luxury high-rise apartments, iconic commercial towers,
-              and exclusive private villas engineered with structural permanence and aesthetic refinement.
+
+            <p className="project-hero-reveal mt-6 max-w-2xl text-xs leading-5 text-white/65 sm:text-sm sm:leading-6">
+              Discover a curated portfolio of luxury high-rise apartments,
+              iconic commercial towers, and exclusive private villas
+              engineered with structural permanence and aesthetic refinement.
             </p>
 
-            <div className="project-hero-reveal mt-7 flex flex-wrap items-center gap-4">
+            <div className="project-hero-reveal mt-7 flex flex-wrap items-center gap-3 sm:gap-4">
               <a
                 href="#projects-showcase"
-                className="inline-flex items-center gap-3 rounded-full bg-[#c9a66b] px-6 py-3 font-mono text-[9px] font-semibold uppercase tracking-[0.2em] text-[#0a0b0b] transition hover:bg-[#e0c28d]"
+                className="inline-flex items-center gap-3 rounded-full bg-[#c9a66b] px-5 py-3 font-mono text-[9px] font-semibold uppercase tracking-[0.2em] text-[#0a0b0b] transition hover:bg-[#e0c28d] sm:px-6"
               >
                 Explore Projects
                 <ArrowDown size={14} />
               </a>
+
               <Link
                 to="/contact"
-                className="inline-flex items-center gap-3 rounded-full border border-white/20 bg-white/5 px-6 py-3 font-mono text-[9px] uppercase tracking-[0.2em] text-white backdrop-blur-sm transition hover:border-[#c9a66b] hover:text-[#c9a66b]"
+                className="inline-flex items-center gap-3 rounded-full border border-white/20 bg-white/5 px-5 py-3 font-mono text-[9px] uppercase tracking-[0.2em] text-white backdrop-blur-sm transition hover:border-[#c9a66b] hover:text-[#c9a66b] sm:px-6"
               >
                 Schedule Site Visit
                 <ArrowUpRight size={14} />
@@ -325,9 +355,10 @@ export default function Portfolio() {
           </div>
         </div>
 
-        {/* HERO BOTTOM TRUST STATS TICKER */}
-        <div className="relative z-10 mx-auto w-full max-w-7xl px-6 pb-8 sm:px-8 lg:px-12">
-          <div className="project-hero-reveal grid grid-cols-2 gap-4 border-t border-white/10 pt-5 sm:grid-cols-4">
+        {/* HERO BOTTOM TRUST STATS */}
+
+        <div className="relative z-10 mx-auto w-full max-w-7xl px-6 pb-6 sm:px-8 sm:pb-8 lg:px-12">
+          <div className="project-hero-reveal grid grid-cols-2 gap-x-4 gap-y-5 border-t border-white/10 pt-5 sm:grid-cols-4 sm:gap-5">
             <div>
               <span className="block font-display text-2xl font-semibold text-white sm:text-3xl">
                 03
@@ -336,6 +367,7 @@ export default function Portfolio() {
                 Flagship Landmarks
               </span>
             </div>
+
             <div>
               <span className="block font-display text-2xl font-semibold text-[#c9a66b] sm:text-3xl">
                 BY ALS
@@ -344,6 +376,7 @@ export default function Portfolio() {
                 Architectural Design
               </span>
             </div>
+
             <div>
               <span className="block font-display text-2xl font-semibold text-white sm:text-3xl">
                 100%
@@ -352,8 +385,9 @@ export default function Portfolio() {
                 RERA & Vastu Aligned
               </span>
             </div>
+
             <div>
-              <span className="block font-display text-2xl font-semibold text-white sm:text-3xl">
+              <span className="block font-display text-xl font-semibold text-white sm:text-3xl">
                 Gorakhpur
               </span>
               <span className="font-mono text-[8px] uppercase tracking-[0.18em] text-white/45">
@@ -364,38 +398,40 @@ export default function Portfolio() {
         </div>
       </section>
 
-      {/* =========================================================
-         THE THREE SIGNATURE DEVELOPMENTS (FEATURED SECTION)
-         Clicking any card opens the project directly in FULL SCREEN!
-      ========================================================= */}
+      {/* PROJECT SHOWCASE */}
+
       <section
         id="projects-showcase"
-        className="relative scroll-mt-10 px-6 py-20 sm:px-8 lg:px-12 lg:py-28"
+        className="relative scroll-mt-10 px-6 py-20 sm:px-8 sm:py-24 lg:px-12 lg:py-28"
       >
         <div className="mx-auto max-w-7xl">
-          {/* SECTION HEADER AS PER SCREENSHOT */}
           <div className="text-center">
             <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.3em] text-[#b08a4a]">
               PROJECTS
             </span>
-            <h2 className="mt-3 font-display text-4xl font-medium tracking-tight text-[var(--text)] sm:text-5xl lg:text-6xl">
+
+            <h2 className="mt-3 font-display text-[clamp(2rem,4.5vw,3.75rem)] font-medium tracking-tight text-[var(--text)]">
               Premium Living Spaces
             </h2>
+
             <p className="mx-auto mt-4 max-w-2xl text-sm leading-6 text-[var(--text-soft)] sm:text-base">
-              Explore our portfolio of luxury residential projects designed for modern lifestyles. Click any project to open in full screen.
+              Explore our portfolio of luxury residential projects designed
+              for modern lifestyles. Click any project to open in full screen.
             </p>
           </div>
 
-          {/* INTERACTIVE FILTER PILLS */}
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-2">
+          {/* FILTER PILLS */}
+
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-2 sm:mt-10">
             {filters.map((f) => {
               const active = activeFilter === f.id;
+
               return (
                 <button
                   key={f.id}
                   type="button"
                   onClick={() => setActiveFilter(f.id)}
-                  className={`flex items-center gap-2 rounded-full px-5 py-2.5 font-mono text-[9px] uppercase tracking-[0.18em] transition-all ${
+                  className={`flex items-center gap-2 rounded-full px-4 py-2.5 font-mono text-[9px] uppercase tracking-[0.18em] transition-all sm:px-5 ${
                     active
                       ? "bg-[#171918] text-white shadow-md dark:bg-white dark:text-black"
                       : "border border-[var(--line)] bg-[var(--surface)] text-[var(--text-soft)] hover:border-[var(--gold)] hover:text-[var(--text)]"
@@ -412,12 +448,14 @@ export default function Portfolio() {
             })}
           </div>
 
-          {/* THE THREE PROJECT CARDS GRID */}
-          <div className="mt-14 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+          {/* PROJECT CARDS */}
+
+          <div className="mt-10 grid gap-6 sm:mt-12 sm:gap-8 md:grid-cols-2 lg:grid-cols-3">
             {filteredProjects.map((project) => {
               const isReadyToMove = project.badge
                 .toLowerCase()
                 .includes("ready");
+
               return (
                 <article
                   key={project.id}
@@ -430,7 +468,6 @@ export default function Portfolio() {
                       "transform 0.4s ease-out, box-shadow 0.4s ease-out, border-color 0.3s ease",
                   }}
                 >
-                  {/* CARD IMAGE CONTAINER */}
                   <div className="relative aspect-[4/3] w-full overflow-hidden bg-black">
                     <img
                       src={project.image}
@@ -439,10 +476,8 @@ export default function Portfolio() {
                       className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                     />
 
-                    {/* SOFT GRADIENT OVERLAY */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60 transition-opacity group-hover:opacity-40" />
 
-                    {/* TOP LEFT BADGE (Emerald Pill as in screenshot) */}
                     <div className="absolute left-4 top-4 z-10">
                       <span
                         className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1 font-mono text-[9px] font-bold uppercase tracking-wider text-white shadow-md ${
@@ -453,46 +488,42 @@ export default function Portfolio() {
                       </span>
                     </div>
 
-                    {/* TOP RIGHT FULL-SCREEN EXPAND ICON */}
                     <div className="absolute right-4 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-full border border-white/25 bg-black/40 text-white backdrop-blur-md transition-all group-hover:bg-[#c9a66b] group-hover:text-black">
                       <Maximize2 size={14} />
                     </div>
 
-                    {/* HOVER ACCENT LINE */}
                     <div className="absolute bottom-0 left-0 h-[3px] w-0 bg-[var(--gold)] transition-all duration-500 group-hover:w-full" />
                   </div>
 
                   {/* CARD CONTENT */}
-                  <div className="flex flex-1 flex-col justify-between p-6">
+
+                  <div className="flex flex-1 flex-col justify-between p-5 sm:p-6">
                     <div>
-                      {/* TITLE */}
-                      <h3 className="font-display text-2xl font-bold tracking-tight text-[var(--text)] transition-colors group-hover:text-[var(--gold)]">
+                      <h3 className="font-display text-xl font-bold tracking-tight text-[var(--text)] transition-colors group-hover:text-[var(--gold)] sm:text-2xl">
                         {project.title}
                       </h3>
 
-                      {/* LOCATION WITH MAP PIN */}
                       <div className="mt-2 flex items-center gap-1.5 text-xs text-[var(--text-muted)]">
-                        <MapPin size={13} className="shrink-0 text-[#b08a4a]" />
+                        <MapPin
+                          size={13}
+                          className="shrink-0 text-[#b08a4a]"
+                        />
                         <span>{project.location}</span>
                       </div>
 
-                      {/* CONFIGURATION / HIGHLIGHT TAG */}
                       <div className="mt-3">
                         <span className="inline-block rounded-md bg-[var(--surface-2)] px-2.5 py-1 font-mono text-[8px] uppercase tracking-wider text-[var(--text-soft)]">
                           {project.configuration}
                         </span>
                       </div>
 
-                      {/* SHORT DESCRIPTION */}
                       <p className="mt-3 line-clamp-2 text-xs leading-5 text-[var(--text-soft)]">
                         {project.description}
                       </p>
                     </div>
 
-                    {/* BOTTOM SPECIFICATION STRIP (Matching screenshot) */}
                     <div className="mt-6 border-t border-[var(--line)] pt-4">
                       <div className="grid grid-cols-2 gap-4">
-                        {/* TYPE */}
                         <div>
                           <span className="block font-mono text-[8px] uppercase tracking-[0.2em] text-[var(--text-muted)]">
                             TYPE
@@ -502,7 +533,6 @@ export default function Portfolio() {
                           </span>
                         </div>
 
-                        {/* AREA */}
                         <div>
                           <span className="block font-mono text-[8px] uppercase tracking-[0.2em] text-[var(--text-muted)]">
                             AREA
@@ -513,7 +543,6 @@ export default function Portfolio() {
                         </div>
                       </div>
 
-                      {/* CARD ACTION BUTTONS */}
                       <div className="mt-5 flex items-center gap-2 border-t border-[var(--line)] pt-4">
                         <button
                           type="button"
@@ -521,7 +550,7 @@ export default function Portfolio() {
                             e.stopPropagation();
                             openFullScreen(project);
                           }}
-                          className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[var(--dark)] px-4 py-2.5 font-mono text-[9px] font-semibold uppercase tracking-wider text-white transition hover:bg-[var(--gold)] hover:text-black dark:bg-[var(--surface-2)] dark:text-white dark:hover:bg-[var(--gold)] dark:hover:text-black"
+                          className="flex min-w-0 flex-1 items-center justify-center gap-2 rounded-xl bg-[var(--dark)] px-3 py-2.5 font-mono text-[9px] font-semibold uppercase tracking-wider text-white transition hover:bg-[var(--gold)] hover:text-black dark:bg-[var(--surface-2)] dark:text-white dark:hover:bg-[var(--gold)] dark:hover:text-black sm:px-4"
                         >
                           Open Full Screen
                           <Maximize2 size={12} />
@@ -531,7 +560,7 @@ export default function Portfolio() {
                           type="button"
                           onClick={(e) => handleWhatsApp(project, e)}
                           aria-label={`Chat on WhatsApp about ${project.title}`}
-                          className="flex h-10 w-10 items-center justify-center rounded-xl border border-[var(--line)] bg-[var(--surface-2)] text-[#10b981] transition hover:border-[#10b981] hover:bg-[#10b981] hover:text-white"
+                          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[var(--line)] bg-[var(--surface-2)] text-[#10b981] transition hover:border-[#10b981] hover:bg-[#10b981] hover:text-white"
                         >
                           <MessageCircle size={16} />
                         </button>
@@ -545,10 +574,9 @@ export default function Portfolio() {
         </div>
       </section>
 
-      {/* =========================================================
-         PROJECT COMPARISON MATRIX (EXECUTIVE VIEW)
-      ========================================================= */}
-      <section className="border-y border-[var(--line)] bg-[var(--surface)] px-6 py-16 sm:px-8 lg:px-12 lg:py-24">
+      {/* PROJECT COMPARISON */}
+
+      <section className="border-y border-[var(--line)] bg-[var(--surface)] px-6 py-16 sm:px-8 sm:py-20 lg:px-12 lg:py-24">
         <div className="mx-auto max-w-7xl">
           <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
             <div>
@@ -558,22 +586,26 @@ export default function Portfolio() {
                   Portfolio Comparison
                 </span>
               </div>
+
               <h2 className="mt-2 font-display text-3xl font-medium tracking-tight sm:text-4xl">
                 Compare Developments at a Glance
               </h2>
             </div>
+
             <p className="max-w-md text-xs leading-5 text-[var(--text-soft)]">
-              Evaluate carpet dimensions, architectural typologies, and location advantages across Vardha Builders flagship offerings.
+              Evaluate carpet dimensions, architectural typologies, and
+              location advantages across Vardha Builders flagship offerings.
             </p>
           </div>
 
-          <div className="mt-10 overflow-x-auto">
+          <div className="mt-8 overflow-x-auto sm:mt-10">
             <table className="w-full min-w-[700px] border-collapse text-left">
               <thead>
                 <tr className="border-b border-[var(--line-strong)]">
                   <th className="py-4 font-mono text-[9px] uppercase tracking-wider text-[var(--text-muted)]">
                     Specification
                   </th>
+
                   {projects.map((p) => (
                     <th
                       key={p.id}
@@ -587,6 +619,7 @@ export default function Portfolio() {
                   ))}
                 </tr>
               </thead>
+
               <tbody className="divide-y divide-[var(--line)] text-sm">
                 <tr>
                   <td className="py-4 font-mono text-[9px] uppercase tracking-wider text-[var(--text-muted)]">
@@ -601,6 +634,7 @@ export default function Portfolio() {
                     </td>
                   ))}
                 </tr>
+
                 <tr>
                   <td className="py-4 font-mono text-[9px] uppercase tracking-wider text-[var(--text-muted)]">
                     Super / Carpet Area
@@ -614,6 +648,7 @@ export default function Portfolio() {
                     </td>
                   ))}
                 </tr>
+
                 <tr>
                   <td className="py-4 font-mono text-[9px] uppercase tracking-wider text-[var(--text-muted)]">
                     Prime Location
@@ -624,6 +659,7 @@ export default function Portfolio() {
                     </td>
                   ))}
                 </tr>
+
                 <tr>
                   <td className="py-4 font-mono text-[9px] uppercase tracking-wider text-[var(--text-muted)]">
                     Development Status
@@ -637,6 +673,7 @@ export default function Portfolio() {
                     </td>
                   ))}
                 </tr>
+
                 <tr>
                   <td className="py-4 font-mono text-[9px] uppercase tracking-wider text-[var(--text-muted)]">
                     Design Partner
@@ -650,6 +687,7 @@ export default function Portfolio() {
                     </td>
                   ))}
                 </tr>
+
                 <tr>
                   <td className="py-4 font-mono text-[9px] uppercase tracking-wider text-[var(--text-muted)]">
                     Action
@@ -673,83 +711,102 @@ export default function Portfolio() {
         </div>
       </section>
 
-      {/* =========================================================
-         ARCHITECTURAL PRINCIPLES (WHY VARDHA)
-      ========================================================= */}
-      <section className="px-6 py-20 sm:px-8 lg:px-12 lg:py-28">
+      {/* ARCHITECTURAL PRINCIPLES */}
+
+      <section className="px-6 py-20 sm:px-8 sm:py-24 lg:px-12 lg:py-28">
         <div className="mx-auto max-w-7xl">
           <div className="max-w-2xl">
             <span className="font-mono text-[9px] uppercase tracking-[0.28em] text-[var(--gold)]">
               Engineering Principles
             </span>
+
             <h2 className="mt-3 font-display text-3xl font-medium tracking-tight sm:text-4xl lg:text-5xl">
               Structures engineered for generations.
             </h2>
+
             <p className="mt-4 text-sm leading-6 text-[var(--text-soft)]">
-              From foundation soil compaction to precision exterior cladding, every Vardha Builders development adheres to rigorous structural integrity and environmental design standards.
+              From foundation soil compaction to precision exterior cladding,
+              every Vardha Builders development adheres to rigorous structural
+              integrity and environmental design standards.
             </p>
           </div>
 
-          <div className="mt-14 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-6 transition-all hover:border-[var(--gold)]">
+          <div className="mt-10 grid gap-5 sm:mt-12 sm:grid-cols-2 sm:gap-6 lg:mt-14 lg:grid-cols-4 lg:gap-8">
+            <div className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-5 transition-all hover:border-[var(--gold)] sm:p-6">
               <ShieldCheck size={26} className="text-[#059669]" />
-              <h3 className="mt-4 font-display text-xl font-medium">Seismic RCC Frames</h3>
+              <h3 className="mt-4 font-display text-xl font-medium">
+                Seismic RCC Frames
+              </h3>
               <p className="mt-2 text-xs leading-5 text-[var(--text-soft)]">
-                Engineered with high-grade Fe550 steel and M30+ concrete mixes to endure seismic stress and heavy wind shear.
+                Engineered with high-grade Fe550 steel and M30+ concrete mixes
+                to endure seismic stress and heavy wind shear.
               </p>
             </div>
 
-            <div className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-6 transition-all hover:border-[var(--gold)]">
+            <div className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-5 transition-all hover:border-[var(--gold)] sm:p-6">
               <Compass size={26} className="text-[var(--gold)]" />
-              <h3 className="mt-4 font-display text-xl font-medium">100% Vastu Orientation</h3>
+              <h3 className="mt-4 font-display text-xl font-medium">
+                100% Vastu Orientation
+              </h3>
               <p className="mt-2 text-xs leading-5 text-[var(--text-soft)]">
-                Layouts optimized for cross ventilation, natural sunlight corridors, and positive spatial energy flow.
+                Layouts optimized for cross ventilation, natural sunlight
+                corridors, and positive spatial energy flow.
               </p>
             </div>
 
-            <div className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-6 transition-all hover:border-[var(--gold)]">
+            <div className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-5 transition-all hover:border-[var(--gold)] sm:p-6">
               <Layers size={26} className="text-[var(--gold)]" />
-              <h3 className="mt-4 font-display text-xl font-medium">Bespoke Finishes</h3>
+              <h3 className="mt-4 font-display text-xl font-medium">
+                Bespoke Finishes
+              </h3>
               <p className="mt-2 text-xs leading-5 text-[var(--text-soft)]">
-                Imported porcelain tiling, high-acoustic double glazed windows, and precision plumbing infrastructure.
+                Imported porcelain tiling, high-acoustic double glazed
+                windows, and precision plumbing infrastructure.
               </p>
             </div>
 
-            <div className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-6 transition-all hover:border-[var(--gold)]">
+            <div className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-5 transition-all hover:border-[var(--gold)] sm:p-6">
               <Sparkles size={26} className="text-[#059669]" />
-              <h3 className="mt-4 font-display text-xl font-medium">By ALS Partnership</h3>
+              <h3 className="mt-4 font-display text-xl font-medium">
+                By ALS Partnership
+              </h3>
               <p className="mt-2 text-xs leading-5 text-[var(--text-soft)]">
-                Signature contemporary facade designs that become prominent architectural landmarks in Gorakhpur.
+                Signature contemporary facade designs that become prominent
+                architectural landmarks in Gorakhpur.
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* =========================================================
-         CALL TO ACTION: SITE VISIT & BROCHURE
-      ========================================================= */}
-      <section className="relative overflow-hidden bg-[#0c0d0d] px-6 py-20 text-white sm:px-8 lg:px-12 lg:py-28">
+      {/* SITE VISIT CTA */}
+
+      <section className="relative overflow-hidden bg-[#0c0d0d] px-6 py-20 text-white sm:px-8 sm:py-24 lg:px-12 lg:py-28">
         <div className="arch-grid absolute inset-0 opacity-[0.05]" />
+
         <div className="relative mx-auto max-w-7xl">
-          <div className="grid gap-10 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
+          <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr] lg:items-center lg:gap-10">
             <div>
               <span className="font-mono text-[9px] uppercase tracking-[0.3em] text-[#c9a66b]">
                 Private Walkthrough & Consultation
               </span>
+
               <h2 className="mt-4 font-display text-3xl font-medium leading-[1.05] tracking-tight sm:text-4xl lg:text-5xl">
                 Ready to experience Vardha living spaces in person?
               </h2>
+
               <p className="mt-5 max-w-xl text-xs leading-6 text-white/65 sm:text-sm">
-                Schedule an exclusive site visit to Paalm Paradise, Central Tower, or Adhvik Skyline.
-                Our project specialists will guide you through sample units, layout schematics, and payment schedules.
+                Schedule an exclusive site visit to Paalm Paradise, Central
+                Tower, or Adhvik Skyline. Our project specialists will guide
+                you through sample units, layout schematics, and payment
+                schedules.
               </p>
 
-              <div className="mt-8 flex flex-wrap items-center gap-4">
+              <div className="mt-7 flex flex-wrap items-center gap-3 sm:mt-8 sm:gap-4">
                 <button
                   type="button"
                   onClick={() => handleWhatsApp(projects[0])}
-                  className="inline-flex items-center gap-2.5 rounded-full bg-[#059669] px-6 py-3.5 font-mono text-[10px] font-bold uppercase tracking-wider text-white shadow-lg transition hover:bg-[#047857]"
+                  className="inline-flex items-center gap-2.5 rounded-full bg-[#059669] px-5 py-3.5 font-mono text-[10px] font-bold uppercase tracking-wider text-white shadow-lg transition hover:bg-[#047857] sm:px-6"
                 >
                   <MessageCircle size={16} />
                   Inquire on WhatsApp
@@ -757,7 +814,7 @@ export default function Portfolio() {
 
                 <Link
                   to="/contact"
-                  className="inline-flex items-center gap-2.5 rounded-full border border-white/20 bg-white/5 px-6 py-3.5 font-mono text-[10px] uppercase tracking-wider text-white backdrop-blur-sm transition hover:border-[#c9a66b] hover:text-[#c9a66b]"
+                  className="inline-flex items-center gap-2.5 rounded-full border border-white/20 bg-white/5 px-5 py-3.5 font-mono text-[10px] uppercase tracking-wider text-white backdrop-blur-sm transition hover:border-[#c9a66b] hover:text-[#c9a66b] sm:px-6"
                 >
                   Book Private Site Visit
                   <ArrowUpRight size={14} />
@@ -765,13 +822,15 @@ export default function Portfolio() {
               </div>
             </div>
 
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-md sm:p-8">
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur-md sm:p-8">
               <span className="font-mono text-[8px] uppercase tracking-[0.2em] text-[#c9a66b]">
                 Sales & Site Office
               </span>
+
               <h3 className="mt-2 font-display text-2xl font-medium text-white">
                 Vardha Builders Desk
               </h3>
+
               <p className="mt-2 text-xs leading-5 text-white/60">
                 Golghar & Prime Gorakhpur Locations, Uttar Pradesh
               </p>
@@ -781,6 +840,7 @@ export default function Portfolio() {
                   <Phone size={14} className="text-[#c9a66b]" />
                   <span>Call Us: +91 99999 99999</span>
                 </div>
+
                 <div className="flex items-center gap-2.5">
                   <MapPin size={14} className="text-[#c9a66b]" />
                   <span>Gorakhpur, Uttar Pradesh, India</span>
@@ -791,10 +851,8 @@ export default function Portfolio() {
         </div>
       </section>
 
-      {/* =========================================================
-         TRUE 100% FULL-SCREEN PROJECT EXPERIENCE
-         (Opens immediately on card click, stays in place when closed)
-      ========================================================= */}
+      {/* FULL-SCREEN PROJECT EXPERIENCE */}
+
       {fullScreenProject && (
         <div
           className="fixed inset-0 z-[200] flex h-[100dvh] w-screen flex-col overflow-hidden bg-[#090a0a] text-white"
@@ -802,27 +860,33 @@ export default function Portfolio() {
           aria-modal="true"
           aria-label={`${fullScreenProject.title} full screen view`}
         >
-          {/* TOP FULL-SCREEN HEADER BAR */}
-          <header className="flex h-16 shrink-0 items-center justify-between border-b border-white/10 bg-[#090a0a]/95 px-4 backdrop-blur-md sm:px-8">
-            {/* BRAND & PROJECT INFO */}
-            <div className="flex items-center gap-3">
-              <span className="h-px w-6 bg-[#c9a66b]" />
-              <span className="font-mono text-[9px] uppercase tracking-[0.25em] text-[#c9a66b]">
+          {/* HEADER */}
+
+          <header className="flex h-16 shrink-0 items-center justify-between gap-3 border-b border-white/10 bg-[#090a0a]/95 px-3 backdrop-blur-md sm:px-8">
+            <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+              <span className="h-px w-5 shrink-0 bg-[#c9a66b] sm:w-6" />
+
+              <span className="whitespace-nowrap font-mono text-[8px] uppercase tracking-[0.2em] text-[#c9a66b] sm:text-[9px] sm:tracking-[0.25em]">
                 Vardha Builders
               </span>
+
               <span className="hidden text-white/30 sm:inline">/</span>
-              <span className="hidden font-display text-sm font-semibold sm:inline">
+
+              <span className="hidden truncate font-display text-sm font-semibold sm:inline">
                 {fullScreenProject.title}
               </span>
-              <span className="ml-1 rounded-md bg-[#059669] px-2.5 py-0.5 font-mono text-[8px] font-bold uppercase tracking-wider text-white">
+
+              <span className="hidden rounded-md bg-[#059669] px-2.5 py-0.5 font-mono text-[8px] font-bold uppercase tracking-wider text-white sm:inline-block">
                 {fullScreenProject.badge}
               </span>
             </div>
 
-            {/* PROJECT SWITCHER TABS (DESKTOP) */}
+            {/* PROJECT SWITCHER */}
+
             <div className="hidden items-center gap-2 md:flex">
               {projects.map((p) => {
                 const isSelected = p.id === fullScreenProject.id;
+
                 return (
                   <button
                     key={p.id}
@@ -830,11 +894,16 @@ export default function Portfolio() {
                     onClick={() => {
                       setFullScreenProject(p);
                       setSelectedGalleryIndex(0);
-                      window.history.replaceState(null, "", `/portfolio/${p.id}`);
+
+                      window.history.replaceState(
+                        null,
+                        "",
+                        `/portfolio/${p.id}`
+                      );
                     }}
                     className={`rounded-full px-4 py-1.5 font-mono text-[9px] uppercase tracking-wider transition ${
                       isSelected
-                        ? "bg-[#c9a66b] text-black font-bold"
+                        ? "bg-[#c9a66b] font-bold text-black"
                         : "border border-white/15 text-white/70 hover:border-white hover:text-white"
                     }`}
                   >
@@ -844,51 +913,50 @@ export default function Portfolio() {
               })}
             </div>
 
-            {/* CLOSE BUTTON (RETURNS USER TO PROJECT SECTION, NOT HERO) */}
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={closeFullScreen}
-                aria-label="Close full screen project"
-                className="flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 font-mono text-[9px] font-semibold uppercase tracking-wider text-white transition hover:border-[#c9a66b] hover:bg-[#c9a66b] hover:text-black"
-              >
-                <span>Close</span>
-                <X size={15} />
-                <span className="hidden text-[8px] opacity-60 sm:inline">[ESC]</span>
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={closeFullScreen}
+              aria-label="Close full screen project"
+              className="flex shrink-0 items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-2 font-mono text-[9px] font-semibold uppercase tracking-wider text-white transition hover:border-[#c9a66b] hover:bg-[#c9a66b] hover:text-black sm:px-4"
+            >
+              <span>Close</span>
+              <X size={15} />
+              <span className="hidden text-[8px] opacity-60 sm:inline">
+                [ESC]
+              </span>
+            </button>
           </header>
 
-          {/* MAIN FULL-SCREEN BODY (SPLIT VIEW) */}
-          <div className="grid flex-1 grid-cols-1 overflow-hidden lg:grid-cols-[1.35fr_0.65fr]">
-            {/* LEFT: FULL-HEIGHT HIGH-RES IMAGE & GALLERY STAGE */}
-            <div className="relative flex flex-col justify-between overflow-hidden bg-black p-4 sm:p-6 lg:p-8">
-              {/* MAIN CURRENT IMAGE */}
-              <div className="relative flex flex-1 items-center justify-center overflow-hidden rounded-xl">
+          {/* MAIN SPLIT VIEW */}
+
+          <div className="grid min-h-0 flex-1 grid-cols-1 overflow-y-auto lg:grid-cols-[1.35fr_0.65fr] lg:overflow-hidden">
+            {/* IMAGE GALLERY */}
+
+            <div className="relative flex min-h-[45vh] flex-col justify-between overflow-hidden bg-black p-3 sm:p-5 lg:min-h-0 lg:p-8">
+              <div className="relative flex min-h-[35vh] flex-1 items-center justify-center overflow-hidden rounded-xl sm:min-h-[45vh] lg:min-h-0">
                 <img
                   src={
                     fullScreenProject.gallery[selectedGalleryIndex] ||
                     fullScreenProject.image
                   }
                   alt={fullScreenProject.title}
-                  className="h-full w-full object-cover transition-all duration-500"
+                  className="absolute inset-0 h-full w-full object-cover transition-all duration-500"
                 />
 
-                <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-black/30 pointer-events-none" />
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-black/30" />
 
-                {/* IMAGE CAPTION & COUNTER OVERLAY */}
-                <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between text-white/90">
-                  <div className="flex items-center gap-2 font-mono text-[9px] uppercase tracking-wider">
-                    <MapPin size={12} className="text-[#c9a66b]" />
-                    <span>{fullScreenProject.location}</span>
+                <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between gap-3 text-white/90">
+                  <div className="flex min-w-0 items-center gap-2 font-mono text-[9px] uppercase tracking-wider">
+                    <MapPin size={12} className="shrink-0 text-[#c9a66b]" />
+                    <span className="truncate">{fullScreenProject.location}</span>
                   </div>
-                  <span className="font-mono text-[9px] uppercase tracking-wider text-white/70">
+
+                  <span className="shrink-0 font-mono text-[9px] uppercase tracking-wider text-white/70">
                     Photo {selectedGalleryIndex + 1} of{" "}
                     {fullScreenProject.gallery.length}
                   </span>
                 </div>
 
-                {/* PREV / NEXT PHOTO ARROWS */}
                 {fullScreenProject.gallery.length > 1 && (
                   <>
                     <button
@@ -901,19 +969,21 @@ export default function Portfolio() {
                         )
                       }
                       aria-label="Previous image"
-                      className="absolute left-3 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur-md transition hover:bg-[#c9a66b] hover:text-black"
+                      className="absolute left-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur-md transition hover:bg-[#c9a66b] hover:text-black"
                     >
                       <ChevronLeft size={20} />
                     </button>
+
                     <button
                       type="button"
                       onClick={() =>
                         setSelectedGalleryIndex(
-                          (prev) => (prev + 1) % fullScreenProject.gallery.length
+                          (prev) =>
+                            (prev + 1) % fullScreenProject.gallery.length
                         )
                       }
                       aria-label="Next image"
-                      className="absolute right-3 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur-md transition hover:bg-[#c9a66b] hover:text-black"
+                      className="absolute right-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur-md transition hover:bg-[#c9a66b] hover:text-black"
                     >
                       <ChevronRight size={20} />
                     </button>
@@ -921,17 +991,18 @@ export default function Portfolio() {
                 )}
               </div>
 
-              {/* GALLERY THUMBNAIL STRIP */}
+              {/* THUMBNAILS */}
+
               {fullScreenProject.gallery.length > 1 && (
-                <div className="mt-4 flex gap-3 overflow-x-auto pb-1">
+                <div className="mt-3 flex gap-3 overflow-x-auto pb-1 sm:mt-4">
                   {fullScreenProject.gallery.map((img, idx) => (
                     <button
                       key={`${img}-${idx}`}
                       type="button"
                       onClick={() => setSelectedGalleryIndex(idx)}
-                      className={`relative h-14 w-20 shrink-0 overflow-hidden rounded-lg border-2 transition ${
+                      className={`relative h-12 w-16 shrink-0 overflow-hidden rounded-lg border-2 transition sm:h-14 sm:w-20 ${
                         selectedGalleryIndex === idx
-                          ? "border-[#c9a66b] scale-105"
+                          ? "scale-105 border-[#c9a66b]"
                           : "border-white/20 opacity-60 hover:opacity-100"
                       }`}
                     >
@@ -946,34 +1017,32 @@ export default function Portfolio() {
               )}
             </div>
 
-            {/* RIGHT: SCROLLABLE SPECIFICATIONS & INQUIRY CONSOLE */}
-            <aside className="flex flex-col justify-between overflow-y-auto border-t border-white/10 bg-[#0e1010] p-6 sm:p-8 lg:border-l lg:border-t-0 lg:p-10">
+            {/* PROJECT DETAILS */}
+
+            <aside className="flex min-h-0 flex-col justify-between overflow-y-auto border-t border-white/10 bg-[#0e1010] p-5 sm:p-7 lg:border-l lg:border-t-0 lg:p-10">
               <div>
-                {/* PROJECT TAG */}
                 <div className="flex items-center gap-2">
                   <span className="font-mono text-[9px] uppercase tracking-[0.25em] text-[#c9a66b]">
                     {fullScreenProject.category} · By ALS
                   </span>
                 </div>
 
-                {/* TITLE */}
                 <h2 className="mt-2 font-display text-3xl font-bold tracking-tight text-white sm:text-4xl">
                   {fullScreenProject.title}
                 </h2>
 
-                {/* LOCATION */}
                 <div className="mt-2 flex items-center gap-2 text-xs text-white/60">
                   <MapPin size={13} className="text-[#c9a66b]" />
                   <span>{fullScreenProject.location}</span>
                 </div>
 
-                {/* DESCRIPTION */}
                 <p className="mt-4 text-xs leading-6 text-white/70">
                   {fullScreenProject.description}
                 </p>
 
-                {/* SPECS GRID */}
-                <div className="mt-6 grid grid-cols-2 gap-3 border-y border-white/10 py-5">
+                {/* SPECS */}
+
+                <div className="mt-5 grid grid-cols-2 gap-3 border-y border-white/10 py-4 sm:mt-6 sm:py-5">
                   <div className="rounded-lg bg-white/5 p-3">
                     <span className="block font-mono text-[8px] uppercase tracking-wider text-white/40">
                       TYPE
@@ -1011,11 +1080,13 @@ export default function Portfolio() {
                   </div>
                 </div>
 
-                {/* KEY HIGHLIGHTS */}
+                {/* HIGHLIGHTS */}
+
                 <div className="mt-5">
                   <span className="block font-mono text-[8px] uppercase tracking-wider text-white/40">
                     Architectural Highlights
                   </span>
+
                   <div className="mt-3 space-y-2">
                     {fullScreenProject.highlights.map((h) => (
                       <div
@@ -1033,10 +1104,12 @@ export default function Portfolio() {
                 </div>
 
                 {/* AMENITIES */}
+
                 <div className="mt-5">
                   <span className="block font-mono text-[8px] uppercase tracking-wider text-white/40">
                     Amenities & Facilities
                   </span>
+
                   <div className="mt-2.5 flex flex-wrap gap-1.5">
                     {fullScreenProject.amenities.map((a) => (
                       <span
@@ -1050,12 +1123,13 @@ export default function Portfolio() {
                 </div>
               </div>
 
-              {/* ACTION BUTTONS (STAYS IN FULL SCREEN & OFFERS DIRECT INQUIRY) */}
-              <div className="mt-8 space-y-3 border-t border-white/10 pt-5">
+              {/* ACTION BUTTONS */}
+
+              <div className="mt-7 space-y-3 border-t border-white/10 pt-5 sm:mt-8">
                 <button
                   type="button"
                   onClick={(e) => handleWhatsApp(fullScreenProject, e)}
-                  className="flex w-full items-center justify-center gap-2.5 rounded-xl bg-[#059669] px-5 py-3.5 font-mono text-[10px] font-bold uppercase tracking-wider text-white shadow-lg transition hover:bg-[#047857]"
+                  className="flex w-full items-center justify-center gap-2.5 rounded-xl bg-[#059669] px-4 py-3.5 font-mono text-[10px] font-bold uppercase tracking-wider text-white shadow-lg transition hover:bg-[#047857] sm:px-5"
                 >
                   <MessageCircle size={16} />
                   Chat on WhatsApp for Availability
@@ -1086,12 +1160,13 @@ export default function Portfolio() {
         </div>
       )}
 
-      {/* BACK TO TOP BUTTON */}
+      {/* BACK TO TOP */}
+
       <button
         type="button"
         onClick={scrollToTop}
         aria-label="Back to top"
-        className={`fixed bottom-6 right-6 z-50 flex h-11 w-11 items-center justify-center rounded-full border border-[var(--line)] bg-[var(--surface)] text-[var(--text)] shadow-xl transition-all duration-300 ${
+        className={`fixed bottom-5 right-5 z-50 flex h-11 w-11 items-center justify-center rounded-full border border-[var(--line)] bg-[var(--surface)] text-[var(--text)] shadow-xl transition-all duration-300 sm:bottom-6 sm:right-6 ${
           showTopButton
             ? "translate-y-0 opacity-100"
             : "pointer-events-none translate-y-4 opacity-0"

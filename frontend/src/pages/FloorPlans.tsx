@@ -665,75 +665,93 @@ export default function FloorPlans() {
   return (
     <main
       className={`floor-plans-page min-h-screen overflow-hidden transition-colors duration-300 ${
-        isDark ? "theme-dark bg-[#10110f] text-[#f4f0e7]" : "theme-light bg-[#eeece5] text-[#151614]"
+        isDark
+          ? "theme-dark bg-[#10110f] text-[#f4f0e7]"
+          : "theme-light bg-[#eeece5] text-[#151614]"
       }`}
     >
-      {/* HERO */}
-      <section className="relative min-h-[88vh] overflow-hidden bg-[#10110f] text-[#f5f1e9] md:min-h-screen">
-        <img
-          src={images.hero}
-          alt="Vardha Builders architectural floor plans"
-          className="floor-hero-image absolute inset-0 h-full w-full object-cover opacity-65"
-        />
+      {/* HERO SECTION — REPLACED */}
+      <section className="relative min-h-screen overflow-hidden bg-[#0d0e0d] text-[#f2eee6]">
+        {/* Background Image */}
+        <div className="absolute inset-0">
+          <img
+            src={images.hero}
+            alt="Vardha architectural residence"
+            className="floor-hero-image h-full w-full object-cover"
+          />
 
-        <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/45 to-black/20" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/25" />
-
-        {/* THEME TOGGLE BUTTON — ADDED */}
-        <button
-          type="button"
-          onClick={toggleTheme}
-          aria-label={isDark ? "Switch to light theme" : "Switch to dark theme"}
-          title={isDark ? "Switch to light theme" : "Switch to dark theme"}
-          className="absolute right-5 top-5 z-30 flex h-11 w-11 items-center justify-center border border-white/30 bg-black/40 text-white backdrop-blur-md transition hover:border-[#c5a46d] hover:bg-[#c5a46d] hover:text-black md:right-8 md:top-8"
-        >
-          {isDark ? <Sun size={18} /> : <Moon size={18} />}
-        </button>
-
-        <div className="absolute right-5 top-1/2 hidden -translate-y-1/2 rotate-90 text-[8px] uppercase tracking-[0.4em] text-white/50 lg:block">
-          VARDHA / SPATIAL COLLECTION / 004
+          <div className="absolute inset-0 bg-black/45" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/30 to-black/10" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-transparent to-black/25" />
         </div>
 
-        <div className="relative z-10 mx-auto flex min-h-[88vh] max-w-[1500px] items-end px-6 pb-20 pt-32 md:min-h-screen md:px-12 md:pb-24 lg:px-20">
-          <div className="floor-hero-content max-w-4xl">
-            <div className="mb-6 flex items-center gap-3 text-[9px] uppercase tracking-[0.28em] text-[#c5a46d]">
-              <span className="h-px w-9 bg-[#c5a46d]" />
-              Vardha Builders · Floor Plans
-            </div>
+        {/* Top Labels */}
+        <div className="absolute inset-x-0 top-0 z-20">
+          <div className="mx-auto flex max-w-[1600px] items-center justify-between px-6 pt-7 md:px-12 lg:px-20">
+            <Link
+              to="/"
+              className="text-[9px] uppercase tracking-[0.24em] text-white/75"
+            >
+              Vardha Builders
+            </Link>
 
-            <h1 className="max-w-4xl font-serif text-4xl leading-[0.98] tracking-[-0.025em] sm:text-5xl md:text-6xl lg:text-[72px]">
-              Spaces
-              <br />
-              <span className="text-[#c5a46d]">Designed</span>
-              <br />
-              Around Life.
-            </h1>
+            <span className="text-[9px] uppercase tracking-[0.24em] text-white/50">
+              Floor Plans / 04
+            </span>
+          </div>
+        </div>
 
-            <div className="mt-7 flex max-w-2xl flex-col justify-between gap-6 md:flex-row md:items-end">
-              <p className="max-w-xl text-[13px] leading-6 text-white/65 md:text-sm">
-                Thoughtfully planned residences where architecture,
-                movement, natural light and everyday living come together.
-              </p>
+        {/* Hero Content — Home Page Spacing */}
+        <div className="relative z-10 flex min-h-screen items-end">
+          <div className="mx-auto w-full max-w-[1600px] px-6 pb-20 pt-[100px] md:px-12 lg:px-20">
+            <div className="floor-hero-content floor-hero-copy w-full max-w-[720px]">
+              {/* Eyebrow */}
+              <div className="mb-6 flex items-center gap-3 md:mb-8">
+                <span className="h-px w-8 bg-[#c5a46d]" />
 
-              <a
-                href="#residences"
-                className="group flex shrink-0 items-center gap-3 text-[9px] uppercase tracking-[0.2em]"
-              >
-                Explore Plans
-                <span className="flex h-10 w-10 items-center justify-center border border-white/30 transition group-hover:bg-white group-hover:text-black">
-                  <ArrowDown size={14} />
+                <span className="font-mono text-[9px] uppercase tracking-[0.3em] text-[#d2b477]">
+                  Spatial Planning · Vardha
                 </span>
-              </a>
+              </div>
+
+              {/* Main Heading */}
+              <h1 className="font-display text-[clamp(3.2rem,6.5vw,6.5rem)] font-medium leading-[0.88] tracking-[-0.06em] text-[#f2eee6]">
+                Spaces Designed
+                <br />
+                Around Life.
+              </h1>
+
+              {/* Description and CTA */}
+              <div className="mt-8 flex flex-col gap-7 sm:mt-10 md:mt-12 md:flex-row md:items-end md:justify-between">
+                <p className="max-w-[420px] text-[13px] leading-7 text-white/65 md:text-[14px] md:leading-8">
+                  Explore residences shaped around movement,
+                  natural light, privacy and the everyday rituals
+                  that make a house feel like home.
+                </p>
+
+                <a
+                  href="#residences"
+                  className="group inline-flex w-fit shrink-0 items-center gap-4 text-[9px] uppercase tracking-[0.22em] text-[#f2eee6]"
+                >
+                  Discover Residences
+
+                  <span className="flex h-10 w-10 items-center justify-center rounded-full border border-white/30 transition-all duration-300 group-hover:border-[#c5a46d] group-hover:bg-[#c5a46d] group-hover:text-black">
+                    <ArrowDown size={14} />
+                  </span>
+                </a>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="absolute bottom-0 left-0 right-0 z-20 border-t border-white/10">
-          <div className="mx-auto flex max-w-[1500px] items-center justify-between px-6 py-4 text-[8px] uppercase tracking-[0.18em] text-white/40 md:px-12 lg:px-20">
-            <span>01 — Residential Planning</span>
-            <span className="hidden md:block">Architecture / Function / Light</span>
-            <span>Scroll to explore</span>
-          </div>
+        {/* Bottom Corner Label */}
+        <div className="absolute bottom-8 right-6 z-10 hidden text-right lg:bottom-10 lg:right-12 lg:block">
+          <p className="font-mono text-[9px] uppercase tracking-[0.25em] text-white/40">
+            VARDHA / 004
+          </p>
+          <p className="mt-2 text-[9px] uppercase tracking-[0.25em] text-white/55">
+            Architecture in Motion
+          </p>
         </div>
       </section>
 

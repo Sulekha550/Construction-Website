@@ -1,3 +1,4 @@
+
 import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 
@@ -18,24 +19,20 @@ gsap.registerPlugin(ScrollTrigger);
 
 /* ========================================================
    VARDHA — ARCHITECTURAL / CONSTRUCTION VISUALS
-   ========================================================= */
+   ======================================================== */
 
 const images = {
   // Dramatic architectural exterior / building visualization
-  hero:
-    "/images/About/About1.webp",
+  hero: "/images/About/About1.webp",
 
   // Architectural / structural perspective
-  architecture:
-    "/images/About/About2.webp",
+  architecture: "/images/About/About2.webp",
 
   // Premium finished interior / architectural visualization feel
-  interior:
-    "/images/About/About3.webp",
+  interior: "/images/Gallery/Gallery2.webp",
 
   // Construction / large-scale development
-  construction:
-    "/images/About/About4.webp",
+  construction: "/images/About/About4.webp",
 };
 
 const principles = [
@@ -72,8 +69,6 @@ export default function About() {
     if (!pageRef.current) return;
 
     const ctx = gsap.context(() => {
-      
-
       gsap.fromTo(
         ".about-reveal",
         {
@@ -240,44 +235,42 @@ export default function About() {
       ===================================================== */}
 
       <section className="relative min-h-screen overflow-hidden">
+        {/* Preserve the original About hero image */}
         <img
           src={images.hero}
           alt="Premium architectural building visualization"
           className="absolute inset-0 h-full w-full object-cover"
         />
 
-        {/* Dark cinematic overlay */}
+        {/* Dark cinematic overlays */}
         <div className="absolute inset-0 bg-black/45" />
-
         <div className="absolute inset-0 bg-gradient-to-b from-black/65 via-black/20 to-black/80" />
 
         {/* Architectural grid */}
-        <div className="absolute inset-0 opacity-25 arch-grid" />
+        <div className="arch-grid absolute inset-0 opacity-25" />
 
-        <div className="relative z-10 flex min-h-screen flex-col justify-between px-6 pb-10 pt-32 md:px-12 lg:px-20">
-          <div className="about-reveal flex items-center gap-4 text-[9px] uppercase tracking-[0.35em] text-white/70">
-            <span className="h-px w-12 bg-[#c9a66b]" />
-
+        {/* Content spacing and width aligned with the Home page */}
+        <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-[1600px] flex-col justify-between px-6 pb-8 pt-32 md:px-8 md:pb-10 lg:px-12">
+          <div className="about-reveal flex items-center gap-4 text-[9px] uppercase tracking-[0.3em] text-white/70 md:text-[10px] md:tracking-[0.35em]">
+            <span className="h-px w-10 shrink-0 bg-[#c9a66b] md:w-12" />
             About Vardha Builders
           </div>
 
-          <div className="max-w-6xl">
-            <p className="about-reveal mb-6 text-[9px] uppercase tracking-[0.35em] text-[#d2b477] md:text-[10px]">
+          <div className="my-14 w-full max-w-7xl md:my-16 lg:my-10">
+            <p className="about-reveal mb-6 text-[9px] uppercase tracking-[0.3em] text-[#d2b477] md:text-[10px] md:tracking-[0.35em]">
               Building Dreams Since 2014
             </p>
 
-            <h1 className="about-reveal font-display text-[clamp(3.2rem,6.5vw,6.8rem)] font-medium leading-[0.82] tracking-[-0.065em] text-white">
+            <h1 className="about-reveal font-display text-[clamp(3.2rem,6.5vw,6.5rem)] font-medium leading-[0.88] tracking-[-0.06em] text-white">
               We Build
               <br />
-
-              <span className="ml-[5vw] italic text-white/80">
+              <span className="ml-[4vw] inline-block italic text-white/80">
                 More.
               </span>
             </h1>
 
-            <div className="about-reveal mt-8 flex max-w-xl items-start gap-4 text-[12px] leading-6 text-white/70 md:mt-10 md:text-[13px] lg:text-[14px] lg:leading-7">
-              <span className="mt-3 h-px w-12 shrink-0 bg-[#c9a66b] md:w-16" />
-
+            <div className="about-reveal mt-7 flex max-w-xl items-start gap-4 text-[12px] leading-6 text-white/75 md:mt-8 md:text-[13px] md:leading-7 lg:mt-9 lg:text-[14px]">
+              <span className="mt-3 h-px w-10 shrink-0 bg-[#c9a66b] md:w-12" />
               <p>
                 Vardha Builders is built around a simple idea — architecture
                 should do more than occupy land. It should create places,
@@ -295,7 +288,6 @@ export default function About() {
               <span className="text-[8px] uppercase tracking-[0.3em] text-white/60">
                 Scroll to explore
               </span>
-
               <ArrowDown
                 size={15}
                 strokeWidth={1}
@@ -535,10 +527,7 @@ export default function About() {
               <h2 className="mt-7 font-display text-[clamp(2.5rem,5vw,5.5rem)] leading-[0.92] tracking-[-0.04em]">
                 Ideas become
                 <br />
-
-                <span className="italic text-white/70">
-                  places.
-                </span>
+                <span className="italic text-white/70">places.</span>
               </h2>
 
               <p className="mt-8 max-w-xl text-[12px] leading-6 text-white/65 md:text-[13px] md:leading-7">
@@ -553,10 +542,7 @@ export default function About() {
               >
                 Explore Our Projects
 
-                <ArrowRight
-                  size={15}
-                  strokeWidth={1.5}
-                />
+                <ArrowRight size={15} strokeWidth={1.5} />
               </Link>
             </div>
           </div>
@@ -565,11 +551,13 @@ export default function About() {
 
       {/* =====================================================
           LIFESTYLE / INTERIOR
+          Floating Detail / 01 / 04 box removed
       ===================================================== */}
 
       <section className="px-6 py-24 md:px-12 md:py-32 lg:px-20 lg:py-36">
         <div className="mx-auto max-w-[1500px]">
           <div className="grid items-center gap-14 lg:grid-cols-2 lg:gap-16">
+            {/* Interior image — no floating detail box */}
             <div className="relative">
               <div className="aspect-[4/5] overflow-hidden">
                 <img
@@ -577,16 +565,6 @@ export default function About() {
                   alt="Premium architectural interior"
                   className="about-image h-full w-full object-cover"
                 />
-              </div>
-
-              <div className="absolute -bottom-7 -right-4 hidden bg-[var(--surface)] p-6 shadow-2xl md:block lg:-right-7">
-                <div className="font-mono text-[8px] uppercase tracking-[0.25em] text-[var(--text-muted)]">
-                  Detail
-                </div>
-
-                <div className="mt-2 font-display text-2xl md:text-3xl">
-                  01 / 04
-                </div>
               </div>
             </div>
 
@@ -600,10 +578,7 @@ export default function About() {
                 <br />
                 designed for
                 <br />
-
-                <span className="text-[#b08a4a]">
-                  life.
-                </span>
+                <span className="text-[#b08a4a]">life.</span>
               </h2>
 
               <p className="mt-8 max-w-xl text-[13px] leading-7 text-[var(--text-soft)] md:text-[14px] md:leading-8">
@@ -652,7 +627,6 @@ export default function About() {
               <h2 className="mt-7 max-w-5xl font-display text-[clamp(3rem,6.2vw,6.8rem)] leading-[0.9] tracking-[-0.055em]">
                 Let’s build
                 <br />
-
                 <span className="italic text-white/55">
                   something lasting.
                 </span>

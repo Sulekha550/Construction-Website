@@ -2259,3 +2259,49 @@ html.dark .floor-plans-page {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Gallery typography — align with FloorPlans */
+.gallery-page {
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.gallery-page h1 {
+  font-size: clamp(2.25rem, 4.2vw, 4.5rem);
+  line-height: 0.98;
+  letter-spacing: -0.04em;
+  font-weight: 500;
+}
+
+.gallery-page h2 {
+  font-size: clamp(1.8rem, 3.5vw, 3.5rem);
+  line-height: 1.04;
+  letter-spacing: -0.035em;
+  font-weight: 500;
+}
+
+.gallery-page h3 {
+  line-height: 1.08;
+  letter-spacing: -0.025em;
+  font-weight: 500;
+}
+
+.gallery-page p {
+  line-height: 1.75;
+}
+
+@media (max-width: 767px) {
+  .gallery-page h1 {
+    font-size: clamp(2.25rem, 9vw, 3.25rem);
+    line-height: 0.98;
+  }
+
+  .gallery-page h2 {
+    font-size: clamp(1.7rem, 7vw, 2.5rem);
+    line-height: 1.06;
+  }
+
+  .gallery-page p {
+    line-height: 1.65;
+  }
+}
