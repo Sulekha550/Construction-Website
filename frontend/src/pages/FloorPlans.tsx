@@ -11,8 +11,8 @@ import {
   Home,
   Maximize2,
   Move3d,
-  Ruler,
-  Sparkles,
+  Sun,
+  Moon,
   X,
 } from "lucide-react";
 
@@ -34,24 +34,14 @@ const images = {
   construction4: "/images/floorplans/Floorplans6.webp",
 };
 
-/* =========================================================
-   EXACT 2D / 3D FLOOR PLAN PATHS
-========================================================= */
-
 const floorPlanImages = {
   twoBhk2D: "/images/floorplans/2bhkk 2d.webp",
   twoBhk3D: "/images/floorplans/2bhkk 3d.webp",
-
   threeBhk2D: "/images/floorplans/3bhkk2dform.webp",
   threeBhk3D: "/images/floorplans/3bhk3dform.webp",
-
   fourBhk2D: "/images/floorplans/4bhk2dform.webp",
   fourBhk3D: "/images/floorplans/4bhk3dform.webp",
 };
-
-/* =========================================================
-   GALLERY
-========================================================= */
 
 const residenceGallery = [
   {
@@ -105,10 +95,6 @@ type Plan = {
   accent: string;
   idealFor: string;
 };
-
-/* =========================================================
-   RESIDENCE DATA
-========================================================= */
 
 const plans: Plan[] = [
   {
@@ -164,14 +150,7 @@ const plans: Plan[] = [
 type ViewMode = "2D" | "3D";
 
 /* =========================================================
-   INTERACTIVE FLOOR PLAN VIEWER
-
-   Behaviour:
-   1. Default view is 2D.
-   2. Hovering over the floor plan changes 2D to 3D.
-   3. Leaving the floor plan returns to 2D.
-   4. The toggle button manually switches between 2D and 3D.
-   5. On touch devices, the toggle button can be used instead.
+   FLOOR PLAN VIEWER
 ========================================================= */
 
 function FloorPlanViewer({
@@ -188,8 +167,6 @@ function FloorPlanViewer({
   const [imageError, setImageError] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
-  // When the saved view is 2D, hovering temporarily displays 3D.
-  // When the user manually selects 3D, it stays 3D.
   const displayedView: ViewMode =
     isHovered && viewMode === "2D" ? "3D" : viewMode;
 
@@ -200,13 +177,11 @@ function FloorPlanViewer({
     setImageError(false);
   }, [currentImage]);
 
-  // Prevent the hover preview from carrying over to another residence.
   useEffect(() => {
     setIsHovered(false);
   }, [plan.id]);
 
   const handleToggle = () => {
-    // Clear the temporary hover preview before changing the saved view.
     setIsHovered(false);
     onToggleView();
   };
@@ -218,7 +193,6 @@ function FloorPlanViewer({
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        {/* FLOOR PLAN IMAGE */}
         {!imageError ? (
           <img
             key={`${plan.id}-${displayedView}`}
@@ -230,40 +204,33 @@ function FloorPlanViewer({
         ) : (
           <div className="flex min-h-[360px] w-full flex-col items-center justify-center gap-3 px-6 text-center text-[#151613]">
             <Home size={30} />
-
             <p className="font-serif text-xl">
               {plan.type} {displayedView} Plan
             </p>
-
             <p className="max-w-md text-sm text-black/55">
               Image not found. Check the filename and path in
               public/images/floorplans.
             </p>
-
             <p className="break-all text-xs text-black/45">
               {currentImage}
             </p>
           </div>
         )}
 
-        {/* RESIDENCE LABEL */}
         <div className="pointer-events-none absolute left-4 top-4 z-10 sm:left-6 sm:top-6">
           <div className="border border-black/10 bg-white/85 px-3 py-2.5 backdrop-blur-md">
             <p className="text-[8px] uppercase tracking-[0.2em] text-black/45">
               Residence {plan.id}
             </p>
-
             <p className="mt-1 font-serif text-lg text-black">
               {plan.type}
             </p>
           </div>
         </div>
 
-        {/* CURRENT VIEW LABEL */}
         <div className="pointer-events-none absolute right-4 top-4 z-10 sm:right-6 sm:top-6">
           <div className="flex items-center gap-2 border border-black/10 bg-white/85 px-3 py-2.5 text-black/65 backdrop-blur-md">
             <Move3d size={13} />
-
             <span className="text-[8px] uppercase tracking-[0.15em]">
               {displayedView === "2D"
                 ? "2D Architectural"
@@ -272,7 +239,6 @@ function FloorPlanViewer({
           </div>
         </div>
 
-        {/* 2D / 3D TOGGLE + FULLSCREEN */}
         <div className="absolute bottom-4 right-4 z-10 flex flex-wrap gap-2 sm:bottom-6 sm:right-6">
           <button
             type="button"
@@ -286,7 +252,6 @@ function FloorPlanViewer({
             className="flex min-h-11 items-center justify-center gap-2 bg-[#151613] px-4 py-3 text-[9px] uppercase tracking-[0.15em] text-white transition duration-300 hover:bg-[#c5a46d] hover:text-black sm:px-5"
           >
             <Move3d size={15} />
-
             {viewMode === "2D" ? "View 3D Plan" : "View 2D Plan"}
           </button>
 
@@ -300,58 +265,42 @@ function FloorPlanViewer({
           </button>
         </div>
 
-        {/* 2D / 3D STATUS INDICATOR */}
         <div className="pointer-events-none absolute bottom-5 left-4 z-10 flex items-center gap-2 sm:bottom-7 sm:left-6">
           <span
             className={`h-1.5 w-1.5 rounded-full ${
-              displayedView === "2D"
-                ? "bg-[#b18d4e]"
-                : "bg-black/20"
+              displayedView === "2D" ? "bg-[#b18d4e]" : "bg-black/20"
             }`}
           />
-
           <span className="text-[8px] uppercase tracking-[0.15em] text-black/50">
             2D
           </span>
-
           <span className="h-px w-5 bg-black/20" />
-
           <span
             className={`h-1.5 w-1.5 rounded-full ${
-              displayedView === "3D"
-                ? "bg-[#b18d4e]"
-                : "bg-black/20"
+              displayedView === "3D" ? "bg-[#b18d4e]" : "bg-black/20"
             }`}
           />
-
           <span className="text-[8px] uppercase tracking-[0.15em] text-black/50">
             3D
           </span>
         </div>
       </div>
 
-      {/* PLAN DETAILS */}
       <div className="grid border-t border-white/10 bg-[#191a16] sm:grid-cols-4">
         <div className="border-b border-white/10 p-5 sm:border-b-0 sm:border-r sm:p-6">
           <p className="text-[8px] uppercase tracking-[0.2em] text-[#c5a46d]">
             Residence
           </p>
-
-          <p className="mt-2 font-serif text-xl text-white">
-            {plan.type}
-          </p>
+          <p className="mt-2 font-serif text-xl text-white">{plan.type}</p>
         </div>
 
         <div className="border-b border-white/10 p-5 sm:border-b-0 sm:border-r sm:p-6">
           <p className="text-[8px] uppercase tracking-[0.2em] text-white/35">
             Approx. Area
           </p>
-
           <p className="mt-2 font-serif text-xl text-white">
             {plan.area}
-            <span className="ml-1 text-[9px] text-white/35">
-              SQ.FT.
-            </span>
+            <span className="ml-1 text-[9px] text-white/35">SQ.FT.</span>
           </p>
         </div>
 
@@ -359,7 +308,6 @@ function FloorPlanViewer({
           <p className="text-[8px] uppercase tracking-[0.2em] text-white/35">
             Bedrooms
           </p>
-
           <p className="mt-2 flex items-center gap-2 font-serif text-xl text-white">
             <BedDouble size={16} className="text-[#c5a46d]" />
             {plan.bedrooms}
@@ -370,7 +318,6 @@ function FloorPlanViewer({
           <p className="text-[8px] uppercase tracking-[0.2em] text-white/35">
             Bathrooms
           </p>
-
           <p className="mt-2 flex items-center gap-2 font-serif text-xl text-white">
             <Home size={15} className="text-[#c5a46d]" />
             {plan.bathrooms}
@@ -405,17 +352,12 @@ function ImageCard({
           loading="lazy"
           className="h-[300px] w-full object-cover transition duration-1000 group-hover:scale-110 md:h-[400px]"
         />
-
         <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-transparent to-transparent opacity-70 transition duration-700 group-hover:opacity-100" />
-
         <div className="absolute left-5 top-5 border border-white/30 bg-black/30 px-3 py-2 text-[9px] uppercase tracking-[0.18em] text-white backdrop-blur-md">
           {item.category}
         </div>
-
         <div className="absolute bottom-5 left-5 right-5 text-white transition duration-500 group-hover:translate-y-[-3px]">
-          <h3 className="font-serif text-xl md:text-2xl">
-            {item.title}
-          </h3>
+          <h3 className="font-serif text-xl md:text-2xl">{item.title}</h3>
         </div>
       </div>
     </div>
@@ -455,7 +397,6 @@ function FullscreenPlan({
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
-
     document.body.style.overflow = "hidden";
 
     return () => {
@@ -472,20 +413,16 @@ function FullscreenPlan({
 
     window.addEventListener("keydown", handleKeyDown);
 
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [onClose, onNext, onPrevious]);
 
   return (
     <div className="fixed inset-0 z-[100] flex flex-col bg-[#11120f]/[0.98] text-white backdrop-blur-xl">
-      {/* MODAL HEADER */}
       <header className="relative z-20 flex items-center justify-between gap-4 border-b border-white/10 px-5 py-4 md:px-8">
         <div>
           <p className="text-[8px] uppercase tracking-[0.25em] text-[#c5a46d]">
             Vardha Builders · Residence Plans
           </p>
-
           <h2 className="mt-1 font-serif text-lg md:text-xl">
             {plan.type} — {plan.title}
           </h2>
@@ -501,7 +438,6 @@ function FullscreenPlan({
         </button>
       </header>
 
-      {/* FULLSCREEN IMAGE */}
       <div className="flex min-h-0 flex-1 items-center justify-center overflow-hidden px-5 py-5 md:px-16">
         {!imageError ? (
           <img
@@ -514,21 +450,17 @@ function FullscreenPlan({
         ) : (
           <div className="flex flex-col items-center gap-3 text-center text-white/60">
             <Home size={32} />
-
             <p className="font-serif text-xl">
               {plan.type} {viewMode} Plan
             </p>
-
             <p className="text-sm">
               Image could not be loaded. Please check the image path.
             </p>
-
             <p className="break-all text-xs">{currentImage}</p>
           </div>
         )}
       </div>
 
-      {/* MODAL FOOTER */}
       <footer className="relative z-20 flex flex-col justify-between gap-4 border-t border-white/10 px-5 py-4 sm:flex-row sm:items-center md:px-8">
         <div className="flex flex-wrap items-center gap-4 text-[9px] uppercase tracking-[0.12em] text-white/55">
           <span>{plan.area} SQ.FT.</span>
@@ -540,14 +472,11 @@ function FullscreenPlan({
           <button
             type="button"
             onClick={() =>
-              setViewMode((previous) =>
-                previous === "2D" ? "3D" : "2D"
-              )
+              setViewMode((previous) => (previous === "2D" ? "3D" : "2D"))
             }
             className="flex h-10 items-center gap-2 border border-white/20 px-4 text-[9px] uppercase tracking-[0.12em] transition hover:bg-[#c5a46d] hover:text-black"
           >
             <Move3d size={14} />
-
             View {viewMode === "2D" ? "3D" : "2D"}
           </button>
 
@@ -579,6 +508,38 @@ function FullscreenPlan({
 ========================================================= */
 
 export default function FloorPlans() {
+  /* THEME TOGGLE — ADDED */
+  const [isDark, setIsDark] = useState(() => {
+    const savedTheme = localStorage.getItem("vardha-theme");
+
+    if (savedTheme !== null) {
+      return savedTheme === "dark";
+    }
+
+    return (
+      document.documentElement.classList.contains("vardha-night") ||
+      document.documentElement.classList.contains("dark")
+    );
+  });
+
+  const toggleTheme = useCallback(() => {
+    setIsDark((previous) => {
+      const next = !previous;
+
+      document.documentElement.classList.toggle("vardha-night", next);
+      document.documentElement.classList.toggle("dark", next);
+
+      localStorage.setItem("vardha-theme", next ? "dark" : "light");
+
+      return next;
+    });
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("vardha-night", isDark);
+    document.documentElement.classList.toggle("dark", isDark);
+  }, [isDark]);
+
   const [activePlanId, setActivePlanId] = useState("02");
 
   const [viewModes, setViewModes] = useState<Record<string, ViewMode>>({
@@ -615,7 +576,6 @@ export default function FloorPlans() {
   const nextPlan = useCallback(() => {
     setViewerPlanId((currentId) => {
       const index = plans.findIndex((plan) => plan.id === currentId);
-
       return plans[(index + 1 + plans.length) % plans.length].id;
     });
   }, []);
@@ -623,15 +583,11 @@ export default function FloorPlans() {
   const previousPlan = useCallback(() => {
     setViewerPlanId((currentId) => {
       const index = plans.findIndex((plan) => plan.id === currentId);
-
       return plans[(index - 1 + plans.length) % plans.length].id;
     });
   }, []);
 
-  /* =========================================================
-     GSAP ANIMATIONS
-  ========================================================= */
-
+  /* GSAP ANIMATIONS */
   useEffect(() => {
     const context = gsap.context(() => {
       gsap.fromTo(
@@ -652,72 +608,67 @@ export default function FloorPlans() {
         { scale: 1, duration: 1.7, ease: "power3.out" }
       );
 
-      gsap.utils
-        .toArray<HTMLElement>(".reveal-section")
-        .forEach((section) => {
-          gsap.fromTo(
-            section,
-            { opacity: 0, y: 35 },
-            {
-              opacity: 1,
-              y: 0,
-              duration: 0.8,
-              ease: "power3.out",
-              scrollTrigger: {
-                trigger: section,
-                start: "top 86%",
-                once: true,
-              },
-            }
-          );
-        });
-
-      gsap.utils
-        .toArray<HTMLElement>(".parallax-image")
-        .forEach((image) => {
-          gsap.to(image, {
-            yPercent: -10,
-            ease: "none",
+      gsap.utils.toArray<HTMLElement>(".reveal-section").forEach((section) => {
+        gsap.fromTo(
+          section,
+          { opacity: 0, y: 35 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.8,
+            ease: "power3.out",
             scrollTrigger: {
-              trigger: image,
-              start: "top bottom",
-              end: "bottom top",
-              scrub: true,
+              trigger: section,
+              start: "top 86%",
+              once: true,
             },
-          });
-        });
+          }
+        );
+      });
 
-      gsap.utils
-        .toArray<HTMLElement>(".spatial-card")
-        .forEach((card, index) => {
-          gsap.fromTo(
-            card,
-            { opacity: 0, y: 35 },
-            {
-              opacity: 1,
-              y: 0,
-              duration: 0.75,
-              delay: index * 0.04,
-              ease: "power3.out",
-              scrollTrigger: {
-                trigger: card,
-                start: "top 90%",
-                once: true,
-              },
-            }
-          );
+      gsap.utils.toArray<HTMLElement>(".parallax-image").forEach((image) => {
+        gsap.to(image, {
+          yPercent: -10,
+          ease: "none",
+          scrollTrigger: {
+            trigger: image,
+            start: "top bottom",
+            end: "bottom top",
+            scrub: true,
+          },
         });
+      });
+
+      gsap.utils.toArray<HTMLElement>(".spatial-card").forEach((card, index) => {
+        gsap.fromTo(
+          card,
+          { opacity: 0, y: 35 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.75,
+            delay: index * 0.04,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: card,
+              start: "top 90%",
+              once: true,
+            },
+          }
+        );
+      });
     });
 
     return () => context.revert();
   }, []);
 
   return (
-    <main className="min-h-screen overflow-hidden bg-[#eeece5] text-[#151614]">
-      {/* =====================================================
-          HERO
-      ===================================================== */}
-
+    <main
+      className={`floor-plans-page min-h-screen overflow-hidden transition-colors duration-300 ${
+        isDark ? "theme-dark bg-[#10110f] text-[#f4f0e7]" : "theme-light bg-[#eeece5] text-[#151614]"
+      }`}
+    >
+      {/* HERO */}
       <section className="relative min-h-[88vh] overflow-hidden bg-[#10110f] text-[#f5f1e9] md:min-h-screen">
         <img
           src={images.hero}
@@ -727,6 +678,17 @@ export default function FloorPlans() {
 
         <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/45 to-black/20" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/25" />
+
+        {/* THEME TOGGLE BUTTON — ADDED */}
+        <button
+          type="button"
+          onClick={toggleTheme}
+          aria-label={isDark ? "Switch to light theme" : "Switch to dark theme"}
+          title={isDark ? "Switch to light theme" : "Switch to dark theme"}
+          className="absolute right-5 top-5 z-30 flex h-11 w-11 items-center justify-center border border-white/30 bg-black/40 text-white backdrop-blur-md transition hover:border-[#c5a46d] hover:bg-[#c5a46d] hover:text-black md:right-8 md:top-8"
+        >
+          {isDark ? <Sun size={18} /> : <Moon size={18} />}
+        </button>
 
         <div className="absolute right-5 top-1/2 hidden -translate-y-1/2 rotate-90 text-[8px] uppercase tracking-[0.4em] text-white/50 lg:block">
           VARDHA / SPATIAL COLLECTION / 004
@@ -758,7 +720,6 @@ export default function FloorPlans() {
                 className="group flex shrink-0 items-center gap-3 text-[9px] uppercase tracking-[0.2em]"
               >
                 Explore Plans
-
                 <span className="flex h-10 w-10 items-center justify-center border border-white/30 transition group-hover:bg-white group-hover:text-black">
                   <ArrowDown size={14} />
                 </span>
@@ -770,46 +731,37 @@ export default function FloorPlans() {
         <div className="absolute bottom-0 left-0 right-0 z-20 border-t border-white/10">
           <div className="mx-auto flex max-w-[1500px] items-center justify-between px-6 py-4 text-[8px] uppercase tracking-[0.18em] text-white/40 md:px-12 lg:px-20">
             <span>01 — Residential Planning</span>
-
-            <span className="hidden md:block">
-              Architecture / Function / Light
-            </span>
-
+            <span className="hidden md:block">Architecture / Function / Light</span>
             <span>Scroll to explore</span>
           </div>
         </div>
       </section>
 
-      {/* =====================================================
-          INTRODUCTION
-      ===================================================== */}
-
+      {/* INTRODUCTION */}
       <section className="reveal-section px-6 py-20 md:px-12 md:py-24 lg:px-20">
         <div className="mx-auto grid max-w-[1500px] gap-10 lg:grid-cols-[0.7fr_1.3fr]">
           <div>
             <p className="text-[9px] uppercase tracking-[0.25em] text-[#a58a59]">
               01 / Planning Philosophy
             </p>
-
             <div className="mt-7 h-px w-16 bg-[#c5a46d]" />
           </div>
 
           <div>
             <h2 className="max-w-5xl font-serif text-3xl leading-[1.1] tracking-[-0.02em] md:text-4xl lg:text-5xl">
               A floor plan is more than a drawing.
-              <span className="text-black/35">
+              <span className="text-current/35">
                 {" "}It is the beginning of how a home will feel.
               </span>
             </h2>
 
-            <div className="mt-8 grid gap-6 border-t border-black/10 pt-7 md:grid-cols-2">
-              <p className="text-[13px] leading-6 text-black/55">
+            <div className="mt-8 grid gap-6 border-t border-current/10 pt-7 md:grid-cols-2">
+              <p className="text-[13px] leading-6 opacity-65">
                 Every Vardha residence is planned around the rhythm of
                 everyday life, from morning light and family gatherings to
                 private corners and quiet evenings.
               </p>
-
-              <p className="text-[13px] leading-6 text-black/55">
+              <p className="text-[13px] leading-6 opacity-65">
                 Proportion, circulation, ventilation and natural light are
                 considered together to create spaces that feel intuitive,
                 spacious and timeless.
@@ -819,10 +771,7 @@ export default function FloorPlans() {
         </div>
       </section>
 
-      {/* =====================================================
-          RESIDENCE COLLECTION
-      ===================================================== */}
-
+      {/* RESIDENCE COLLECTION */}
       <section
         id="residences"
         className="bg-[#151613] px-6 py-20 text-[#f4f0e7] md:px-12 md:py-24 lg:px-20"
@@ -833,21 +782,18 @@ export default function FloorPlans() {
               <p className="text-[9px] uppercase tracking-[0.25em] text-[#c5a46d]">
                 02 / Residence Collection
               </p>
-
               <h2 className="mt-4 max-w-3xl font-serif text-3xl leading-[1.08] md:text-4xl lg:text-5xl">
                 Three ways to
                 <br />
                 <span className="text-[#c5a46d]">live beautifully.</span>
               </h2>
             </div>
-
             <p className="max-w-sm text-[13px] leading-6 text-white/45">
               Choose your preferred residence, explore the 2D layout and
               switch to the 3D floor plan whenever you want.
             </p>
           </div>
 
-          {/* 2 BHK / 3 BHK / 4 BHK SELECTOR */}
           <div className="mb-7 grid grid-cols-3 border-y border-white/10">
             {plans.map((plan) => {
               const isActive = activePlanId === plan.id;
@@ -867,11 +813,9 @@ export default function FloorPlans() {
                   <span className="block text-[8px] uppercase tracking-[0.15em]">
                     Residence {plan.id}
                   </span>
-
                   <span className="mt-1.5 block font-serif text-lg sm:text-2xl">
                     {plan.type}
                   </span>
-
                   {isActive && (
                     <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#c5a46d]" />
                   )}
@@ -880,7 +824,6 @@ export default function FloorPlans() {
             })}
           </div>
 
-          {/* SELECTED RESIDENCE DETAILS */}
           <div className="grid gap-7 lg:grid-cols-[1.3fr_0.7fr]">
             <div className="reveal-section min-w-0">
               <FloorPlanViewer
@@ -898,7 +841,6 @@ export default function FloorPlans() {
                   <span className="text-[8px] uppercase tracking-[0.22em] text-[#c5a46d]">
                     Residence {selectedPlan.id}
                   </span>
-
                   <span className="font-serif text-2xl text-white/15 sm:text-3xl">
                     {selectedPlan.type}
                   </span>
@@ -907,11 +849,9 @@ export default function FloorPlans() {
                 <h3 className="mt-8 font-serif text-3xl leading-tight md:text-4xl">
                   {selectedPlan.title}
                 </h3>
-
                 <p className="mt-5 text-[13px] leading-6 text-white/50">
                   {selectedPlan.description}
                 </p>
-
                 <p className="mt-5 text-[9px] uppercase leading-5 tracking-[0.13em] text-[#c5a46d]">
                   {selectedPlan.accent}
                 </p>
@@ -921,7 +861,6 @@ export default function FloorPlans() {
                 <p className="text-[8px] uppercase tracking-[0.22em] text-white/35">
                   Ideal For
                 </p>
-
                 <p className="mt-2 text-[13px] text-white/75">
                   {selectedPlan.idealFor}
                 </p>
@@ -931,23 +870,16 @@ export default function FloorPlans() {
                     <p className="text-[8px] uppercase tracking-[0.16em] text-white/30">
                       Area
                     </p>
-
                     <p className="mt-2 font-serif text-xl">
                       {selectedPlan.area}
-                      <span className="ml-1 text-[9px] text-white/35">
-                        SQ.FT.
-                      </span>
+                      <span className="ml-1 text-[9px] text-white/35">SQ.FT.</span>
                     </p>
                   </div>
-
                   <div className="py-5 pl-5">
                     <p className="text-[8px] uppercase tracking-[0.16em] text-white/30">
                       Layout
                     </p>
-
-                    <p className="mt-2 font-serif text-xl">
-                      {selectedPlan.type}
-                    </p>
+                    <p className="mt-2 font-serif text-xl">{selectedPlan.type}</p>
                   </div>
                 </div>
 
@@ -957,11 +889,7 @@ export default function FloorPlans() {
                   className="group mt-2 flex min-h-12 w-full items-center justify-between border border-white/15 px-5 py-3.5 text-[9px] uppercase tracking-[0.16em] transition hover:bg-[#c5a46d] hover:text-black"
                 >
                   Open Fullscreen Plan
-
-                  <Maximize2
-                    size={15}
-                    className="transition group-hover:scale-110"
-                  />
+                  <Maximize2 size={15} className="transition group-hover:scale-110" />
                 </button>
 
                 <button
@@ -970,11 +898,7 @@ export default function FloorPlans() {
                   className="group mt-3 flex min-h-12 w-full items-center justify-between bg-[#c5a46d] px-5 py-3.5 text-[9px] uppercase tracking-[0.16em] text-black transition hover:bg-[#d5b77f]"
                 >
                   {selectedView === "2D" ? "Switch to 3D" : "Switch to 2D"}
-
-                  <ArrowRight
-                    size={15}
-                    className="transition group-hover:translate-x-1"
-                  />
+                  <ArrowRight size={15} className="transition group-hover:translate-x-1" />
                 </button>
               </div>
             </div>
@@ -986,10 +910,7 @@ export default function FloorPlans() {
         </div>
       </section>
 
-      {/* =====================================================
-          NUMBERS
-      ===================================================== */}
-
+      {/* NUMBERS */}
       <section className="bg-[#e7e4dc] px-6 py-14 md:px-12 lg:px-20">
         <div className="mx-auto grid max-w-[1500px] divide-y divide-black/10 border-y border-black/10 sm:grid-cols-2 sm:divide-y-0 md:grid-cols-4 md:divide-x">
           {[
@@ -1000,7 +921,6 @@ export default function FloorPlans() {
           ].map(([number, label]) => (
             <div key={label} className="px-5 py-7 md:px-6 md:py-9">
               <p className="font-serif text-3xl md:text-4xl">{number}</p>
-
               <p className="mt-2 text-[8px] uppercase tracking-[0.16em] text-black/45">
                 {label}
               </p>
@@ -1009,10 +929,7 @@ export default function FloorPlans() {
         </div>
       </section>
 
-      {/* =====================================================
-          SPATIAL JOURNAL
-      ===================================================== */}
-
+      {/* SPATIAL JOURNAL */}
       <section className="px-6 py-20 md:px-12 md:py-24 lg:px-20">
         <div className="mx-auto max-w-[1500px]">
           <div className="reveal-section grid gap-7 md:grid-cols-[1fr_0.7fr] md:items-end">
@@ -1020,15 +937,13 @@ export default function FloorPlans() {
               <p className="text-[9px] uppercase tracking-[0.25em] text-[#a58a59]">
                 03 / Spatial Journal
               </p>
-
               <h2 className="mt-4 font-serif text-3xl leading-tight md:text-4xl lg:text-5xl">
                 Where plans become
                 <br />
-                <span className="text-black/35">places.</span>
+                <span className="text-current/35">places.</span>
               </h2>
             </div>
-
-            <p className="text-[13px] leading-6 text-black/50">
+            <p className="text-[13px] leading-6 opacity-60">
               Explore the materials, interiors and architectural details
               that shape the Vardha residential experience.
             </p>
@@ -1042,42 +957,31 @@ export default function FloorPlans() {
         </div>
       </section>
 
-      {/* =====================================================
-          ARCHITECTURE PARALLAX
-      ===================================================== */}
-
+      {/* ARCHITECTURE PARALLAX */}
       <section className="relative h-[65vh] min-h-[450px] overflow-hidden bg-black">
         <img
           src={images.architecture}
           alt="Vardha residential architecture"
           className="parallax-image absolute inset-0 h-[115%] w-full object-cover opacity-75"
         />
-
         <div className="absolute inset-0 bg-black/45" />
-
         <div className="relative z-10 flex h-full items-end px-6 pb-14 md:px-12 md:pb-18 lg:px-20">
           <div className="mx-auto w-full max-w-[1500px]">
             <div className="max-w-3xl">
               <p className="text-[9px] uppercase tracking-[0.25em] text-[#c5a46d]">
                 Architecture / Material / Light
               </p>
-
               <h2 className="mt-5 font-serif text-3xl leading-tight text-white md:text-4xl lg:text-5xl">
                 Designed for the way
                 <br />
-                <span className="text-white/50">
-                  life actually happens.
-                </span>
+                <span className="text-white/50">life actually happens.</span>
               </h2>
             </div>
           </div>
         </div>
       </section>
 
-      {/* =====================================================
-          DESIGN PRINCIPLES
-      ===================================================== */}
-
+      {/* DESIGN PRINCIPLES */}
       <section className="bg-[#151613] px-6 py-20 text-white md:px-12 md:py-24 lg:px-20">
         <div className="mx-auto max-w-[1500px]">
           <div className="reveal-section grid gap-7 md:grid-cols-[0.5fr_1.5fr]">
@@ -1086,13 +990,10 @@ export default function FloorPlans() {
                 04 / Spatial Philosophy
               </p>
             </div>
-
             <h2 className="font-serif text-3xl leading-tight md:text-4xl lg:text-5xl">
               Four principles behind
               <br />
-              <span className="text-[#c5a46d]">
-                every Vardha plan.
-              </span>
+              <span className="text-[#c5a46d]">every Vardha plan.</span>
             </h2>
           </div>
 
@@ -1123,14 +1024,8 @@ export default function FloorPlans() {
                 key={item.number}
                 className="grid gap-3 border-b border-white/10 py-6 md:grid-cols-[70px_0.7fr_1fr] md:items-center md:gap-5"
               >
-                <span className="font-serif text-xl text-white/25">
-                  {item.number}
-                </span>
-
-                <h3 className="font-serif text-xl md:text-2xl">
-                  {item.title}
-                </h3>
-
+                <span className="font-serif text-xl text-white/25">{item.number}</span>
+                <h3 className="font-serif text-xl md:text-2xl">{item.title}</h3>
                 <p className="max-w-lg text-[13px] leading-6 text-white/45">
                   {item.text}
                 </p>
@@ -1140,17 +1035,13 @@ export default function FloorPlans() {
         </div>
       </section>
 
-      {/* =====================================================
-          CONTACT CTA
-      ===================================================== */}
-
+      {/* CONTACT CTA */}
       <section className="bg-[#c5a46d] px-6 py-20 md:px-12 md:py-24 lg:px-20">
         <div className="mx-auto grid max-w-[1500px] gap-8 md:grid-cols-[1fr_auto] md:items-end">
           <div>
             <p className="text-[9px] uppercase tracking-[0.25em] text-black/50">
               05 / Begin Your Journey
             </p>
-
             <h2 className="mt-5 max-w-4xl font-serif text-4xl leading-[1.02] tracking-[-0.02em] md:text-5xl lg:text-6xl">
               Find the space
               <br />
@@ -1163,35 +1054,23 @@ export default function FloorPlans() {
             className="group flex min-h-14 items-center justify-between gap-8 border border-black/30 px-5 text-[9px] uppercase tracking-[0.16em] transition hover:bg-black hover:text-white"
           >
             Talk to Vardha
-
-            <ArrowRight
-              size={16}
-              className="transition group-hover:translate-x-1"
-            />
+            <ArrowRight size={16} className="transition group-hover:translate-x-1" />
           </Link>
         </div>
       </section>
 
-      {/* =====================================================
-          FOOTER
-      ===================================================== */}
-
+      {/* FOOTER */}
       <footer className="bg-[#10110f] px-6 py-7 text-white md:px-12 lg:px-20">
         <div className="mx-auto flex max-w-[1500px] flex-col justify-between gap-3 text-[8px] uppercase tracking-[0.18em] text-white/35 md:flex-row">
           <span>© {new Date().getFullYear()} Vardha Builders</span>
-
           <span>Building Dreams. Creating Landmarks.</span>
-
           <Link to="/" className="transition hover:text-white">
             Back to Home
           </Link>
         </div>
       </footer>
 
-      {/* =====================================================
-          FULLSCREEN MODAL
-      ===================================================== */}
-
+      {/* FULLSCREEN MODAL */}
       {viewerPlan && (
         <FullscreenPlan
           key={viewerPlan.id}
