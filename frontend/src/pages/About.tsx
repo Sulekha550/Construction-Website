@@ -1,7 +1,5 @@
-
 import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-
 import {
   ArrowDown,
   ArrowRight,
@@ -11,7 +9,6 @@ import {
   Ruler,
   Sparkles,
 } from "lucide-react";
-
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
@@ -22,16 +19,9 @@ gsap.registerPlugin(ScrollTrigger);
    ======================================================== */
 
 const images = {
-  // Dramatic architectural exterior / building visualization
   hero: "/images/About/About1.webp",
-
-  // Architectural / structural perspective
   architecture: "/images/About/About2.webp",
-
-  // Premium finished interior / architectural visualization feel
   interior: "/images/Gallery/Gallery2.webp",
-
-  // Construction / large-scale development
   construction: "/images/About/About4.webp",
 };
 
@@ -84,10 +74,7 @@ export default function About() {
         }
       );
 
-      /* ---------------------------------------------
-         IMAGE SCALE / 3D VISUAL FEEL
-      --------------------------------------------- */
-
+      /* IMAGE SCALE ANIMATIONS */
       gsap.utils.toArray<HTMLElement>(".about-image").forEach((image) => {
         gsap.fromTo(
           image,
@@ -107,10 +94,7 @@ export default function About() {
         );
       });
 
-      /* ---------------------------------------------
-         HORIZONTAL LINES
-      --------------------------------------------- */
-
+      /* HORIZONTAL LINES */
       gsap.utils.toArray<HTMLElement>(".about-line").forEach((line) => {
         gsap.fromTo(
           line,
@@ -131,10 +115,7 @@ export default function About() {
         );
       });
 
-      /* ---------------------------------------------
-         SECTION TITLES
-      --------------------------------------------- */
-
+      /* SECTION TITLES */
       gsap.utils
         .toArray<HTMLElement>(".about-section-title")
         .forEach((title) => {
@@ -151,31 +132,28 @@ export default function About() {
               ease: "power3.out",
               scrollTrigger: {
                 trigger: title,
-                start: "top 82%",
+                start: "top 88%",
                 once: true,
               },
             }
           );
         });
 
-      /* ---------------------------------------------
-         PRINCIPLES
-      --------------------------------------------- */
-
+      /* PRINCIPLE ITEMS */
       gsap.utils
         .toArray<HTMLElement>(".principle-item")
         .forEach((item, index) => {
           gsap.fromTo(
             item,
             {
-              y: 35,
+              x: -30,
               opacity: 0,
             },
             {
-              y: 0,
+              x: 0,
               opacity: 1,
               duration: 0.8,
-              delay: index * 0.08,
+              delay: index * 0.1,
               ease: "power3.out",
               scrollTrigger: {
                 trigger: item,
@@ -186,10 +164,7 @@ export default function About() {
           );
         });
 
-      /* ---------------------------------------------
-         NUMBERS
-      --------------------------------------------- */
-
+      /* NUMBERS */
       gsap.utils
         .toArray<HTMLElement>(".about-number")
         .forEach((item, index) => {
@@ -231,11 +206,10 @@ export default function About() {
       className="bg-[var(--bg)] text-[var(--text)] transition-colors duration-500"
     >
       {/* =====================================================
-          HERO
+          01 — HERO (Always Dark Image Stage with Guaranteed Contrast)
       ===================================================== */}
-
       <section className="relative min-h-screen overflow-hidden">
-        {/* Preserve the original About hero image */}
+        {/* Background hero image */}
         <img
           src={images.hero}
           alt="Premium architectural building visualization"
@@ -243,55 +217,57 @@ export default function About() {
         />
 
         {/* Dark cinematic overlays */}
-        <div className="absolute inset-0 bg-black/45" />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/65 via-black/20 to-black/80" />
+        <div className="absolute inset-0 bg-[#0b0c0c]/50" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0b0c0c]/70 via-black/30 to-[#0b0c0c]" />
 
         {/* Architectural grid */}
-        <div className="arch-grid absolute inset-0 opacity-25" />
+        <div className="arch-grid absolute inset-0 opacity-[0.07]" />
 
-        {/* Content spacing and width aligned with the Home page */}
-        <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-[1600px] flex-col justify-between px-6 pb-8 pt-32 md:px-8 md:pb-10 lg:px-12">
-          <div className="about-reveal flex items-center gap-4 text-[9px] uppercase tracking-[0.3em] text-white/70 md:text-[10px] md:tracking-[0.35em]">
-            <span className="h-px w-10 shrink-0 bg-[#c9a66b] md:w-12" />
-            About Vardha Builders
+        {/* Hero container */}
+        <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-7xl flex-col justify-between px-5 pb-10 pt-28 sm:px-8 sm:pt-32 lg:px-12 lg:pt-36">
+          <div className="about-reveal flex items-center gap-3">
+            <span className="h-px w-8 bg-[#c7a15c]" />
+            <span className="font-mono text-[9px] uppercase tracking-[0.3em] text-[#c7a15c]">
+              About Vardha Builders
+            </span>
           </div>
 
-          <div className="my-14 w-full max-w-7xl md:my-16 lg:my-10">
-            <p className="about-reveal mb-6 text-[9px] uppercase tracking-[0.3em] text-[#d2b477] md:text-[10px] md:tracking-[0.35em]">
+          <div className="my-12 w-full max-w-4xl md:my-16">
+            <p className="about-reveal mb-4 font-mono text-[9px] uppercase tracking-[0.3em] text-[#c7a15c] sm:text-[10px]">
               Building Dreams Since 2014
             </p>
 
-            <h1 className="about-reveal font-display text-[clamp(3.2rem,6.5vw,6.5rem)] font-medium leading-[0.88] tracking-[-0.06em] text-white">
+            <h1 className="about-reveal font-display text-[clamp(2.8rem,6vw,6rem)] font-medium leading-[0.92] tracking-[-0.05em] text-white">
               We Build
               <br />
-              <span className="ml-[4vw] inline-block italic text-white/80">
+              <span className="ml-[3vw] inline-block italic text-[#c7a15c]">
                 More.
               </span>
             </h1>
 
-            <div className="about-reveal mt-7 flex max-w-xl items-start gap-4 text-[12px] leading-6 text-white/75 md:mt-8 md:text-[13px] md:leading-7 lg:mt-9 lg:text-[14px]">
-              <span className="mt-3 h-px w-10 shrink-0 bg-[#c9a66b] md:w-12" />
+            <div className="about-reveal mt-7 flex max-w-xl items-start gap-4 text-xs leading-6 text-white/75 sm:text-sm sm:leading-7">
+              <span className="mt-3 h-px w-8 shrink-0 bg-[#c7a15c]" />
               <p>
                 Vardha Builders is built around a simple idea — architecture
                 should do more than occupy land. It should create places,
-                experiences and lasting value.
+                experiences and lasting value for generations.
               </p>
             </div>
           </div>
 
           <div className="about-reveal flex items-end justify-between text-white">
             <div className="font-mono text-[9px] uppercase tracking-[0.25em] text-white/50">
-              01 / 06
+              01 / 06 · Corporate Identity
             </div>
 
-            <div className="flex flex-col items-center gap-3">
-              <span className="text-[8px] uppercase tracking-[0.3em] text-white/60">
+            <div className="flex flex-col items-center gap-2">
+              <span className="font-mono text-[8px] uppercase tracking-[0.25em] text-white/50">
                 Scroll to explore
               </span>
               <ArrowDown
-                size={15}
-                strokeWidth={1}
-                className="animate-bounce"
+                size={14}
+                strokeWidth={1.5}
+                className="animate-bounce text-[#c7a15c]"
               />
             </div>
           </div>
@@ -299,48 +275,45 @@ export default function About() {
       </section>
 
       {/* =====================================================
-          INTRO / STORY
+          02 — OUR STORY (Adapts to Light / Dark Themes)
       ===================================================== */}
-
-      <section className="px-6 py-24 md:px-12 md:py-32 lg:px-20 lg:py-36">
-        <div className="mx-auto max-w-[1500px]">
-          <div className="mb-10 flex items-center justify-between">
-            <span className="font-mono text-[9px] tracking-[0.3em] text-[var(--text-muted)]">
-              02 / OUR STORY
-            </span>
+      <section className="px-5 py-20 sm:px-8 sm:py-28 lg:px-12 lg:py-32">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-8 flex items-center justify-between">
+            <div className="flex items-center gap-3 font-mono text-[9px] uppercase tracking-[0.3em] text-[#c7a15c]">
+              <span className="h-px w-8 bg-[#c7a15c]" />
+              <span>02 / OUR STORY</span>
+            </div>
 
             <Building2
               size={18}
-              strokeWidth={1}
-              className="text-[#b08a4a]"
+              strokeWidth={1.5}
+              className="text-[#c7a15c]"
             />
           </div>
 
           <div className="about-line mb-14 h-px w-full bg-[var(--line)]" />
 
-          <div className="grid gap-14 lg:grid-cols-[0.8fr_1.4fr] lg:gap-16">
+          <div className="grid gap-12 lg:grid-cols-[0.8fr_1.4fr] lg:gap-16">
             <div>
-              <p className="text-[9px] uppercase tracking-[0.3em] text-[#b08a4a] md:text-[10px]">
+              <p className="font-mono text-[9px] uppercase tracking-[0.3em] text-[#c7a15c] sm:text-[10px]">
                 The Vardha Approach
               </p>
-            </div>
+            </div> 
 
             <div className="about-section-title">
-              <h2 className="font-display text-[clamp(2.2rem,4.5vw,5rem)] leading-[1.05] tracking-[-0.035em]">
+              <h2 className="font-display text-[clamp(2.2rem,4.5vw,4.5rem)] font-medium leading-[0.96] tracking-[-0.04em] text-[var(--text)]">
                 Architecture that feels
-                <span className="text-[var(--text-muted)]">
-                  {" "}
-                  considered.
-                </span>
+                <span className="italic text-[#c7a15c]"> considered.</span>
               </h2>
 
-              <p className="mt-8 max-w-3xl text-[13px] leading-7 text-[var(--text-soft)] md:text-[14px] md:leading-8">
+              <p className="mt-7 max-w-3xl text-[13px] leading-7 text-[var(--text-soft)] sm:text-sm sm:leading-7">
                 We believe meaningful development begins long before
                 construction. It starts with understanding the site, the
                 surroundings, the people and the way a space will be lived in.
               </p>
 
-              <p className="mt-5 max-w-3xl text-[13px] leading-7 text-[var(--text-soft)] md:text-[14px] md:leading-8">
+              <p className="mt-4 max-w-3xl text-[13px] leading-7 text-[var(--text-soft)] sm:text-sm sm:leading-7">
                 Our work brings together architecture, planning, materials,
                 technology and execution to create environments that are
                 visually distinctive while remaining practical for everyday
@@ -352,56 +325,53 @@ export default function About() {
       </section>
 
       {/* =====================================================
-          ARCHITECTURE VISUAL
+          03 — ARCHITECTURE VISUAL (Card Surface + Image Stage)
       ===================================================== */}
-
-      <section className="px-6 pb-24 md:px-12 md:pb-32 lg:px-20 lg:pb-36">
-        <div className="mx-auto grid max-w-[1500px] gap-5 lg:grid-cols-[1.35fr_0.65fr]">
-          <div className="group relative min-h-[480px] overflow-hidden md:min-h-[650px]">
+      <section className="px-5 pb-20 sm:px-8 sm:pb-28 lg:px-12 lg:pb-32">
+        <div className="mx-auto grid max-w-7xl gap-6 lg:grid-cols-[1.35fr_0.65fr]">
+          <div className="group relative min-h-[460px] overflow-hidden border border-[var(--line)] md:min-h-[580px]">
             <img
               src={images.architecture}
               alt="Contemporary architectural structure"
               className="about-image absolute inset-0 h-full w-full object-cover transition-transform duration-[1.5s] group-hover:scale-105"
             />
 
-            <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-transparent to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 
-            <div className="absolute bottom-7 left-7 text-white md:bottom-10 md:left-10">
-              <p className="font-mono text-[8px] uppercase tracking-[0.3em] text-white/60 md:text-[9px]">
+            <div className="absolute bottom-6 left-6 text-white sm:bottom-8 sm:left-8">
+              <p className="font-mono text-[8px] uppercase tracking-[0.3em] text-[#c7a15c]">
                 Architecture / 01
               </p>
 
-              <h3 className="mt-3 font-display text-[clamp(1.8rem,3vw,3.2rem)] leading-[1]">
+              <h3 className="mt-2 font-display text-[clamp(1.8rem,3vw,3rem)] font-semibold leading-[1] text-white">
                 Form follows
                 <br />
-                experience.
+                <span className="italic text-[#c7a15c]">experience.</span>
               </h3>
             </div>
           </div>
 
-          <div className="flex min-h-[480px] flex-col justify-between bg-[var(--surface)] p-7 md:min-h-[650px] md:p-10 lg:p-12">
+          <div className="flex min-h-[460px] flex-col justify-between border border-[var(--line)] bg-[var(--surface)] p-7 md:min-h-[580px] md:p-10 lg:p-12">
             <div>
-              <span className="font-mono text-[9px] tracking-[0.3em] text-[var(--text-muted)]">
-                VARDHA / PHILOSOPHY
+              <span className="font-mono text-[9px] uppercase tracking-[0.3em] text-[var(--text-muted)]">
+                Vardha / Philosophy
               </span>
 
-              <div className="mt-7 h-px bg-[var(--line)]" />
+              <div className="mt-6 h-px bg-[var(--line)]" />
             </div>
 
             <div>
-              <p className="font-display text-[clamp(1.9rem,3.2vw,3.4rem)] leading-[1.05]">
-                "Good architecture is not simply seen.
-                <span className="text-[#b08a4a]">
-                  {" "}
-                  It is experienced."
+              <p className="font-display text-[clamp(1.8rem,3vw,3.2rem)] font-medium leading-[1.05] text-[var(--text)]">
+                &ldquo;Good architecture is not simply seen.
+                <span className="italic text-[#c7a15c]">
+                  {" "}It is experienced.&rdquo;
                 </span>
               </p>
 
-              <div className="mt-8 flex items-center gap-4">
-                <span className="h-px w-10 bg-[#b08a4a]" />
-
-                <span className="text-[9px] uppercase tracking-[0.2em] text-[var(--text-muted)]">
-                  Vardha Builders
+              <div className="mt-8 flex items-center gap-3">
+                <span className="h-px w-8 bg-[#c7a15c]" />
+                <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-[var(--text-muted)]">
+                  Vardha Builders Principle
                 </span>
               </div>
             </div>
@@ -410,22 +380,27 @@ export default function About() {
       </section>
 
       {/* =====================================================
-          PRINCIPLES
+          04 — PRINCIPLES (Adaptive Background & Accessible Contrast)
       ===================================================== */}
-
-      <section className="bg-[var(--bg-soft)] px-6 py-24 md:px-12 md:py-32 lg:px-20 lg:py-36">
-        <div className="mx-auto max-w-[1500px]">
-          <div className="grid gap-12 lg:grid-cols-[0.65fr_1.35fr] lg:gap-14">
+      <section className="border-y border-[var(--line)] bg-[var(--bg-soft)] px-5 py-20 sm:px-8 sm:py-28 lg:px-12 lg:py-32">
+        <div className="mx-auto max-w-7xl">
+          <div className="grid gap-12 lg:grid-cols-[0.7fr_1.3fr] lg:gap-14">
             <div>
-              <span className="font-mono text-[9px] tracking-[0.3em] text-[var(--text-muted)]">
-                03 / PRINCIPLES
-              </span>
+              <div className="flex items-center gap-3 font-mono text-[9px] uppercase tracking-[0.3em] text-[#c7a15c]">
+                <span className="h-px w-8 bg-[#c7a15c]" />
+                <span>03 / PRINCIPLES</span>
+              </div>
 
-              <h2 className="about-section-title mt-7 font-display text-[clamp(2.4rem,4vw,4.5rem)] leading-[0.95] tracking-[-0.04em]">
+              <h2 className="about-section-title mt-6 font-display text-[clamp(2.2rem,4vw,4.2rem)] font-medium leading-[0.96] tracking-[-0.04em] text-[var(--text)]">
                 How
                 <br />
-                we think.
+                <span className="italic text-[#c7a15c]">we think.</span>
               </h2>
+
+              <p className="mt-5 max-w-sm text-xs leading-6 text-[var(--text-soft)]">
+                Core engineering and design values that govern every project
+                from blueprint to occupancy.
+              </p>
             </div>
 
             <div>
@@ -435,25 +410,26 @@ export default function About() {
                 return (
                   <div
                     key={item.number}
-                    className="principle-item group border-t border-[var(--line)] py-8 transition-all duration-500 hover:px-3"
+                    className="principle-item group border-t border-[var(--line)] py-7 transition-all duration-300 hover:px-2"
                   >
-                    <div className="grid gap-5 md:grid-cols-[60px_1fr_2fr] md:items-start">
-                      <span className="font-mono text-[10px] text-[#b08a4a]">
+                    <div className="grid gap-5 md:grid-cols-[50px_1fr_2fr] md:items-start">
+                      <span className="font-mono text-[10px] text-[#c7a15c]">
                         {item.number}
                       </span>
 
-                      <Icon
-                        size={22}
-                        strokeWidth={1}
-                        className="text-[var(--text)] transition-colors duration-300 group-hover:text-[#b08a4a]"
-                      />
-
-                      <div>
-                        <h3 className="text-lg font-medium md:text-xl">
+                      <div className="flex items-center gap-3">
+                        <Icon
+                          size={20}
+                          strokeWidth={1.5}
+                          className="text-[#c7a15c] transition-transform duration-300 group-hover:scale-110"
+                        />
+                        <h3 className="font-display text-lg font-semibold text-[var(--text)] md:text-xl">
                           {item.title}
                         </h3>
+                      </div>
 
-                        <p className="mt-3 max-w-xl text-[12px] leading-6 text-[var(--text-soft)] md:text-[13px] md:leading-7">
+                      <div>
+                        <p className="text-[13px] leading-6 text-[var(--text-soft)]">
                           {item.text}
                         </p>
                       </div>
@@ -469,33 +445,33 @@ export default function About() {
       </section>
 
       {/* =====================================================
-          NUMBERS
+          05 — NUMBERS / AT A GLANCE (Fully Adaptive Contrast)
       ===================================================== */}
-
-      <section className="px-6 py-24 md:px-12 md:py-32 lg:px-20 lg:py-36">
-        <div className="mx-auto max-w-[1500px]">
-          <div className="mb-14">
-            <span className="font-mono text-[9px] tracking-[0.3em] text-[var(--text-muted)]">
-              04 / AT A GLANCE
-            </span>
+      <section className="px-5 py-20 sm:px-8 sm:py-28 lg:px-12 lg:py-32">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-10">
+            <div className="flex items-center gap-3 font-mono text-[9px] uppercase tracking-[0.3em] text-[#c7a15c]">
+              <span className="h-px w-8 bg-[#c7a15c]" />
+              <span>04 / AT A GLANCE</span>
+            </div>
           </div>
 
           <div className="grid border-t border-[var(--line)] sm:grid-cols-2 lg:grid-cols-4">
             {[
-              ["2014", "Since"],
-              ["10+", "Years of Vision"],
-              ["100%", "Attention to Detail"],
-              ["∞", "Possibilities"],
+              ["2014", "Established Since"],
+              ["10+", "Years of Excellence"],
+              ["100%", "Quality Execution"],
+              ["∞", "Architectural Possibilities"],
             ].map(([number, label]) => (
               <div
                 key={label}
                 className="about-number border-b border-[var(--line)] p-7 sm:border-r lg:border-b-0"
               >
-                <div className="font-display text-[clamp(2.8rem,5vw,4.8rem)] tracking-[-0.04em]">
+                <div className="font-display text-[clamp(2.8rem,5vw,4.5rem)] font-semibold tracking-[-0.04em] text-[var(--text)]">
                   {number}
                 </div>
 
-                <p className="mt-4 text-[9px] uppercase tracking-[0.25em] text-[var(--text-muted)]">
+                <p className="mt-3 font-mono text-[9px] uppercase tracking-[0.2em] text-[#c7a15c]">
                   {label}
                 </p>
               </div>
@@ -505,44 +481,43 @@ export default function About() {
       </section>
 
       {/* =====================================================
-          CONSTRUCTION / VISION TO REALITY
+          06 — CONSTRUCTION / VISION TO REALITY (Dark Cinematic Overlay)
       ===================================================== */}
-
-      <section className="relative min-h-[650px] overflow-hidden md:min-h-[700px]">
+      <section className="relative min-h-[580px] overflow-hidden md:min-h-[640px]">
         <img
           src={images.construction}
           alt="Architectural construction and development"
           className="about-image absolute inset-0 h-full w-full object-cover"
         />
 
-        <div className="absolute inset-0 bg-black/60" />
+        <div className="absolute inset-0 bg-[#0b0c0c]/70" />
 
-        <div className="relative z-10 flex min-h-[650px] items-center px-6 md:min-h-[700px] md:px-12 lg:px-20">
-          <div className="mx-auto w-full max-w-[1500px]">
-            <div className="about-section-title max-w-3xl text-white">
-              <span className="font-mono text-[9px] uppercase tracking-[0.3em] text-[#d2b477]">
-                05 / FROM VISION TO REALITY
-              </span>
+        <div className="relative z-10 flex min-h-[580px] items-center px-5 py-16 sm:px-8 md:min-h-[640px] lg:px-12">
+          <div className="mx-auto w-full max-w-7xl">
+            <div className="about-section-title max-w-2xl text-white">
+              <div className="flex items-center gap-3 font-mono text-[9px] uppercase tracking-[0.3em] text-[#c7a15c]">
+                <span className="h-px w-8 bg-[#c7a15c]" />
+                <span>05 / FROM VISION TO REALITY</span>
+              </div>
 
-              <h2 className="mt-7 font-display text-[clamp(2.5rem,5vw,5.5rem)] leading-[0.92] tracking-[-0.04em]">
+              <h2 className="mt-6 font-display text-[clamp(2.4rem,4.5vw,4.8rem)] font-medium leading-[0.92] tracking-[-0.04em] text-white">
                 Ideas become
                 <br />
-                <span className="italic text-white/70">places.</span>
+                <span className="italic text-[#c7a15c]">places.</span>
               </h2>
 
-              <p className="mt-8 max-w-xl text-[12px] leading-6 text-white/65 md:text-[13px] md:leading-7">
-                Planning. Design. Engineering. Construction. Finishing.
-                Every stage is connected by one objective — creating a built
+              <p className="mt-6 text-[13px] leading-7 text-white/75 sm:text-sm sm:leading-7">
+                Planning. Design. Engineering. Construction. Finishing. Every
+                stage is connected by one objective — creating a built
                 environment that lasts.
               </p>
 
               <Link
-                to="/projects"
-                className="mt-9 inline-flex items-center gap-4 border-b border-white/40 pb-3 text-[9px] uppercase tracking-[0.2em] transition-colors hover:border-[#d2b477] hover:text-[#d2b477]"
+                to="/portfolio"
+                className="mt-8 inline-flex items-center gap-3 rounded-full border border-[#c7a15c]/50 bg-[#c7a15c]/10 px-6 py-3.5 font-mono text-[9px] font-semibold uppercase tracking-[0.2em] text-[#dfbb78] transition-all hover:bg-[#c7a15c] hover:text-[#0b0c0c]"
               >
                 Explore Our Projects
-
-                <ArrowRight size={15} strokeWidth={1.5} />
+                <ArrowRight size={14} />
               </Link>
             </div>
           </div>
@@ -550,15 +525,12 @@ export default function About() {
       </section>
 
       {/* =====================================================
-          LIFESTYLE / INTERIOR
-          Floating Detail / 01 / 04 box removed
+          07 — LIFESTYLE / THE EXPERIENCE (Adaptive Light / Dark Text)
       ===================================================== */}
-
-      <section className="px-6 py-24 md:px-12 md:py-32 lg:px-20 lg:py-36">
-        <div className="mx-auto max-w-[1500px]">
-          <div className="grid items-center gap-14 lg:grid-cols-2 lg:gap-16">
-            {/* Interior image — no floating detail box */}
-            <div className="relative">
+      <section className="px-5 py-20 sm:px-8 sm:py-28 lg:px-12 lg:py-32">
+        <div className="mx-auto max-w-7xl">
+          <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
+            <div className="relative overflow-hidden border border-[var(--line)]">
               <div className="aspect-[4/5] overflow-hidden">
                 <img
                   src={images.interior}
@@ -569,40 +541,39 @@ export default function About() {
             </div>
 
             <div className="about-section-title">
-              <span className="font-mono text-[9px] tracking-[0.3em] text-[var(--text-muted)]">
-                06 / THE EXPERIENCE
-              </span>
+              <div className="flex items-center gap-3 font-mono text-[9px] uppercase tracking-[0.3em] text-[#c7a15c]">
+                <span className="h-px w-8 bg-[#c7a15c]" />
+                <span>06 / THE EXPERIENCE</span>
+              </div>
 
-              <h2 className="mt-7 font-display text-[clamp(2.5rem,4.8vw,5.2rem)] leading-[0.94] tracking-[-0.04em]">
+              <h2 className="mt-6 font-display text-[clamp(2.2rem,4.5vw,4.5rem)] font-medium leading-[0.94] tracking-[-0.04em] text-[var(--text)]">
                 Spaces
                 <br />
                 designed for
                 <br />
-                <span className="text-[#b08a4a]">life.</span>
+                <span className="italic text-[#c7a15c]">life.</span>
               </h2>
 
-              <p className="mt-8 max-w-xl text-[13px] leading-7 text-[var(--text-soft)] md:text-[14px] md:leading-8">
+              <p className="mt-6 text-[13px] leading-7 text-[var(--text-soft)] sm:text-sm sm:leading-7">
                 The final measure of architecture is not the drawing or the
                 render. It is how naturally people inhabit the finished space.
               </p>
 
-              <div className="mt-9 grid grid-cols-2 gap-6 border-t border-[var(--line)] pt-6">
+              <div className="mt-8 grid grid-cols-2 gap-6 border-t border-[var(--line)] pt-6">
                 <div>
-                  <div className="font-display text-2xl md:text-3xl">
+                  <div className="font-display text-2xl font-semibold text-[var(--text)] md:text-3xl">
                     Light
                   </div>
-
-                  <p className="mt-2 text-[10px] text-[var(--text-muted)]">
+                  <p className="mt-1 font-mono text-[9px] uppercase tracking-[0.16em] text-[var(--text-muted)]">
                     Natural environments
                   </p>
                 </div>
 
                 <div>
-                  <div className="font-display text-2xl md:text-3xl">
+                  <div className="font-display text-2xl font-semibold text-[var(--text)] md:text-3xl">
                     Space
                   </div>
-
-                  <p className="mt-2 text-[10px] text-[var(--text-muted)]">
+                  <p className="mt-1 font-mono text-[9px] uppercase tracking-[0.16em] text-[var(--text-muted)]">
                     Thoughtful planning
                   </p>
                 </div>
@@ -613,21 +584,21 @@ export default function About() {
       </section>
 
       {/* =====================================================
-          FINAL CTA
+          08 — FINAL CTA (Dedicated Dark Luxury Footer Card)
       ===================================================== */}
-
-      <section className="bg-[#0b0c0c] px-6 py-28 text-white md:px-12 md:py-36 lg:px-20">
-        <div className="mx-auto max-w-[1500px]">
-          <div className="flex flex-col justify-between gap-14 lg:flex-row lg:items-end">
+      <section className="border-t border-[var(--line)] bg-[#0b0c0c] px-5 py-20 text-white sm:px-8 sm:py-28 lg:px-12 lg:py-32">
+        <div className="mx-auto max-w-7xl">
+          <div className="flex flex-col justify-between gap-10 lg:flex-row lg:items-end">
             <div>
-              <span className="font-mono text-[9px] tracking-[0.3em] text-[#d2b477]">
-                VARDHA BUILDERS
-              </span>
+              <div className="flex items-center gap-3 font-mono text-[9px] uppercase tracking-[0.3em] text-[#c7a15c]">
+                <span className="h-px w-8 bg-[#c7a15c]" />
+                <span>Vardha Builders</span>
+              </div>
 
-              <h2 className="mt-7 max-w-5xl font-display text-[clamp(3rem,6.2vw,6.8rem)] leading-[0.9] tracking-[-0.055em]">
-                Let’s build
+              <h2 className="mt-6 max-w-3xl font-display text-[clamp(2.6rem,5.5vw,5.5rem)] font-medium leading-[0.92] tracking-[-0.05em] text-white">
+                Let&apos;s build
                 <br />
-                <span className="italic text-white/55">
+                <span className="italic text-[#c7a15c]">
                   something lasting.
                 </span>
               </h2>
@@ -635,14 +606,12 @@ export default function About() {
 
             <Link
               to="/contact"
-              className="group inline-flex w-fit items-center gap-5 border-b border-white/30 pb-4 text-[9px] uppercase tracking-[0.25em] transition-colors hover:border-[#d2b477] hover:text-[#d2b477]"
+              className="group inline-flex w-fit items-center gap-4 rounded-full bg-[#c7a15c] px-7 py-4 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-[#0b0c0c] transition-all hover:bg-[#dfbb78] hover:-translate-y-0.5"
             >
               Start a Conversation
-
               <ArrowRight
-                size={17}
-                strokeWidth={1.5}
-                className="transition-transform duration-300 group-hover:translate-x-2"
+                size={15}
+                className="transition-transform group-hover:translate-x-1"
               />
             </Link>
           </div>

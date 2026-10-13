@@ -6,17 +6,28 @@ export default {
     extend: {
       colors: {
         vardha: {
-          black: "#0b0b0a",
-          gold: "#c7a66a",
-          cream: "#f3efe7",
-          line: "rgba(199,166,106,.25)"
-        }
+          black: "#0b0c0c",
+          dark: "#101110",
+          surface: "#151715",
+          surface2: "#1c1f1c",
+          gold: "#c7a15c",
+          goldLight: "#dfbb78",
+          goldMuted: "rgba(199, 161, 92, 0.15)",
+          cream: "#f2eee7",
+          line: "rgba(255, 255, 255, 0.1)",
+          lineGold: "rgba(199, 161, 92, 0.35)",
+        },
       },
       fontFamily: {
-        sans: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"],
-        display: ["Cormorant Garamond", "Georgia", "serif"]
-      }
-    }
+        sans: ["Manrope", "Inter", "ui-sans-serif", "system-ui", "sans-serif"],
+        display: ["Cormorant Garamond", "Playfair Display", "Georgia", "serif"],
+        serif: ["Cormorant Garamond", "Playfair Display", "Georgia", "serif"],
+        mono: ["DM Mono", "ui-monospace", "monospace"],
+      },
+      maxWidth: {
+        "screen-2xl": "1600px",
+      },
+    },
   },
-  plugins: []
+  plugins: [],
 };

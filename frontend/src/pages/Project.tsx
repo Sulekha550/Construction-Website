@@ -28,9 +28,13 @@ import {
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-import projects, { type Project } from "../data/projects";
+import staticProjects, { type Project } from "../data/projects";
 
 gsap.registerPlugin(ScrollTrigger);
+
+const API_URL = (
+  import.meta.env.VITE_API_URL || "http://localhost:5000/api"
+).replace(/\/+$/, "");
 
 const filters = [
   { id: "all", label: "All Projects" },
@@ -39,12 +43,136 @@ const filters = [
   { id: "ready", label: "Ready to Move" },
 ];
 
+type ApiProject = {
+  _id?: string;
+  id?: string;
+  slug?: string;
+  title?: string;
+  name?: string;
+  badge?: string;
+  location?: string;
+  category?: string;
+  type?: string;
+  area?: string;
+  status?: string;
+  year?: string | number;
+  configuration?: string;
+  highlights?: string[];
+  description?: string;
+  image?: string;
+  gallery?: string[];
+  amenities?: string[];
+  stats?: { label: string; value: string }[];
+  tags?: string[];
+  price?: string;
+};
+
+function slugify(value: string) {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+function normalizeProject(item: ApiProject): Project {
+  const title = String(item.title || item.name || "Untitled Project");
+  const slug = String(item.slug || slugify(title));
+  const category = String(item.category || "Residential");
+  const status = String(item.status || "Ongoing");
+
+  const gallery = Array.isArray(item.gallery)
+    ? item.gallery.filter(
+        (image): image is string => typeof image === "string" && !!image.trim()
+      )
+    : [];
+
+  const image = String(item.image || gallery[0] || "");
+
+  const type =
+    item.type ||
+    (category.toLowerCase().includes("villa") ? "Villas" : "Flats");
+
+  return {
+    id: String(item._id || item.id || slug),
+    slug,
+    title,
+    name: String(item.name || title),
+    badge:
+      item.badge ||
+      (status.toLowerCase().includes("ready")
+        ? "READY TO MOVE"
+        : status.toUpperCase()),
+    location: String(item.location || "Gorakhpur, Uttar Pradesh"),
+    category,
+    type: String(type),
+    area: String(item.area || "Contact for details"),
+    status,
+    year: String(item.year || new Date().getFullYear()), 
+    configuration: String(
+      item.configuration || "Contact for configuration"
+    ),
+    highlights: Array.isArray(item.highlights)
+      ? item.highlights
+      : Array.isArray(item.tags)
+        ? item.tags
+        : [],
+    description: String(item.description || ""),
+    image,
+    gallery: gallery.length ? gallery : image ? [image] : [],
+    amenities: Array.isArray(item.amenities) ? item.amenities : [],
+    stats: Array.isArray(item.stats) ? item.stats : [],
+    tags: Array.isArray(item.tags) ? item.tags : [],
+    ...(item.price ? { price: String(item.price) } : {}),
+  };
+}
+
+
+function combineProjects(
+  apiProjects: Project[],
+  fallbackProjects: Project[]
+): Project[] {
+  const combined = [...apiProjects, ...fallbackProjects];
+  const seen = new Set<string>();
+
+  return combined.filter((project) => {
+    const title = (project.title || project.name || "")
+      .toLowerCase()
+      .trim();
+
+    const slug = (project.slug || "").toLowerCase().trim();
+    const id = (project.id || "").toLowerCase().trim();
+
+    // Remove Green Valley Homes from API and static projects
+    const isGreenValley =
+      title.includes("green valley") ||
+      slug.includes("green-valley") ||
+      slug.includes("green valley") ||
+      id.includes("green-valley") ||
+      id.includes("green valley");
+
+    if (isGreenValley) return false;
+
+    // Prevent duplicate projects
+    const key = slug || id || title;
+
+    if (seen.has(key)) return false;
+
+    seen.add(key);
+    return true;
+  });
+}
+
 export default function Portfolio() {
   const { id } = useParams();
   const navigate = useNavigate();
 
   const pageRef = useRef<HTMLDivElement>(null);
   const heroImageRef = useRef<HTMLImageElement>(null);
+
+  const [projects, setProjects] = useState<Project[]>(staticProjects);
+  const [projectsLoading, setProjectsLoading] = useState(true);
+  const [projectsError, setProjectsError] = useState("");
 
   const [activeFilter, setActiveFilter] = useState("all");
   const [fullScreenProject, setFullScreenProject] =
@@ -53,26 +181,85 @@ export default function Portfolio() {
   const [showTopButton, setShowTopButton] = useState(false);
   const [selectedGalleryIndex, setSelectedGalleryIndex] = useState(0);
 
-  /* SYNC URL PARAM :id WITH FULL-SCREEN PROJECT */
+  /* LOAD PROJECTS FROM MONGODB API */
 
   useEffect(() => {
-    if (id) {
-      const normalized = id.toLowerCase();
-      const match = projects.find(
-        (p) =>
-          p.id === normalized ||
-          p.slug === normalized ||
-          (normalized.includes("palm") && p.id === "palm-paradise") ||
-          (normalized.includes("central") && p.id === "central-tower") ||
-          (normalized.includes("adhvik") && p.id === "adhvik-skyline")
-      );
+    const controller = new AbortController();
 
-      if (match) {
-        setFullScreenProject(match);
-        setSelectedGalleryIndex(0);
+    async function loadProjects() {
+      try {
+        setProjectsError("");
+
+        const response = await fetch(`${API_URL}/projects`, {
+          signal: controller.signal,
+        });
+
+        const result = await response.json();
+
+        if (!response.ok || result.success === false) {
+          throw new Error(result.message || "Unable to load projects.");
+        }
+
+        const records: ApiProject[] = Array.isArray(result)
+          ? result
+          : Array.isArray(result.data)
+            ? result.data
+            : Array.isArray(result.projects)
+              ? result.projects
+              : Array.isArray(result.data?.projects)
+                ? result.data.projects  
+                : [];
+
+        const apiProjects = records.map(normalizeProject);
+
+        // Use API records first, then retain old static projects not present in API.
+        setProjects(combineProjects(apiProjects, staticProjects));
+      } catch (error) {
+        if (error instanceof Error && error.name === "AbortError") {
+          return;
+        }
+
+        console.error("Portfolio API error:", error);
+        setProjects(combineProjects([], staticProjects)); 
+        setProjectsError(
+          "Showing saved portfolio projects because the server could not be reached."
+        );
+      } finally { 
+        if (!controller.signal.aborted) {
+          setProjectsLoading(false);
+        }
       }
     }
-  }, [id]);
+
+    void loadProjects();
+
+    return () => controller.abort();
+  }, []);
+
+  /* SYNC URL PARAM WITH PROJECT */
+
+  useEffect(() => {
+    if (!id || projects.length === 0) return;
+
+    const normalized = id.toLowerCase();
+
+    const match = projects.find(
+      (project) =>
+        project.id.toLowerCase() === normalized ||
+        project.slug.toLowerCase() === normalized ||
+        (normalized.includes("palm") &&
+          project.slug.toLowerCase().includes("palm")) ||
+        (normalized.includes("central") &&
+          project.slug.toLowerCase().includes("central")) ||
+        (normalized.includes("adhvik") &&
+          project.slug.toLowerCase().includes("adhvik"))
+    );
+
+    if (match) {
+      setFullScreenProject(match);
+      setSelectedGalleryIndex(0);
+    }
+  }, [id, projects]);
 
   /* FILTER LOGIC */
 
@@ -80,29 +267,41 @@ export default function Portfolio() {
     if (activeFilter === "all") return projects;
 
     if (activeFilter === "flats") {
-      return projects.filter((p) =>
-        p.type.toLowerCase().includes("flat")
-      );
+      return projects.filter((project) => {
+        const type = project.type.toLowerCase();
+        const category = project.category.toLowerCase();
+        const configuration = project.configuration.toLowerCase();
+
+        return (
+          type.includes("flat") ||
+          type.includes("apartment") ||
+          category.includes("residential") ||
+          configuration.includes("bhk")
+        );
+      });
     }
 
     if (activeFilter === "villas") {
       return projects.filter(
-        (p) =>
-          p.type.toLowerCase().includes("villa") ||
-          p.category.toLowerCase().includes("villa")
+        (project) =>
+          project.type.toLowerCase().includes("villa") ||
+          project.category.toLowerCase().includes("villa") ||
+          project.configuration.toLowerCase().includes("villa")
       );
     }
 
     if (activeFilter === "ready") {
-      return projects.filter((p) =>
-        p.status.toLowerCase().includes("ready")
+      return projects.filter(
+        (project) =>
+          project.status.toLowerCase().includes("ready") ||
+          project.badge.toLowerCase().includes("ready")
       );
     }
 
     return projects;
-  }, [activeFilter]);
+  }, [activeFilter, projects]);
 
-  /* SCROLL PROGRESS TRACKER */
+  /* SCROLL PROGRESS */
 
   useEffect(() => {
     const handleScroll = () => {
@@ -115,11 +314,12 @@ export default function Portfolio() {
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
 
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  /* LOCK SCROLL ON FULL-SCREEN */
+  /* LOCK SCROLL ON FULL SCREEN */
 
   useEffect(() => {
     document.body.style.overflow = fullScreenProject ? "hidden" : "";
@@ -129,48 +329,44 @@ export default function Portfolio() {
     };
   }, [fullScreenProject]);
 
-  /* KEYBOARD NAVIGATION FOR FULL-SCREEN */
+  /* CLOSE PROJECT AND KEYBOARD NAVIGATION */
+
+  const closeFullScreen = () => {
+    setFullScreenProject(null);
+    navigate("/portfolio", { replace: true });
+  };
 
   useEffect(() => {
-    if (!fullScreenProject) return;
+    if (!fullScreenProject || projects.length === 0) return;
 
     const currentIndex = projects.findIndex(
-      (p) => p.id === fullScreenProject.id
+      (project) => project.id === fullScreenProject.id
     );
 
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
         closeFullScreen();
-      } else if (e.key === "ArrowRight") {
-        const next = (currentIndex + 1) % projects.length;
+      }
 
-        setFullScreenProject(projects[next]);
+      if (event.key === "ArrowRight" || event.key === "ArrowLeft") {
+        if (currentIndex < 0) return;
+
+        const direction = event.key === "ArrowRight" ? 1 : -1;
+        const nextIndex =
+          (currentIndex + direction + projects.length) % projects.length;
+
+        const nextProject = projects[nextIndex];
+
+        setFullScreenProject(nextProject);
         setSelectedGalleryIndex(0);
-
-        window.history.replaceState(
-          null,
-          "",
-          `/portfolio/${projects[next].id}`
-        );
-      } else if (e.key === "ArrowLeft") {
-        const prev =
-          (currentIndex - 1 + projects.length) % projects.length;
-
-        setFullScreenProject(projects[prev]);
-        setSelectedGalleryIndex(0);
-
-        window.history.replaceState(
-          null,
-          "",
-          `/portfolio/${projects[prev].id}`
-        );
+        navigate(`/portfolio/${nextProject.slug}`, { replace: true });
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
 
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [fullScreenProject]);
+  }, [fullScreenProject, projects, navigate]);
 
   /* GSAP ENTRANCE ANIMATIONS */
 
@@ -196,7 +392,7 @@ export default function Portfolio() {
 
       gsap.utils
         .toArray<HTMLElement>(".project-card-anim")
-        .forEach((card, idx) => {
+        .forEach((card, index) => {
           gsap.fromTo(
             card,
             { y: reduceMotion ? 0 : 30, opacity: 0 },
@@ -204,7 +400,7 @@ export default function Portfolio() {
               y: 0,
               opacity: 1,
               duration: reduceMotion ? 0 : 0.7,
-              delay: reduceMotion ? 0 : idx * 0.1,
+              delay: reduceMotion ? 0 : index * 0.1,
               ease: "power3.out",
               scrollTrigger: {
                 trigger: card,
@@ -226,6 +422,7 @@ export default function Portfolio() {
 
     const card = event.currentTarget;
     const rect = card.getBoundingClientRect();
+
     const x = ((event.clientX - rect.left) / rect.width - 0.5) * 2;
     const y = ((event.clientY - rect.top) / rect.height - 0.5) * 2;
 
@@ -236,34 +433,28 @@ export default function Portfolio() {
     event.currentTarget.style.transform = "";
   };
 
-  /* OPEN PROJECT IN FULL SCREEN */
+  /* OPEN PROJECT */
 
   const openFullScreen = (project: Project) => {
     setFullScreenProject(project);
     setSelectedGalleryIndex(0);
-
-    window.history.replaceState(null, "", `/portfolio/${project.id}`);
+    navigate(`/portfolio/${project.slug}`, { replace: true });
   };
 
-  /* CLOSE FULL SCREEN */
+  /* WHATSAPP */
 
-  const closeFullScreen = () => {
-    setFullScreenProject(null);
-    window.history.replaceState(null, "", "/portfolio");
-  };
-
-  const scrollToTop = () => {  
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }; 
-
-  const handleWhatsApp = (project: Project, e?: MouseEvent) => {
-    if (e) e.stopPropagation();
+  const handleWhatsApp = (project: Project, event?: MouseEvent) => {
+    event?.stopPropagation();
 
     const text = encodeURIComponent(
       `Hello Vardha Builders, I am inquiring about ${project.title} (${project.location}). Please share availability and floor plans.`
     );
 
-    window.open(`https://wa.me/919999999999?text=${text}`, "_blank");
+    window.open(`https://wa.me/919999999999?text=${text}`, "_blank", "noopener,noreferrer");
+  };
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   return (
@@ -280,7 +471,7 @@ export default function Portfolio() {
         />
       </div>
 
-      {/* HERO SECTION */}
+      {/* HERO */}
 
       <section className="relative flex min-h-[100svh] flex-col justify-between overflow-hidden bg-[#0a0b0b] text-white">
         <div className="absolute inset-0">
@@ -295,13 +486,10 @@ export default function Portfolio() {
           <div className="arch-grid absolute inset-0 opacity-[0.06]" />
         </div>
 
-        {/* HERO TOP BAR */}
-
         <div className="relative z-10 mx-auto w-full max-w-7xl px-6 pt-24 sm:px-8 sm:pt-28 lg:px-12 lg:pt-32">
           <div className="project-hero-reveal flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <span className="h-px w-8 bg-[#c9a66b]" />
-
               <span className="font-mono text-[9px] uppercase tracking-[0.3em] text-[#d4b57b]">
                 Vardha Builders · Portfolio
               </span>
@@ -313,9 +501,7 @@ export default function Portfolio() {
           </div>
         </div>
 
-        {/* HERO CENTER CONTENT */}
-
-        <div className="relative z-10 mx-auto w-full max-w-7xl px-6 py-8 sm: px-8 sm:py-10 lg:px-12">
+        <div className="relative z-10 mx-auto w-full max-w-7xl px-6 py-8 sm:px-8 sm:py-10 lg:px-12">
           <div className="max-w-5xl">
             <p className="project-hero-reveal font-mono text-[10px] uppercase tracking-[0.3em] text-[#c9a66b]">
               Signature Developments · 2026
@@ -355,16 +541,14 @@ export default function Portfolio() {
           </div>
         </div>
 
-        {/* HERO BOTTOM TRUST STATS */}
-
         <div className="relative z-10 mx-auto w-full max-w-7xl px-6 pb-6 sm:px-8 sm:pb-8 lg:px-12">
           <div className="project-hero-reveal grid grid-cols-2 gap-x-4 gap-y-5 border-t border-white/10 pt-5 sm:grid-cols-4 sm:gap-5">
             <div>
               <span className="block font-display text-2xl font-semibold text-white sm:text-3xl">
-                03
+                {String(projects.length).padStart(2, "0")}
               </span>
               <span className="font-mono text-[8px] uppercase tracking-[0.18em] text-white/45">
-                Flagship Landmarks
+                Portfolio Projects
               </span>
             </div>
 
@@ -382,7 +566,7 @@ export default function Portfolio() {
                 100%
               </span>
               <span className="font-mono text-[8px] uppercase tracking-[0.18em] text-white/45">
-                RERA & Vastu Aligned
+                Design Focus
               </span>
             </div>
 
@@ -418,19 +602,25 @@ export default function Portfolio() {
               Explore our portfolio of luxury residential projects designed
               for modern lifestyles. Click any project to open in full screen.
             </p>
+
+            {projectsError && (
+              <p className="mx-auto mt-4 max-w-xl text-xs text-[var(--text-soft)]">
+                {projectsError}
+              </p>
+            )}
           </div>
 
           {/* FILTER PILLS */}
 
           <div className="mt-8 flex flex-wrap items-center justify-center gap-2 sm:mt-10">
-            {filters.map((f) => {
-              const active = activeFilter === f.id;
+            {filters.map((filter) => {
+              const active = activeFilter === filter.id;
 
               return (
                 <button
-                  key={f.id}
+                  key={filter.id}
                   type="button"
-                  onClick={() => setActiveFilter(f.id)}
+                  onClick={() => setActiveFilter(filter.id)}
                   className={`flex items-center gap-2 rounded-full px-4 py-2.5 font-mono text-[9px] uppercase tracking-[0.18em] transition-all sm:px-5 ${
                     active
                       ? "bg-[#171918] text-white shadow-md dark:bg-white dark:text-black"
@@ -442,19 +632,25 @@ export default function Portfolio() {
                       active ? "bg-[#10b981]" : "bg-[var(--line-strong)]"
                     }`}
                   />
-                  {f.label}
+                  {filter.label}
                 </button>
               );
             })}
           </div>
 
+          {projectsLoading && (
+            <p className="mt-8 text-center text-xs text-[var(--text-soft)]">
+              Checking latest projects…
+            </p>
+          )}
+
           {/* PROJECT CARDS */}
 
           <div className="mt-10 grid gap-6 sm:mt-12 sm:gap-8 md:grid-cols-2 lg:grid-cols-3">
             {filteredProjects.map((project) => {
-              const isReadyToMove = project.badge
-                .toLowerCase()
-                .includes("ready");
+              const isReadyToMove =
+                project.badge.toLowerCase().includes("ready") ||
+                project.status.toLowerCase().includes("ready");
 
               return (
                 <article
@@ -470,7 +666,7 @@ export default function Portfolio() {
                 >
                   <div className="relative aspect-[4/3] w-full overflow-hidden bg-black">
                     <img
-                      src={project.image}
+                      src={project.image || "/images/projects/central-tower.webp"}
                       alt={project.title}
                       loading="lazy"
                       className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
@@ -495,8 +691,6 @@ export default function Portfolio() {
                     <div className="absolute bottom-0 left-0 h-[3px] w-0 bg-[var(--gold)] transition-all duration-500 group-hover:w-full" />
                   </div>
 
-                  {/* CARD CONTENT */}
-
                   <div className="flex flex-1 flex-col justify-between p-5 sm:p-6">
                     <div>
                       <h3 className="font-display text-xl font-bold tracking-tight text-[var(--text)] transition-colors group-hover:text-[var(--gold)] sm:text-2xl">
@@ -504,10 +698,7 @@ export default function Portfolio() {
                       </h3>
 
                       <div className="mt-2 flex items-center gap-1.5 text-xs text-[var(--text-muted)]">
-                        <MapPin
-                          size={13}
-                          className="shrink-0 text-[#b08a4a]"
-                        />
+                        <MapPin size={13} className="shrink-0 text-[#b08a4a]" />
                         <span>{project.location}</span>
                       </div>
 
@@ -546,8 +737,8 @@ export default function Portfolio() {
                       <div className="mt-5 flex items-center gap-2 border-t border-[var(--line)] pt-4">
                         <button
                           type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
+                          onClick={(event) => {
+                            event.stopPropagation();
                             openFullScreen(project);
                           }}
                           className="flex min-w-0 flex-1 items-center justify-center gap-2 rounded-xl bg-[var(--dark)] px-3 py-2.5 font-mono text-[9px] font-semibold uppercase tracking-wider text-white transition hover:bg-[var(--gold)] hover:text-black dark:bg-[var(--surface-2)] dark:text-white dark:hover:bg-[var(--gold)] dark:hover:text-black sm:px-4"
@@ -558,7 +749,7 @@ export default function Portfolio() {
 
                         <button
                           type="button"
-                          onClick={(e) => handleWhatsApp(project, e)}
+                          onClick={(event) => handleWhatsApp(project, event)}
                           aria-label={`Chat on WhatsApp about ${project.title}`}
                           className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[var(--line)] bg-[var(--surface-2)] text-[#10b981] transition hover:border-[#10b981] hover:bg-[#10b981] hover:text-white"
                         >
@@ -571,6 +762,21 @@ export default function Portfolio() {
               );
             })}
           </div>
+
+          {!projectsLoading && filteredProjects.length === 0 && (
+            <div className="mt-10 rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-8 text-center">
+              <p className="text-sm text-[var(--text-soft)]">
+                No projects match this filter.
+              </p>
+              <button
+                type="button"
+                onClick={() => setActiveFilter("all")}
+                className="mt-4 rounded-full bg-[var(--gold)] px-5 py-2.5 font-mono text-[9px] font-semibold uppercase tracking-wider text-black"
+              >
+                View All Projects
+              </button>
+            </div>
+          )}
         </div>
       </section>
 
@@ -606,14 +812,14 @@ export default function Portfolio() {
                     Specification
                   </th>
 
-                  {projects.map((p) => (
+                  {projects.map((project) => (
                     <th
-                      key={p.id}
+                      key={project.id}
                       className="py-4 font-display text-lg font-semibold text-[var(--text)]"
                     >
-                      {p.title}
+                      {project.title}
                       <span className="ml-2 rounded bg-[#059669]/15 px-2 py-0.5 font-mono text-[8px] font-bold text-[#059669]">
-                        {p.badge}
+                        {project.badge}
                       </span>
                     </th>
                   ))}
@@ -625,12 +831,9 @@ export default function Portfolio() {
                   <td className="py-4 font-mono text-[9px] uppercase tracking-wider text-[var(--text-muted)]">
                     Typology
                   </td>
-                  {projects.map((p) => (
-                    <td
-                      key={p.id}
-                      className="py-4 font-medium text-[var(--text)]"
-                    >
-                      {p.configuration}
+                  {projects.map((project) => (
+                    <td key={project.id} className="py-4 font-medium text-[var(--text)]">
+                      {project.configuration}
                     </td>
                   ))}
                 </tr>
@@ -639,12 +842,9 @@ export default function Portfolio() {
                   <td className="py-4 font-mono text-[9px] uppercase tracking-wider text-[var(--text-muted)]">
                     Super / Carpet Area
                   </td>
-                  {projects.map((p) => (
-                    <td
-                      key={p.id}
-                      className="py-4 font-semibold text-[var(--gold)]"
-                    >
-                      {p.area}
+                  {projects.map((project) => (
+                    <td key={project.id} className="py-4 font-semibold text-[var(--gold)]">
+                      {project.area}
                     </td>
                   ))}
                 </tr>
@@ -653,9 +853,9 @@ export default function Portfolio() {
                   <td className="py-4 font-mono text-[9px] uppercase tracking-wider text-[var(--text-muted)]">
                     Prime Location
                   </td>
-                  {projects.map((p) => (
-                    <td key={p.id} className="py-4 text-[var(--text-soft)]">
-                      {p.location}
+                  {projects.map((project) => (
+                    <td key={project.id} className="py-4 text-[var(--text-soft)]">
+                      {project.location}
                     </td>
                   ))}
                 </tr>
@@ -664,11 +864,11 @@ export default function Portfolio() {
                   <td className="py-4 font-mono text-[9px] uppercase tracking-wider text-[var(--text-muted)]">
                     Development Status
                   </td>
-                  {projects.map((p) => (
-                    <td key={p.id} className="py-4">
+                  {projects.map((project) => (
+                    <td key={project.id} className="py-4">
                       <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#059669]">
                         <CheckCircle2 size={13} />
-                        {p.status}
+                        {project.status}
                       </span>
                     </td>
                   ))}
@@ -678,11 +878,8 @@ export default function Portfolio() {
                   <td className="py-4 font-mono text-[9px] uppercase tracking-wider text-[var(--text-muted)]">
                     Design Partner
                   </td>
-                  {projects.map((p) => (
-                    <td
-                      key={p.id}
-                      className="py-4 font-mono text-xs text-[var(--text)]"
-                    >
+                  {projects.map((project) => (
+                    <td key={project.id} className="py-4 font-mono text-xs text-[var(--text)]">
                       By ALS
                     </td>
                   ))}
@@ -692,11 +889,11 @@ export default function Portfolio() {
                   <td className="py-4 font-mono text-[9px] uppercase tracking-wider text-[var(--text-muted)]">
                     Action
                   </td>
-                  {projects.map((p) => (
-                    <td key={p.id} className="py-4">
+                  {projects.map((project) => (
+                    <td key={project.id} className="py-4">
                       <button
                         type="button"
-                        onClick={() => openFullScreen(p)}
+                        onClick={() => openFullScreen(project)}
                         className="inline-flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-wider text-[var(--gold)] hover:underline"
                       >
                         Open Full Screen
@@ -796,21 +993,22 @@ export default function Portfolio() {
               </h2>
 
               <p className="mt-5 max-w-xl text-xs leading-6 text-white/65 sm:text-sm">
-                Schedule an exclusive site visit to Paalm Paradise, Central
-                Tower, or Adhvik Skyline. Our project specialists will guide
-                you through sample units, layout schematics, and payment
-                schedules.
+                Schedule an exclusive site visit to our residential and
+                commercial developments. Our project specialists will guide
+                you through layouts and availability.
               </p>
 
               <div className="mt-7 flex flex-wrap items-center gap-3 sm:mt-8 sm:gap-4">
-                <button
-                  type="button"
-                  onClick={() => handleWhatsApp(projects[0])}
-                  className="inline-flex items-center gap-2.5 rounded-full bg-[#059669] px-5 py-3.5 font-mono text-[10px] font-bold uppercase tracking-wider text-white shadow-lg transition hover:bg-[#047857] sm:px-6"
-                >
-                  <MessageCircle size={16} />
-                  Inquire on WhatsApp
-                </button>
+                {projects[0] && (
+                  <button
+                    type="button"
+                    onClick={() => handleWhatsApp(projects[0])}
+                    className="inline-flex items-center gap-2.5 rounded-full bg-[#059669] px-5 py-3.5 font-mono text-[10px] font-bold uppercase tracking-wider text-white shadow-lg transition hover:bg-[#047857] sm:px-6"
+                  >
+                    <MessageCircle size={16} />
+                    Inquire on WhatsApp
+                  </button>
+                )}
 
                 <Link
                   to="/contact"
@@ -860,8 +1058,6 @@ export default function Portfolio() {
           aria-modal="true"
           aria-label={`${fullScreenProject.title} full screen view`}
         >
-          {/* HEADER */}
-
           <header className="flex h-16 shrink-0 items-center justify-between gap-3 border-b border-white/10 bg-[#090a0a]/95 px-3 backdrop-blur-md sm:px-8">
             <div className="flex min-w-0 items-center gap-2 sm:gap-3">
               <span className="h-px w-5 shrink-0 bg-[#c9a66b] sm:w-6" />
@@ -881,25 +1077,18 @@ export default function Portfolio() {
               </span>
             </div>
 
-            {/* PROJECT SWITCHER */}
-
             <div className="hidden items-center gap-2 md:flex">
-              {projects.map((p) => {
-                const isSelected = p.id === fullScreenProject.id;
+              {projects.map((project) => {
+                const isSelected = project.id === fullScreenProject.id;
 
                 return (
                   <button
-                    key={p.id}
+                    key={project.id}
                     type="button"
                     onClick={() => {
-                      setFullScreenProject(p);
+                      setFullScreenProject(project);
                       setSelectedGalleryIndex(0);
-
-                      window.history.replaceState(
-                        null,
-                        "",
-                        `/portfolio/${p.id}`
-                      );
+                      navigate(`/portfolio/${project.slug}`, { replace: true });
                     }}
                     className={`rounded-full px-4 py-1.5 font-mono text-[9px] uppercase tracking-wider transition ${
                       isSelected
@@ -907,7 +1096,7 @@ export default function Portfolio() {
                         : "border border-white/15 text-white/70 hover:border-white hover:text-white"
                     }`}
                   >
-                    {p.title}
+                    {project.title}
                   </button>
                 );
               })}
@@ -921,13 +1110,9 @@ export default function Portfolio() {
             >
               <span>Close</span>
               <X size={15} />
-              <span className="hidden text-[8px] opacity-60 sm:inline">
-                [ESC]
-              </span>
+              <span className="hidden text-[8px] opacity-60 sm:inline">[ESC]</span>
             </button>
           </header>
-
-          {/* MAIN SPLIT VIEW */}
 
           <div className="grid min-h-0 flex-1 grid-cols-1 overflow-y-auto lg:grid-cols-[1.35fr_0.65fr] lg:overflow-hidden">
             {/* IMAGE GALLERY */}
@@ -937,7 +1122,8 @@ export default function Portfolio() {
                 <img
                   src={
                     fullScreenProject.gallery[selectedGalleryIndex] ||
-                    fullScreenProject.image
+                    fullScreenProject.image ||
+                    "/images/projects/central-tower.webp"
                   }
                   alt={fullScreenProject.title}
                   className="absolute inset-0 h-full w-full object-cover transition-all duration-500"
@@ -953,7 +1139,7 @@ export default function Portfolio() {
 
                   <span className="shrink-0 font-mono text-[9px] uppercase tracking-wider text-white/70">
                     Photo {selectedGalleryIndex + 1} of{" "}
-                    {fullScreenProject.gallery.length}
+                    {Math.max(fullScreenProject.gallery.length, 1)}
                   </span>
                 </div>
 
@@ -963,8 +1149,8 @@ export default function Portfolio() {
                       type="button"
                       onClick={() =>
                         setSelectedGalleryIndex(
-                          (prev) =>
-                            (prev - 1 + fullScreenProject.gallery.length) %
+                          (previous) =>
+                            (previous - 1 + fullScreenProject.gallery.length) %
                             fullScreenProject.gallery.length
                         )
                       }
@@ -978,8 +1164,8 @@ export default function Portfolio() {
                       type="button"
                       onClick={() =>
                         setSelectedGalleryIndex(
-                          (prev) =>
-                            (prev + 1) % fullScreenProject.gallery.length
+                          (previous) =>
+                            (previous + 1) % fullScreenProject.gallery.length
                         )
                       }
                       aria-label="Next image"
@@ -991,26 +1177,20 @@ export default function Portfolio() {
                 )}
               </div>
 
-              {/* THUMBNAILS */}
-
               {fullScreenProject.gallery.length > 1 && (
                 <div className="mt-3 flex gap-3 overflow-x-auto pb-1 sm:mt-4">
-                  {fullScreenProject.gallery.map((img, idx) => (
+                  {fullScreenProject.gallery.map((image, index) => (
                     <button
-                      key={`${img}-${idx}`}
+                      key={`${image}-${index}`}
                       type="button"
-                      onClick={() => setSelectedGalleryIndex(idx)}
+                      onClick={() => setSelectedGalleryIndex(index)}
                       className={`relative h-12 w-16 shrink-0 overflow-hidden rounded-lg border-2 transition sm:h-14 sm:w-20 ${
-                        selectedGalleryIndex === idx
+                        selectedGalleryIndex === index
                           ? "scale-105 border-[#c9a66b]"
                           : "border-white/20 opacity-60 hover:opacity-100"
                       }`}
                     >
-                      <img
-                        src={img}
-                        alt=""
-                        className="h-full w-full object-cover"
-                      />
+                      <img src={image} alt="" className="h-full w-full object-cover" />
                     </button>
                   ))}
                 </div>
@@ -1039,8 +1219,6 @@ export default function Portfolio() {
                 <p className="mt-4 text-xs leading-6 text-white/70">
                   {fullScreenProject.description}
                 </p>
-
-                {/* SPECS */}
 
                 <div className="mt-5 grid grid-cols-2 gap-3 border-y border-white/10 py-4 sm:mt-6 sm:py-5">
                   <div className="rounded-lg bg-white/5 p-3">
@@ -1080,30 +1258,23 @@ export default function Portfolio() {
                   </div>
                 </div>
 
-                {/* HIGHLIGHTS */}
-
                 <div className="mt-5">
                   <span className="block font-mono text-[8px] uppercase tracking-wider text-white/40">
                     Architectural Highlights
                   </span>
 
                   <div className="mt-3 space-y-2">
-                    {fullScreenProject.highlights.map((h) => (
+                    {fullScreenProject.highlights.map((highlight) => (
                       <div
-                        key={h}
+                        key={highlight}
                         className="flex items-center gap-2 text-xs text-white/85"
                       >
-                        <CheckCircle2
-                          size={14}
-                          className="shrink-0 text-[#059669]"
-                        />
-                        <span>{h}</span>
+                        <CheckCircle2 size={14} className="shrink-0 text-[#059669]" />
+                        <span>{highlight}</span>
                       </div>
                     ))}
                   </div>
                 </div>
-
-                {/* AMENITIES */}
 
                 <div className="mt-5">
                   <span className="block font-mono text-[8px] uppercase tracking-wider text-white/40">
@@ -1111,24 +1282,22 @@ export default function Portfolio() {
                   </span>
 
                   <div className="mt-2.5 flex flex-wrap gap-1.5">
-                    {fullScreenProject.amenities.map((a) => (
+                    {fullScreenProject.amenities.map((amenity) => (
                       <span
-                        key={a}
+                        key={amenity}
                         className="rounded-full border border-white/15 bg-white/5 px-3 py-1 font-mono text-[8px] uppercase tracking-wider text-white/80"
                       >
-                        {a}
+                        {amenity}
                       </span>
                     ))}
                   </div>
                 </div>
               </div>
 
-              {/* ACTION BUTTONS */}
-
               <div className="mt-7 space-y-3 border-t border-white/10 pt-5 sm:mt-8">
                 <button
                   type="button"
-                  onClick={(e) => handleWhatsApp(fullScreenProject, e)}
+                  onClick={(event) => handleWhatsApp(fullScreenProject, event)}
                   className="flex w-full items-center justify-center gap-2.5 rounded-xl bg-[#059669] px-4 py-3.5 font-mono text-[10px] font-bold uppercase tracking-wider text-white shadow-lg transition hover:bg-[#047857] sm:px-5"
                 >
                   <MessageCircle size={16} />

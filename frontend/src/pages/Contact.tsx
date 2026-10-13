@@ -1,22 +1,36 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
+  AlertCircle,
   ArrowUpRight,
   Building2,
+  CheckCircle2,
   Handshake,
   Headphones,
   Home,
+  Loader2,
   Mail,
   MapPin,
   MessageCircle,
   Phone,
+  RefreshCw,
   Send,
   ShieldCheck,
   Sparkles,
   User,
 } from "lucide-react";
+import {
+  submitContactInquiry,
+  type ContactInquiryRecord,
+} from "../services/contact.service";
 
-const WHATSAPP_NUMBER = "919999999999";
+// Default WhatsApp Business Number (Replace via VITE_WHATSAPP_NUMBER in frontend/.env)
+const DEFAULT_WHATSAPP_NUMBER = "919999999999";
+const RAW_WHATSAPP_NUMBER =
+  (typeof import.meta !== "undefined" && import.meta.env?.VITE_WHATSAPP_NUMBER) ||
+  DEFAULT_WHATSAPP_NUMBER;
+// Sanitize: remove any non-digits for standard wa.me URL format
+const WHATSAPP_NUMBER = RAW_WHATSAPP_NUMBER.replace(/\D/g, "");
 
 const inquiryTypes = [
   {
@@ -74,14 +88,28 @@ export default function Contact() {
     message: "",
   });
 
-  const [submitted, setSubmitted] = useState(false);
+  // Submission state tracking
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [savedInquiry, setSavedInquiry] = useState<ContactInquiryRecord | null>(
+    null
+  );
 
   const active =
     inquiryTypes.find((item) => item.id === selected) ?? inquiryTypes[0];
 
-  const openWhatsApp = () => {
-    const message = encodeURIComponent(active.message);
+  // Handler for quick category selection in the Hero section
+  const handleSelectInquiry = (id: string, label: string) => {
+    setSelected(id);
+    setForm((prev) => ({
+      ...prev,
+      inquiry: label,
+    }));
+  };
 
+  // Direct WhatsApp chat from hero greeting button (User-initiated only)
+  const openHeroWhatsApp = () => {
+    const message = encodeURIComponent(active.message);
     window.open(
       `https://wa.me/${WHATSAPP_NUMBER}?text=${message}`,
       "_blank",
@@ -89,45 +117,148 @@ export default function Contact() {
     );
   };
 
+  // Form field change handler
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
     >
   ) => {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value,
-    });
+    const { name, value } = e.target;
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
+    // If changing the inquiry select dropdown, also sync the hero category button
+    if (name === "inquiry") {
+      const match = inquiryTypes.find((item) => item.label === value);
+      if (match) {
+        setSelected(match.id);
+      }
+    }
+
+    // Clear error message when user starts typing again
+    if (errorMessage) {
+      setErrorMessage(null);
+    }
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  // Client-side validation before dispatching to API
+  const validateForm = (): string | null => {
+    if (!form.name.trim() || form.name.trim().length < 2) {
+      return "Please enter your name (at least 2 characters).";
+    }
+
+    const phoneDigits = form.phone.replace(/\D/g, "");
+    if (!form.phone.trim() || phoneDigits.length < 7) {
+      return "Please enter a valid phone number (at least 7 digits).";
+    }
+
+    if (form.email.trim()) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(form.email.trim())) {
+        return "Please enter a valid email address.";
+      }
+    }
+
+    if (!form.message.trim() || form.message.trim().length < 5) {
+      return "Please enter your message (at least 5 characters).";
+    }
+
+    return null;
+  };
+
+  // Handle Form Submission -> Save to MongoDB via backend API
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    // Prevent duplicate submission while in progress
+    if (isSubmitting) return;
+
+    // Client-side input validation
+    const validationError = validateForm();
+    if (validationError) {
+      setErrorMessage(validationError);
+      return;
+    }
+
+    setIsSubmitting(true);
+    setErrorMessage(null);
+
+    try {
+      // 1. Send form data to the backend API and wait for MongoDB confirmation
+      const response = await submitContactInquiry(form);
+
+      // 2. Only after confirmed storage, set saved record and show success
+      // CRITICAL: We DO NOT automatically open WhatsApp here.
+      if (response.data) {
+        setSavedInquiry(response.data);
+      } else {
+        // Fallback representation if data object is partial
+        setSavedInquiry({
+          id: "",
+          name: form.name.trim(),
+          phone: form.phone.trim(),
+          email: form.email.trim() || null,
+          inquiry: form.inquiry.trim(),
+          message: form.message.trim(),
+          status: "new",
+          createdAt: new Date().toISOString(),
+        });
+      }
+    } catch (err: any) {
+      // 3. Display user-friendly error message, preserve form inputs for retry
+      console.error("Contact form submission error:", err);
+      setErrorMessage(
+        err.message ||
+          "Failed to submit your inquiry. Please check your connection and try again."
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Explicit user click handler to open WhatsApp with saved inquiry details
+  const handleOpenWhatsApp = () => {
+    if (!savedInquiry) return;
 
     const whatsappMessage = `
 Hello Vardha Builders,
 
-I would like to get in touch regarding a project/inquiry.
+I have submitted an inquiry on your website:
 
-Name: ${form.name}
-Phone: ${form.phone}
-Email: ${form.email || "Not provided"}
-Inquiry Type: ${form.inquiry}
+Name: ${savedInquiry.name}
+Phone: ${savedInquiry.phone}
+Email: ${savedInquiry.email || "Not provided"}
+Inquiry Type: ${savedInquiry.inquiry}
 
 Message:
-${form.message}
+${savedInquiry.message}
 
 Thank you.
     `.trim();
 
     const encodedMessage = encodeURIComponent(whatsappMessage);
 
-    setSubmitted(true);
-
     window.open(
       `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMessage}`,
       "_blank",
       "noopener,noreferrer"
     );
+  };
+
+  // Reset form to submit another inquiry
+  const handleResetForm = () => {
+    setSavedInquiry(null);
+    setErrorMessage(null);
+    setForm({
+      name: "",
+      phone: "",
+      email: "",
+      inquiry: "Business Inquiry",
+      message: "",
+    });
+    setSelected("business");
   };
 
   return (
@@ -209,7 +340,8 @@ Thank you.
                 return (
                   <button
                     key={item.id}
-                    onClick={() => setSelected(item.id)}
+                    type="button"
+                    onClick={() => handleSelectInquiry(item.id, item.label)}
                     className={`flex items-center gap-2 rounded-full border px-4 py-3 font-mono text-[8px] font-semibold uppercase tracking-[.16em] transition-all md:px-5 ${
                       activeItem
                         ? "border-[#c7a15c] bg-[#c7a15c]/10 text-[#e2bf79]"
@@ -226,29 +358,22 @@ Thank you.
             <div className="mt-8 flex items-center justify-center gap-3 text-center">
               <Sparkles size={13} className="text-[#c7a15c]" />
 
-              <span className="text-[11px] text-white/35">
-                Selected:
-              </span>
+              <span className="text-[11px] text-white/35">Selected:</span>
 
               <span className="text-[11px] font-medium text-white/75">
                 {active.label}
               </span>
             </div>
 
-            {/* WHATSAPP BUTTON */}
+            {/* WHATSAPP DIRECT CHAT BUTTON */}
             <div className="mt-10 flex justify-center">
               <button
-                onClick={openWhatsApp}
+                type="button"
+                onClick={openHeroWhatsApp}
                 className="group flex w-full max-w-md items-center justify-center gap-4 rounded-full bg-gradient-to-r from-[#20d66b] to-[#16a085] px-7 py-5 text-sm font-bold uppercase tracking-[.12em] text-white shadow-[0_0_45px_rgba(32,214,107,.2)] transition-all hover:-translate-y-1 hover:shadow-[0_0_65px_rgba(32,214,107,.3)]"
               >
-                <MessageCircle
-                  size={22}
-                  fill="currentColor"
-                  strokeWidth={1}
-                />
-
+                <MessageCircle size={22} fill="currentColor" strokeWidth={1} />
                 Chat with Vardha Builders
-
                 <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-white/70" />
               </button>
             </div>
@@ -308,9 +433,12 @@ Thank you.
       </section>
 
       {/* =========================================================
-          DROP US A MESSAGE
+          DROP US A MESSAGE (CONTACT FORM WITH MONGODB INTEGRATION)
       ========================================================= */}
-      <section className="relative overflow-hidden border-t border-white/10 bg-[#0b0c0c] px-5 py-24 md:px-8 lg:px-20 lg:py-32">
+      <section
+        id="contact-form-section"
+        className="relative overflow-hidden border-t border-white/10 bg-[#0b0c0c] px-5 py-24 md:px-8 lg:px-20 lg:py-32"
+      >
         {/* Architectural grid */}
         <div
           className="pointer-events-none absolute inset-0 opacity-[.035]"
@@ -336,10 +464,7 @@ Thank you.
               </div>
 
               <h2 className="mt-7 max-w-xl font-display text-5xl leading-[.95] tracking-[-.03em] text-white md:text-6xl lg:text-7xl">
-                Drop us a{" "}
-                <span className="italic text-[#c7a15c]">
-                  message.
-                </span>
+                Drop us a <span className="italic text-[#c7a15c]">message.</span>
               </h2>
 
               <p className="mt-7 max-w-md text-sm leading-7 text-white/45 md:text-base">
@@ -399,130 +524,259 @@ Thank you.
               </div>
             </div>
 
-            {/* FORM */}
+            {/* FORM CONTAINER */}
             <div className="border border-white/10 bg-[#121413] p-6 md:p-8 lg:p-10">
-              <form
-                onSubmit={handleSubmit}
-                className="space-y-6"
-              >
-                {/* Name + Phone */}
-                <div className="grid gap-6 md:grid-cols-2">
-                  <label className="block">
-                    <span className="mb-3 flex items-center gap-2 font-mono text-[8px] uppercase tracking-[.22em] text-white/35">
-                      <User size={12} />
-                      Your Name
-                    </span>
+              {savedInquiry ? (
+                /* =========================================================
+                    POST-SAVE CONFIRMATION VIEW
+                    Displays ONLY after MongoDB confirms successful storage.
+                    WhatsApp button is explicit and user-triggered only.
+                ========================================================= */
+                <div className="space-y-6">
+                  {/* Luxury Success Card */}
+                  <div className="border border-[#c7a15c]/40 bg-[#171a17] p-6 md:p-8">
+                    <div className="flex items-start gap-4">
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-[#20d66b]/40 bg-[#20d66b]/10 text-[#20d66b]">
+                        <CheckCircle2 size={26} />
+                      </div>
 
-                    <input
-                      required
-                      name="name"
-                      value={form.name}
-                      onChange={handleChange}
-                      placeholder="Enter your name"
-                      className="w-full border-b border-white/15 bg-transparent px-0 py-3 text-sm text-white outline-none transition-colors placeholder:text-white/20 focus:border-[#c7a15c]"
-                    />
-                  </label>
+                      <div className="space-y-1">
+                        <span className="font-mono text-[9px] uppercase tracking-[.25em] text-[#c7a15c]">
+                          Inquiry Successfully Saved
+                        </span>
+                        <h3 className="text-xl font-semibold text-white">
+                          Thank you, {savedInquiry.name}
+                        </h3>
+                        <p className="text-xs leading-5 text-white/60">
+                          Your inquiry has been safely recorded in our database.
+                          Our executive team will review your requirements and
+                          reach out shortly.
+                        </p>
+                      </div>
+                    </div>
 
-                  <label className="block">
-                    <span className="mb-3 flex items-center gap-2 font-mono text-[8px] uppercase tracking-[.22em] text-white/35">
-                      <Phone size={12} />
-                      Phone
-                    </span>
+                    {/* Inquiry Details Summary */}
+                    <div className="mt-6 border-t border-white/10 pt-4">
+                      <div className="grid grid-cols-2 gap-4 text-xs">
+                        <div>
+                          <span className="font-mono text-[8px] uppercase tracking-[.2em] text-white/35">
+                            Category
+                          </span>
+                          <p className="font-medium text-[#e2bf79]">
+                            {savedInquiry.inquiry}
+                          </p>
+                        </div>
+                        <div>
+                          <span className="font-mono text-[8px] uppercase tracking-[.2em] text-white/35">
+                            Phone
+                          </span>
+                          <p className="font-medium text-white/80">
+                            {savedInquiry.phone}
+                          </p>
+                        </div>
+                        {savedInquiry.email && (
+                          <div className="col-span-2">
+                            <span className="font-mono text-[8px] uppercase tracking-[.2em] text-white/35">
+                              Email
+                            </span>
+                            <p className="font-medium text-white/80">
+                              {savedInquiry.email}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
 
-                    <input
-                      required
-                      name="phone"
-                      type="tel"
-                      value={form.phone}
-                      onChange={handleChange}
-                      placeholder="Enter phone number"
-                      className="w-full border-b border-white/15 bg-transparent px-0 py-3 text-sm text-white outline-none transition-colors placeholder:text-white/20 focus:border-[#c7a15c]"
-                    />
-                  </label>
-                </div>
-
-                {/* Email + Inquiry */}
-                <div className="grid gap-6 md:grid-cols-2">
-                  <label className="block">
-                    <span className="mb-3 flex items-center gap-2 font-mono text-[8px] uppercase tracking-[.22em] text-white/35">
-                      <Mail size={12} />
-                      Email
-                    </span>
-
-                    <input
-                      name="email"
-                      type="email"
-                      value={form.email}
-                      onChange={handleChange}
-                      placeholder="Enter email address"
-                      className="w-full border-b border-white/15 bg-transparent px-0 py-3 text-sm text-white outline-none transition-colors placeholder:text-white/20 focus:border-[#c7a15c]"
-                    />
-                  </label>
-
-                  <label className="block">
-                    <span className="mb-3 font-mono text-[8px] uppercase tracking-[.22em] text-white/35">
-                      Inquiry Type
-                    </span>
-
-                    <select
-                      name="inquiry"
-                      value={form.inquiry}
-                      onChange={handleChange}
-                      className="w-full border-b border-white/15 bg-transparent px-0 py-3 text-sm text-white outline-none transition-colors focus:border-[#c7a15c]"
+                  {/* Explicit User-Initiated Open WhatsApp Button */}
+                  <div className="space-y-3">
+                    <button
+                      type="button"
+                      id="open-whatsapp-button"
+                      onClick={handleOpenWhatsApp}
+                      className="group flex w-full items-center justify-center gap-3 rounded-none bg-gradient-to-r from-[#20d66b] to-[#16a085] px-7 py-5 text-xs font-bold uppercase tracking-[.18em] text-white shadow-[0_0_35px_rgba(32,214,107,.2)] transition-all hover:-translate-y-0.5 hover:shadow-[0_0_50px_rgba(32,214,107,.35)]"
                     >
-                      {inquiryTypes.map((item) => (
-                        <option
-                          key={item.id}
-                          value={item.label}
-                          className="bg-[#121413] text-white"
-                        >
-                          {item.label}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
+                      <MessageCircle size={18} fill="currentColor" />
+                      Open WhatsApp
+                      <ArrowUpRight
+                        size={16}
+                        className="transition-transform group-hover:translate-x-1 group-hover:-translate-y-0.5"
+                      />
+                    </button>
+
+                    <p className="text-center font-mono text-[8px] uppercase tracking-[.18em] text-white/35">
+                      Optional: Continue this discussion immediately on WhatsApp
+                    </p>
+                  </div>
+
+                  {/* Submit Another Inquiry Action */}
+                  <div className="border-t border-white/10 pt-4 text-center">
+                    <button
+                      type="button"
+                      onClick={handleResetForm}
+                      className="inline-flex items-center gap-2 font-mono text-[9px] uppercase tracking-[.2em] text-white/45 transition-colors hover:text-[#c7a15c]"
+                    >
+                      <RefreshCw size={11} />
+                      Submit Another Inquiry
+                    </button>
+                  </div>
                 </div>
+              ) : (
+                /* =========================================================
+                    ACTIVE CONTACT FORM
+                ========================================================= */
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  {/* Error Notification Alert */}
+                  {errorMessage && (
+                    <div
+                      role="alert"
+                      className="flex items-start gap-3 border border-red-500/40 bg-red-950/30 p-4 text-xs text-red-200"
+                    >
+                      <AlertCircle
+                        size={16}
+                        className="mt-0.5 shrink-0 text-red-400"
+                      />
+                      <div className="flex-1">
+                        <span className="font-semibold">
+                          Submission Failed:
+                        </span>{" "}
+                        {errorMessage}
+                      </div>
+                    </div>
+                  )}
 
-                {/* MESSAGE */}
-                <label className="block">
-                  <span className="mb-3 flex items-center gap-2 font-mono text-[8px] uppercase tracking-[.22em] text-white/35">
-                    <MessageCircle size={12} />
-                    Your Message
-                  </span>
+                  {/* Name + Phone */}
+                  <div className="grid gap-6 md:grid-cols-2">
+                    <label className="block">
+                      <span className="mb-3 flex items-center gap-2 font-mono text-[8px] uppercase tracking-[.22em] text-white/35">
+                        <User size={12} />
+                        Your Name <span className="text-[#c7a15c]">*</span>
+                      </span>
 
-                  <textarea
-                    required
-                    name="message"
-                    value={form.message}
-                    onChange={handleChange}
-                    placeholder="Tell us about your requirement..."
-                    rows={6}
-                    className="w-full resize-none border-b border-white/15 bg-transparent px-0 py-3 text-sm leading-7 text-white outline-none transition-colors placeholder:text-white/20 focus:border-[#c7a15c]"
-                  />
-                </label>
+                      <input
+                        required
+                        disabled={isSubmitting}
+                        name="name"
+                        value={form.name}
+                        onChange={handleChange}
+                        placeholder="Enter your name"
+                        className="w-full border-b border-white/15 bg-transparent px-0 py-3 text-sm text-white outline-none transition-colors placeholder:text-white/20 focus:border-[#c7a15c] disabled:opacity-50"
+                      />
+                    </label>
 
-                {/* SUBMIT */}
-                <button
-                  type="submit"
-                  className="group flex w-full items-center justify-center gap-3 bg-[#c7a15c] px-7 py-5 text-[10px] font-bold uppercase tracking-[.2em] text-[#0b0c0c] transition-all hover:bg-[#dfbb78] hover:-translate-y-0.5"
-                >
-                  <Send
-                    size={15}
-                    className="transition-transform group-hover:translate-x-1"
-                  />
+                    <label className="block">
+                      <span className="mb-3 flex items-center gap-2 font-mono text-[8px] uppercase tracking-[.22em] text-white/35">
+                        <Phone size={12} />
+                        Phone <span className="text-[#c7a15c]">*</span>
+                      </span>
 
-                  {submitted ? "Message Ready on WhatsApp" : "Send Message"}
+                      <input
+                        required
+                        disabled={isSubmitting}
+                        name="phone"
+                        type="tel"
+                        value={form.phone}
+                        onChange={handleChange}
+                        placeholder="Enter phone number"
+                        className="w-full border-b border-white/15 bg-transparent px-0 py-3 text-sm text-white outline-none transition-colors placeholder:text-white/20 focus:border-[#c7a15c] disabled:opacity-50"
+                      />
+                    </label>
+                  </div>
 
-                  <ArrowUpRight
-                    size={15}
-                    className="transition-transform group-hover:translate-x-1 group-hover:-translate-y-1"
-                  />
-                </button>
+                  {/* Email + Inquiry */}
+                  <div className="grid gap-6 md:grid-cols-2">
+                    <label className="block">
+                      <span className="mb-3 flex items-center gap-2 font-mono text-[8px] uppercase tracking-[.22em] text-white/35">
+                        <Mail size={12} />
+                        Email (Optional)
+                      </span>
 
-                <p className="text-center font-mono text-[8px] uppercase tracking-[.18em] text-white/25">
-                  Your message will open directly in WhatsApp
-                </p>
-              </form>
+                      <input
+                        disabled={isSubmitting}
+                        name="email"
+                        type="email"
+                        value={form.email}
+                        onChange={handleChange}
+                        placeholder="Enter email address"
+                        className="w-full border-b border-white/15 bg-transparent px-0 py-3 text-sm text-white outline-none transition-colors placeholder:text-white/20 focus:border-[#c7a15c] disabled:opacity-50"
+                      />
+                    </label>
+
+                    <label className="block">
+                      <span className="mb-3 font-mono text-[8px] uppercase tracking-[.22em] text-white/35">
+                        Inquiry Type <span className="text-[#c7a15c]">*</span>
+                      </span>
+
+                      <select
+                        disabled={isSubmitting}
+                        name="inquiry"
+                        value={form.inquiry}
+                        onChange={handleChange}
+                        className="w-full border-b border-white/15 bg-transparent px-0 py-3 text-sm text-white outline-none transition-colors focus:border-[#c7a15c] disabled:opacity-50"
+                      >
+                        {inquiryTypes.map((item) => (
+                          <option
+                            key={item.id}
+                            value={item.label}
+                            className="bg-[#121413] text-white"
+                          >
+                            {item.label}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  </div>
+
+                  {/* MESSAGE */}
+                  <label className="block">
+                    <span className="mb-3 flex items-center gap-2 font-mono text-[8px] uppercase tracking-[.22em] text-white/35">
+                      <MessageCircle size={12} />
+                      Your Message <span className="text-[#c7a15c]">*</span>
+                    </span>
+
+                    <textarea
+                      required
+                      disabled={isSubmitting}
+                      name="message"
+                      value={form.message}
+                      onChange={handleChange}
+                      placeholder="Tell us about your requirement..."
+                      rows={6}
+                      className="w-full resize-none border-b border-white/15 bg-transparent px-0 py-3 text-sm leading-7 text-white outline-none transition-colors placeholder:text-white/20 focus:border-[#c7a15c] disabled:opacity-50"
+                    />
+                  </label>
+
+                  {/* SUBMIT BUTTON */}
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="group flex w-full items-center justify-center gap-3 bg-[#c7a15c] px-7 py-5 text-[10px] font-bold uppercase tracking-[.2em] text-[#0b0c0c] transition-all hover:bg-[#dfbb78] hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0"
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 size={15} className="animate-spin" />
+                        <span>Saving Inquiry to Database...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Send
+                          size={15}
+                          className="transition-transform group-hover:translate-x-1"
+                        />
+                        <span>Send Message</span>
+                        <ArrowUpRight
+                          size={15}
+                          className="transition-transform group-hover:translate-x-1 group-hover:-translate-y-1"
+                        />
+                      </>
+                    )}
+                  </button>
+
+                  <p className="text-center font-mono text-[8px] uppercase tracking-[.18em] text-white/25">
+                    Your inquiry will be securely saved before opening WhatsApp
+                  </p>
+                </form>
+              )}
             </div>
           </div>
         </div>
@@ -540,14 +794,13 @@ Thank you.
           <h3 className="mt-6 font-display text-5xl leading-none md:text-7xl lg:text-8xl">
             Let&apos;s create
             <br />
-            <span className="italic text-[#c7a15c]">
-              something lasting.
-            </span>
+            <span className="italic text-[#c7a15c]">something lasting.</span>
           </h3>
 
           <div className="mt-10 flex justify-center">
             <button
-              onClick={openWhatsApp}
+              type="button"
+              onClick={openHeroWhatsApp}
               className="flex items-center gap-3 border border-[#c7a15c]/50 px-7 py-4 text-[10px] uppercase tracking-[.2em] text-[#c7a15c] transition-all hover:bg-[#c7a15c] hover:text-[#0b0c0c]"
             >
               Start a Conversation

@@ -4,23 +4,42 @@ import cors from "cors";
 import dotenv from "dotenv";
 
 import { connectDB } from "./config/db.js";
-import projectRoutes from "./routes/project.routes.js";
-import leadRoutes from "./routes/lead.routes.js";
-import testDataRoutes from "./routes/testdata.routes.js";
+import contactRoutes from "./routes/contact.routes.js";
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+const configuredOrigins = (
+  process.env.CLIENT_URL || "http://localhost:5173"
+)
+  .split(",")
+  .map((url) => url.trim().replace(/\/+$/, ""))
+  .filter(Boolean);
+
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+
+      const cleanOrigin = origin.replace(/\/+$/, "");
+
+      if (
+        configuredOrigins.includes(cleanOrigin) ||
+        process.env.NODE_ENV !== "production"
+      ) {
+        return callback(null, true);
+      }
+
+      return callback(new Error(`Origin ${origin} not allowed by CORS`));
+    },
+    credentials: true,
   })
-); 
+);
 
 app.use(express.json({ limit: "1mb" }));
-app.use("/api/testdata", testDataRoutes);
+
 // Health check
 app.get("/api/health", (_req, res) => {
   res.json({
@@ -30,10 +49,8 @@ app.get("/api/health", (_req, res) => {
   });
 });
 
-// API routes
-app.use("/api/projects", projectRoutes);
-app.use("/api/leads", leadRoutes);
-
+// Only Contact API route
+app.use("/api/contact", contactRoutes);
 
 // 404 handler
 app.use((_req, res) => {
@@ -53,7 +70,7 @@ app.use((err, _req, res, _next) => {
   });
 });
 
-// Connect to MongoDB before starting the server
+// Connect MongoDB before starting the server
 async function startServer() {
   try {
     await connectDB(process.env.MONGO_URI);

@@ -414,9 +414,9 @@ export default function Home() {
           className="hero-image absolute inset-0 h-full w-full object-cover"
         />
 
-        <div className="absolute inset-0 bg-[#05080d]/45" />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#05080d]/90 via-[#05080d]/55 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#05080d]/90 via-transparent to-[#05080d]/15" />
+        <div className="absolute inset-0 bg-[#0b0c0c]/45" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0b0c0c]/90 via-[#0b0c0c]/55 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0b0c0c]/90 via-transparent to-[#0b0c0c]/15" />
         <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-black/45 to-transparent" />
         <div className="arch-grid absolute inset-0 opacity-[0.07]" />
 
@@ -424,8 +424,8 @@ export default function Home() {
           <div className="mx-auto w-full max-w-[1600px]">
             <div className="max-w-[720px]">
               <div className="hero-reveal mb-6 flex items-center gap-3">
-                <span className="h-px w-10 bg-[#d2a155]" />
-                <span className="text-[9px] uppercase tracking-[0.3em] text-[#d2a155]">
+                <span className="h-px w-10 bg-[#c7a15c]" />
+                <span className="text-[9px] uppercase tracking-[0.3em] text-[#c7a15c]">
                   Architecture · Engineering · Construction
                 </span>
               </div>
@@ -437,11 +437,11 @@ export default function Home() {
               <h1 className="hero-reveal font-display text-[clamp(3.2rem,6.5vw,6.5rem)] font-medium leading-[0.88] tracking-[-0.06em] text-white">
                 We Build
                 <br />
-                <span className="italic text-[#d2a155]">More.</span>
+                <span className="italic text-[#c7a15c]">More.</span>
               </h1>
 
               <div className="hero-reveal mt-8 flex max-w-[580px] items-start gap-4">
-                <span className="mt-3 h-px w-10 shrink-0 bg-[#c7944a] md:w-14" />
+                <span className="mt-3 h-px w-10 shrink-0 bg-[#c7a15c] md:w-14" />
                 <p className="text-[13px] leading-7 text-white/65 md:text-[14px] md:leading-8">
                   Vardha Builders brings architecture, engineering and
                   construction together to create places designed for
@@ -452,7 +452,7 @@ export default function Home() {
               <div className="hero-reveal mt-9 flex flex-wrap items-center gap-3">
                 <Link
                   to="/portfolio"
-                  className="group flex items-center gap-4 bg-[#c7944a] px-6 py-3.5 text-[9px] font-semibold uppercase tracking-[0.18em] text-white transition-all duration-300 hover:-translate-y-1 hover:bg-[#d2a155]"
+                  className="group flex items-center gap-4 bg-[#c7a15c] px-6 py-3.5 text-[9px] font-semibold uppercase tracking-[0.18em] text-[#0b0c0c] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#dfbb78]"
                 >
                   Explore Projects
                   <ArrowRight
@@ -474,10 +474,10 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="absolute bottom-7 left-0 right-0 z-10 px-6 md:px-12 lg:px-20">
+        <div className="absolute bottom-7 left-0 right-0 z-10 px-5 sm:px-8 lg:px-12">
           <div className="mx-auto flex max-w-[1600px] items-end justify-between">
             <div className="hidden items-center gap-3 text-[8px] uppercase tracking-[0.28em] text-white/40 sm:flex">
-              <span className="h-px w-10 bg-[#d2a155]" />
+              <span className="h-px w-10 bg-[#c7a15c]" />
               Gorakhpur · Uttar Pradesh
             </div>
 
@@ -504,21 +504,21 @@ export default function Home() {
 
       <section
         id="intro"
-        className="bg-[#f5f6f7] px-6 py-20 transition-colors duration-500 dark:bg-[#111312] md:px-12 md:py-28 lg:px-20"
+        className="bg-[#f5f6f7] px-6 py-20 transition-colors duration-500 dark:bg-[#101110] md:px-12 md:py-28 lg:px-20"
       >
-        <div className="mx-auto max-w-[1500px]">
+        <div className="mx-auto max-w-7xl">
           <div className="mb-10 flex items-center justify-between">
             <span className="font-mono text-[9px] tracking-[0.3em] text-[#7b8490] dark:text-[#8e8b83]">
               02 / THE VARDHA APPROACH
             </span>
-            <Building2 size={18} strokeWidth={1} className="text-[#b08a4a]" />
+            <Building2 size={18} strokeWidth={1} className="text-[#c7a15c]" />
           </div>
 
           <div className="home-line mb-14 h-px w-full bg-[#dfe4e8] dark:bg-white/10" />
 
           <div className="grid gap-14 lg:grid-cols-[0.75fr_1.25fr] lg:gap-16">
             <Reveal>
-              <p className="text-[9px] uppercase tracking-[0.3em] text-[#b08a4a]">
+              <p className="text-[9px] uppercase tracking-[0.3em] text-[#c7a15c]">
                 Architecture · Engineering · Construction
               </p>
             </Reveal>
@@ -552,8 +552,8 @@ export default function Home() {
           03 — CONSTRUCTION FEATURE
       ====================================================== */}
 
-      <section className="bg-[#f5f6f7] px-6 pb-24 transition-colors duration-500 dark:bg-[#111312] md:px-12 md:pb-32 lg:px-20">
-        <div className="mx-auto grid max-w-[1500px] gap-5 lg:grid-cols-[1.35fr_0.65fr]">
+      <section className="bg-[#f5f6f7] px-6 pb-24 transition-colors duration-500 dark:bg-[#101110] md:px-12 md:pb-32 lg:px-20">
+        <div className="mx-auto grid max-w-7xl gap-5 lg:grid-cols-[1.35fr_0.65fr]">
           <div
             onClick={() =>
               setLightboxImage({
@@ -590,7 +590,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="flex min-h-[500px] flex-col justify-between rounded-2xl border border-[var(--line)] bg-white p-8 transition-colors duration-500 dark:bg-[#181a19] md:min-h-[650px] md:p-11 lg:p-12">
+          <div className="flex min-h-[500px] flex-col justify-between rounded-2xl border border-[var(--line)] bg-white p-8 transition-colors duration-500 dark:bg-[#151715] md:min-h-[650px] md:p-11 lg:p-12">
             <div>
               <span className="font-mono text-[9px] tracking-[0.3em] text-[#7b8490] dark:text-[#8e8b83]">
                 VARDHA / CONSTRUCTION
@@ -601,11 +601,11 @@ export default function Home() {
             <div>
               <p className="font-display text-[clamp(1.7rem,2.8vw,2.8rem)] leading-[1.05] text-[#172033] dark:text-[#f4f0e7]">
                 Strong structures.
-                <span className="text-[#b08a4a]"> Thoughtful spaces.</span>
+                <span className="text-[#c7a15c]"> Thoughtful spaces.</span>
               </p>
 
               <div className="mt-8 flex items-center gap-4">
-                <span className="h-px w-10 bg-[#b08a4a]" />
+                <span className="h-px w-10 bg-[#c7a15c]" />
                 <span className="text-[9px] uppercase tracking-[0.2em] text-[#7b8490] dark:text-[#8e8b83]">
                   Vardha Builders
                 </span>
@@ -619,8 +619,8 @@ export default function Home() {
           04 — WHAT WE DO
       ====================================================== */}
 
-      <section className="bg-white px-6 py-24 transition-colors duration-500 dark:bg-[#161817] md:px-12 md:py-32 lg:px-20">
-        <div className="mx-auto max-w-[1500px]">
+      <section className="bg-white px-6 py-24 transition-colors duration-500 dark:bg-[#151715] md:px-12 md:py-32 lg:px-20">
+        <div className="mx-auto max-w-7xl">
           <div className="grid gap-12 lg:grid-cols-[0.65fr_1.35fr] lg:gap-14">
             <Reveal>
               <span className="font-mono text-[9px] tracking-[0.3em] text-[#7b8490] dark:text-[#8e8b83]">
@@ -644,18 +644,18 @@ export default function Home() {
                     className="service-card group border-t border-[#dfe4e8] py-8 transition-all duration-500 hover:px-3 dark:border-white/10"
                   >
                     <div className="grid gap-5 md:grid-cols-[60px_55px_1fr] md:items-start">
-                      <span className="font-mono text-[10px] text-[#b08a4a]">
+                      <span className="font-mono text-[10px] text-[#c7a15c]">
                         {service.number}
                       </span>
 
                       <Icon
                         size={22}
                         strokeWidth={1}
-                        className="text-[#172033] transition-colors duration-300 group-hover:text-[#b08a4a] dark:text-[#f4f0e7]"
+                        className="text-[#172033] transition-colors duration-300 group-hover:text-[#c7a15c] dark:text-[#f4f0e7]"
                       />
 
                       <div>
-                        <h3 className="font-display text-[20px] tracking-[-0.03em] text-[#172033] transition-colors group-hover:text-[#b08a4a] dark:text-[#f4f0e7] md:text-[21px]">
+                        <h3 className="font-display text-[20px] tracking-[-0.03em] text-[#172033] transition-colors group-hover:text-[#c7a15c] dark:text-[#f4f0e7] md:text-[21px]">
                           {service.title}
                         </h3>
 
@@ -696,13 +696,13 @@ export default function Home() {
           className="home-image absolute inset-0 h-full w-full object-cover transition-transform duration-[1.5s] group-hover:scale-105"
         />
 
-        <div className="absolute inset-0 bg-[#071122]/55" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#071122]/90 via-[#071122]/20 to-transparent" />
+        <div className="absolute inset-0 bg-[#0b0c0c]/55" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0b0c0c]/90 via-[#0b0c0c]/20 to-transparent" />
 
         <div className="relative z-10 flex min-h-[650px] items-end px-6 pb-16 md:px-12 md:pb-20 lg:px-20">
-          <div className="mx-auto w-full max-w-[1500px]">
+          <div className="mx-auto w-full max-w-7xl">
             <Reveal className="max-w-[680px] text-white">
-              <span className="font-mono text-[9px] uppercase tracking-[0.3em] text-[#d2b477]">
+              <span className="font-mono text-[9px] uppercase tracking-[0.3em] text-[#c7a15c]">
                 05 / ENGINEERING & PRECISION
               </span>
 
@@ -732,21 +732,21 @@ export default function Home() {
           07 — ARCHITECTURAL EXPERIENCE
       ====================================================== */}
 
-      <section className="relative min-h-[720px] overflow-hidden bg-[#080f1c]">
+      <section className="relative min-h-[720px] overflow-hidden bg-[#0e100f]">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(199,148,74,0.15),_transparent_55%)]" />
 
         <div className="absolute inset-0">
           <div className="absolute left-[15%] top-[20%] h-[300px] w-[300px] rotate-45 border border-white/10" />
-          <div className="absolute bottom-[15%] right-[15%] h-[250px] w-[250px] border border-[#c7944a]/20" />
+          <div className="absolute bottom-[15%] right-[15%] h-[250px] w-[250px] border border-[#c7a15c]/20" />
         </div>
 
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#071122]/95 via-[#071122]/65 to-transparent" />
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#071122]/80 via-transparent to-transparent" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#0b0c0c]/95 via-[#0b0c0c]/65 to-transparent" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#0b0c0c]/80 via-transparent to-transparent" />
 
         <div className="relative z-10 flex min-h-[720px] items-center px-6 py-24 md:px-12 lg:px-20">
-          <div className="mx-auto w-full max-w-[1500px]">
+          <div className="mx-auto w-full max-w-7xl">
             <Reveal className="max-w-[650px] text-white">
-              <span className="font-mono text-[9px] uppercase tracking-[0.3em] text-[#d2b477]">
+              <span className="font-mono text-[9px] uppercase tracking-[0.3em] text-[#c7a15c]">
                 07 / ARCHITECTURAL EXPERIENCE
               </span>
 
@@ -762,7 +762,7 @@ export default function Home() {
               </p>
 
               <div className="mt-9 flex items-center gap-4">
-                <span className="h-px w-12 bg-[#c7944a]" />
+                <span className="h-px w-12 bg-[#c7a15c]" />
                 <span className="text-[8px] uppercase tracking-[0.25em] text-white/45">
                   Interactive architecture
                 </span>
@@ -798,9 +798,9 @@ export default function Home() {
         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
 
         <div className="relative z-10 flex min-h-[650px] items-end px-6 pb-16 md:px-12 md:pb-20 lg:px-20">
-          <div className="mx-auto w-full max-w-[1500px]">
+          <div className="mx-auto w-full max-w-7xl">
             <Reveal className="max-w-[680px] text-white">
-              <span className="font-mono text-[9px] uppercase tracking-[0.3em] text-[#d2b477]">
+              <span className="font-mono text-[9px] uppercase tracking-[0.3em] text-[#c7a15c]">
                 08 / FROM VISION TO REALITY
               </span>
 
@@ -828,8 +828,8 @@ export default function Home() {
           09 — THE FINISHED SPACE (CLICK OPENS IN-PAGE LIGHTBOX)
       ====================================================== */}
 
-      <section className="bg-white px-6 py-24 transition-colors duration-500 dark:bg-[#161817] md:px-12 md:py-32 lg:px-20">
-        <div className="mx-auto max-w-[1500px]">
+      <section className="bg-white px-6 py-24 transition-colors duration-500 dark:bg-[#151715] md:px-12 md:py-32 lg:px-20">
+        <div className="mx-auto max-w-7xl">
           <div className="grid items-center gap-14 lg:grid-cols-2 lg:gap-16">
             {/* LEFT: LUXURY ARCHITECTURAL VISUAL STAGE */}
             <div className="relative">
@@ -841,7 +841,7 @@ export default function Home() {
                     subtitle: interiorViews[activeInteriorIndex].desc,
                   })
                 }
-                className="group relative aspect-[4/3] cursor-pointer overflow-hidden rounded-2xl border border-[var(--line)] bg-black shadow-2xl transition-all duration-700 hover:border-[#c7944a]"
+                className="group relative aspect-[4/3] cursor-pointer overflow-hidden rounded-2xl border border-[var(--line)] bg-black shadow-2xl transition-all duration-700 hover:border-[#c7a15c]"
               >
                 <img
                   key={interiorViews[activeInteriorIndex].image}
@@ -868,7 +868,7 @@ export default function Home() {
 
                 {/* BOTTOM CAPTION */}
                 <div className="absolute bottom-5 left-5 right-5 text-white">
-                  <p className="font-mono text-[8px] uppercase tracking-[0.25em] text-[#d2a155]">
+                  <p className="font-mono text-[8px] uppercase tracking-[0.25em] text-[#c7a15c]">
                     Vardha Interior Experience
                   </p>
                   <h3 className="mt-1 font-display text-2xl font-semibold">
@@ -889,8 +889,8 @@ export default function Home() {
                     onClick={() => setActiveInteriorIndex(idx)}
                     className={`rounded-full px-4 py-2 font-mono text-[8px] uppercase tracking-wider transition-all ${
                       activeInteriorIndex === idx
-                        ? "bg-[#c7944a] text-black font-bold shadow-md"
-                        : "border border-[var(--line)] bg-[var(--surface-2)] text-[var(--text-soft)] hover:border-[#c7944a]"
+                        ? "bg-[#c7a15c] text-black font-bold shadow-md"
+                        : "border border-[var(--line)] bg-[var(--surface-2)] text-[var(--text-soft)] hover:border-[#c7a15c]"
                     }`}
                   >
                     {item.title}
@@ -910,7 +910,7 @@ export default function Home() {
                 <br />
                 becomes
                 <br />
-                <span className="text-[#b08a4a]">experience.</span>
+                <span className="text-[#c7a15c]">experience.</span>
               </h2>
 
               <p className="mt-7 max-w-xl text-[13px] leading-7 text-[#68727d] dark:text-[#a8a59d] md:text-[14px] md:leading-8">
@@ -942,7 +942,7 @@ export default function Home() {
               <div className="mt-9 flex flex-wrap items-center gap-4">
                 <Link
                   to="/about"
-                  className="group inline-flex items-center gap-3 rounded-full bg-[var(--dark)] px-6 py-3 font-mono text-[9px] uppercase tracking-[0.2em] text-white transition-colors hover:bg-[#c7944a] hover:text-black dark:bg-white dark:text-black dark:hover:bg-[#c7944a]"
+                  className="group inline-flex items-center gap-3 rounded-full bg-[var(--dark)] px-6 py-3 font-mono text-[9px] uppercase tracking-[0.2em] text-white transition-colors hover:bg-[#c7a15c] hover:text-black dark:bg-white dark:text-black dark:hover:bg-[#c7a15c]"
                 >
                   Discover our philosophy
                   <ArrowRight
@@ -961,7 +961,7 @@ export default function Home() {
                       subtitle: interiorViews[activeInteriorIndex].desc,
                     })
                   }
-                  className="inline-flex items-center gap-2 font-mono text-[9px] uppercase tracking-[0.2em] text-[#b08a4a] hover:underline"
+                  className="inline-flex items-center gap-2 font-mono text-[9px] uppercase tracking-[0.2em] text-[#c7a15c] hover:underline"
                 >
                   View Full Resolution
                   <Maximize2 size={13} />
@@ -976,8 +976,8 @@ export default function Home() {
           10 — CONSTRUCTION DETAIL
       ====================================================== */}
 
-      <section className="bg-[#f5f6f7] px-6 py-24 transition-colors duration-500 dark:bg-[#111312] md:px-12 md:py-32 lg:px-20">
-        <div className="mx-auto max-w-[1500px]">
+      <section className="bg-[#f5f6f7] px-6 py-24 transition-colors duration-500 dark:bg-[#101110] md:px-12 md:py-32 lg:px-20">
+        <div className="mx-auto max-w-7xl">
           <div className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr]">
             <Reveal className="flex flex-col justify-center">
               <span className="font-mono text-[9px] tracking-[0.3em] text-[#7b8490] dark:text-[#8e8b83]">
@@ -987,7 +987,7 @@ export default function Home() {
               <h2 className="mt-7 font-display text-[clamp(2.4rem,4.2vw,4.5rem)] leading-[0.9] tracking-[-0.045em] text-[#172033] dark:text-[#f4f0e7]">
                 Quality lives
                 <br />
-                <span className="text-[#b08a4a]">in the details.</span>
+                <span className="text-[#c7a15c]">in the details.</span>
               </h2>
 
               <p className="mt-7 max-w-xl text-[13px] leading-7 text-[#68727d] dark:text-[#a8a59d] md:text-[14px] md:leading-8">
@@ -997,7 +997,7 @@ export default function Home() {
               </p>
 
               <div className="mt-9 flex items-center gap-4">
-                <span className="h-px w-12 bg-[#b08a4a]" />
+                <span className="h-px w-12 bg-[#c7a15c]" />
                 <span className="text-[9px] uppercase tracking-[0.2em] text-[#7b8490] dark:text-[#8e8b83]">
                   Precision / Material / Craft
                 </span>
@@ -1045,8 +1045,8 @@ export default function Home() {
           11 — PROCESS
       ====================================================== */}
 
-      <section className="bg-[#f5f6f7] px-6 py-24 transition-colors duration-500 dark:bg-[#111312] md:px-12 md:py-32 lg:px-20">
-        <div className="mx-auto max-w-[1500px]">
+      <section className="bg-[#f5f6f7] px-6 py-24 transition-colors duration-500 dark:bg-[#101110] md:px-12 md:py-32 lg:px-20">
+        <div className="mx-auto max-w-7xl">
           <div className="grid gap-12 lg:grid-cols-[0.7fr_1.3fr]">
             <Reveal>
               <span className="font-mono text-[9px] tracking-[0.3em] text-[#7b8490] dark:text-[#8e8b83]">
@@ -1074,11 +1074,11 @@ export default function Home() {
                   className="process-item group flex items-center justify-between border-t border-[#dfe4e8] py-7 transition-all duration-300 hover:px-3 dark:border-white/10"
                 >
                   <div className="flex items-center gap-6">
-                    <span className="font-mono text-[9px] text-[#c7944a]">
+                    <span className="font-mono text-[9px] text-[#c7a15c]">
                       0{index + 1}
                     </span>
 
-                    <span className="font-display text-xl text-[#172033] transition-colors group-hover:text-[#c7944a] dark:text-[#f4f0e7] md:text-2xl">
+                    <span className="font-display text-xl text-[#172033] transition-colors group-hover:text-[#c7a15c] dark:text-[#f4f0e7] md:text-2xl">
                       {step}
                     </span>
                   </div>
@@ -1086,7 +1086,7 @@ export default function Home() {
                   <Check
                     size={17}
                     strokeWidth={1.3}
-                    className="text-[#b3bbc3] transition-colors group-hover:text-[#c7944a] dark:text-[#6c6962]"
+                    className="text-[#b3bbc3] transition-colors group-hover:text-[#c7a15c] dark:text-[#6c6962]"
                   />
                 </div>
               ))}
@@ -1101,8 +1101,8 @@ export default function Home() {
           12 — NUMBERS
       ====================================================== */}
 
-      <section className="bg-white px-6 py-24 transition-colors duration-500 dark:bg-[#161817] md:px-12 md:py-32 lg:px-20">
-        <div className="mx-auto max-w-[1500px]">
+      <section className="bg-white px-6 py-24 transition-colors duration-500 dark:bg-[#151715] md:px-12 md:py-32 lg:px-20">
+        <div className="mx-auto max-w-7xl">
           <div className="mb-12 text-center">
             <span className="font-mono text-[9px] uppercase tracking-[0.3em] text-[#7b8490] dark:text-[#8e8b83]">
               12 / AT A GLANCE
@@ -1154,12 +1154,12 @@ export default function Home() {
 
         <div className="absolute inset-0 bg-black/80" />
 
-        <div className="relative z-10 mx-auto max-w-[1500px]">
+        <div className="relative z-10 mx-auto max-w-7xl">
           <div className="home-line mb-14 h-px w-full bg-white/15" />
 
           <div className="flex flex-col justify-between gap-14 lg:flex-row lg:items-end">
             <Reveal>
-              <span className="font-mono text-[9px] tracking-[0.3em] text-[#d2b477]">
+              <span className="font-mono text-[9px] tracking-[0.3em] text-[#c7a15c]">
                 VARDHA BUILDERS
               </span>
 
@@ -1174,7 +1174,7 @@ export default function Home() {
 
             <Link
               to="/contact"
-              className="group flex h-14 w-fit items-center gap-5 rounded-full bg-[#c7944a] px-8 text-[9px] uppercase tracking-[0.25em] text-white transition-all duration-300 hover:-translate-y-1 hover:bg-[#d2a155]"
+              className="group flex h-14 w-fit items-center gap-5 rounded-full bg-[#c7a15c] px-8 text-[9px] uppercase tracking-[0.25em] text-[#0b0c0c] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#dfbb78]"
             >
               Start a Project
               <ArrowUpRight
@@ -1208,7 +1208,7 @@ export default function Home() {
               type="button"
               onClick={() => setLightboxImage(null)}
               aria-label="Close image viewer"
-              className="absolute right-4 top-4 z-30 flex h-10 w-10 items-center justify-center rounded-full border border-white/25 bg-black/60 text-white transition hover:bg-[#c7944a] hover:text-black"
+              className="absolute right-4 top-4 z-30 flex h-10 w-10 items-center justify-center rounded-full border border-white/25 bg-black/60 text-white transition hover:bg-[#c7a15c] hover:text-black"
             >
               <X size={18} />
             </button>
@@ -1234,7 +1234,7 @@ export default function Home() {
                   </p>
                 )}
               </div>
-              <span className="font-mono text-[9px] uppercase tracking-wider text-[#c7944a]">
+              <span className="font-mono text-[9px] uppercase tracking-wider text-[#c7a15c]">
                 Vardha Builders · Architectural Showcase
               </span>
             </div>

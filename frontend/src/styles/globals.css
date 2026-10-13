@@ -1,231 +1,282 @@
 
-@import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Manrope:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;500;600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=DM+Mono:wght@300;400;500&family=Manrope:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&display=swap");
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-
 /* =========================================================
    VARDHA BUILDERS
-   ARCHITECTURAL DESIGN SYSTEM
+   CENTRALIZED ARCHITECTURAL DESIGN SYSTEM
    ========================================================= */
 
 :root {
-  --bg: #f3f0e9;
-  --bg-soft: #e9e5dc;
-  --surface: #faf8f3;
-  --surface-2: #e2ded5;
+  --bg-darkest: #0b0c0c;
+  --bg: #101110;
+  --bg-soft: #141615;
+  --surface: #151715;
+  --surface-2: #1c1f1c;
 
-  --text: #191a18;
-  --text-soft: #575750;
-  --text-muted: #817e75;
+  --text: #f2eee7;
+  --text-soft: #c8c5be;
+  --text-muted: rgba(242, 238, 231, 0.45);
 
-  --line: rgba(25, 26, 24, 0.14);
-  --line-strong: rgba(25, 26, 24, 0.23);
-
-  --gold: #a98245;
-  --gold-light: #c7a66d;
-  --gold-soft: rgba(169, 130, 69, 0.12);
-
-  --dark: #171817;
-  --dark-2: #222321;
-
-  --shadow-soft: 0 20px 60px rgba(20, 20, 18, 0.08);
-  --shadow-card: 0 25px 70px rgba(20, 20, 18, 0.11);
-
-  --radius: 0px;
-
-  color-scheme: light;
-}
-
-
-/* =========================================================
-   NIGHT THEME
-   ========================================================= */
-
-html.vardha-night,
-html.dark {
-  --bg: #101211;
-  --bg-soft: #171918;
-  --surface: #1b1e1d;
-  --surface-2: #252826;
-
-  --text: #f4f0e7;
-  --text-soft: #bbb8af;
-  --text-muted: #89867e;
-
-  --line: rgba(255, 255, 255, 0.12);
+  --line: rgba(255, 255, 255, 0.1);
   --line-strong: rgba(255, 255, 255, 0.2);
 
-  --gold: #c6a264;
-  --gold-light: #ddbd7e;
-  --gold-soft: rgba(198, 162, 100, 0.13);
+  --gold: #c7a15c;
+  --gold-light: #dfbb78;
+  --gold-soft: rgba(199, 161, 92, 0.15);
+  --gold-glow: rgba(199, 161, 92, 0.35);
 
-  --dark: #080909;
-  --dark-2: #111312;
+  --dark: #0b0c0c;
+  --dark-2: #121413;
 
-  --shadow-soft: 0 20px 70px rgba(0, 0, 0, 0.3);
-  --shadow-card: 0 30px 90px rgba(0, 0, 0, 0.35);
+  --shadow-soft: 0 20px 60px rgba(0, 0, 0, 0.35);
+  --shadow-card: 0 25px 70px rgba(0, 0, 0, 0.45);
+
+  --radius: 0px;
 
   color-scheme: dark;
 }
 
+/* Day / Light mode fallback overrides */
+html:not(.dark):not(.vardha-night) {
+  --bg-darkest: #e8e4db;
+  --bg: #f5f2eb;
+  --bg-soft: #ebe7de;
+  --surface: #ffffff;
+  --surface-2: #f0ece3;
+
+  --text: #121413;
+  --text-soft: #4a4d4a;
+  --text-muted: #7d807b;
+
+  --line: rgba(18, 20, 19, 0.12);
+  --line-strong: rgba(18, 20, 19, 0.22);
+
+  --gold: #c7a15c;
+  --gold-light: #b08b46;
+  --gold-soft: rgba(199, 161, 92, 0.12);
+  --gold-glow: rgba(199, 161, 92, 0.25);
+
+  --dark: #121413;
+  --dark-2: #1c1f1d;
+
+  --shadow-soft: 0 20px 60px rgba(20, 20, 18, 0.08);
+  --shadow-card: 0 25px 70px rgba(20, 20, 18, 0.12);
+
+  color-scheme: light;
+}
+
+/* Explicit Night / Dark Theme */
+html.vardha-night,
+html.dark {
+  --bg-darkest: #0b0c0c;
+  --bg: #101110;
+  --bg-soft: #141615;
+  --surface: #151715;
+  --surface-2: #1c1f1c;
+
+  --text: #f2eee7;
+  --text-soft: #c8c5be;
+  --text-muted: rgba(242, 238, 231, 0.45);
+
+  --line: rgba(255, 255, 255, 0.1);
+  --line-strong: rgba(255, 255, 255, 0.2);
+
+  --gold: #c7a15c;
+  --gold-light: #dfbb78;
+  --gold-soft: rgba(199, 161, 92, 0.15);
+  --gold-glow: rgba(199, 161, 92, 0.35);
+
+  --dark: #0b0c0c;
+  --dark-2: #121413;
+
+  --shadow-soft: 0 20px 70px rgba(0, 0, 0, 0.4);
+  --shadow-card: 0 30px 90px rgba(0, 0, 0, 0.5);
+
+  color-scheme: dark;
+}
 
 /* =========================================================
-   RESET
-   ========================================================= */
-
-* {
-  box-sizing: border-box;
-}
-
-html {
-  margin: 0;
-  padding: 0;
-
-  background: var(--bg);
-  color: var(--text);
-
-  scroll-behavior: smooth;
-
-  transition:
-    background-color 0.6s ease,
-    color 0.6s ease;
-}
-
-body {
-  margin: 0;
-  padding: 0;
-
-  min-width: 320px;
-
-  background:
-    radial-gradient(
-      circle at 20% 0%,
-      rgba(169, 130, 69, 0.045),
-      transparent 32%
-    ),
-    var(--bg);
-
-  color: var(--text);
-
-  font-family:
-    "Manrope",
-    Arial,
-    sans-serif;
-
-  font-weight: 400;
-  line-height: 1.5;
-
-  overflow-x: hidden;
-
-  transition:
-    background 0.6s ease,
-    color 0.6s ease;
-}
-
-html.vardha-night body {
-  background:
-    radial-gradient(
-      circle at 70% 0%,
-      rgba(198, 162, 100, 0.05),
-      transparent 30%
-    ),
-    var(--bg);
-}
-
-button,
-input,
-textarea,
-select {
-  font: inherit;
-}
-
-button {
-  cursor: pointer;
-}
-
-img {
-  display: block;
-  max-width: 100%;
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-
-/* =========================================================
-   SELECTION
-   ========================================================= */
-
-::selection {
-  background: var(--gold);
-  color: #fff;
-}
-
-
-/* =========================================================
-   SCROLLBAR
-   ========================================================= */
-
-::-webkit-scrollbar {
-  width: 7px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--bg-soft);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--gold);
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--gold-light);
-}
-
-
-/* =========================================================
-   TYPOGRAPHY
+   TYPOGRAPHY FAMILIES
    ========================================================= */
 
 .font-display {
-  font-family: "Playfair Display", Georgia, serif;
+  font-family: "Cormorant Garamond", "Playfair Display", Georgia, serif;
+}
+
+.font-serif {
+  font-family: "Cormorant Garamond", "Playfair Display", Georgia, serif;
+}
+
+.font-sans {
+  font-family: "Manrope", "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 .font-mono {
+  font-family: "DM Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+/* =========================================================
+   STANDARDIZED DESIGN SYSTEM UTILITIES
+   ========================================================= */
+
+/* Consistent Layout Containers */
+.section-container {
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  max-width: 80rem; /* 1280px / max-w-7xl */
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+}
+@media (min-width: 640px) {
+  .section-container {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+@media (min-width: 1024px) {
+  .section-container {
+    padding-left: 3rem;
+    padding-right: 3rem;
+  }
+}
+
+.section-container-wide {
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  max-width: 100rem; /* 1600px */
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+}
+@media (min-width: 640px) {
+  .section-container-wide {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+@media (min-width: 1024px) {
+  .section-container-wide {
+    padding-left: 3rem;
+    padding-right: 3rem;
+  }
+}
+
+/* Standardized Section Vertical Rhythm */
+.section-padding {
+  padding-top: 5rem;
+  padding-bottom: 5rem;
+}
+@media (min-width: 768px) {
+  .section-padding {
+    padding-top: 7rem;
+    padding-bottom: 7rem;
+  }
+}
+@media (min-width: 1024px) {
+  .section-padding {
+    padding-top: 8rem;
+    padding-bottom: 8rem;
+  }
+}
+
+/* Hero Section Standard Padding (clears fixed navbar) */
+.hero-spacing {
+  padding-top: 7rem;
+  padding-bottom: 4rem;
+}
+@media (min-width: 640px) {
+  .hero-spacing {
+    padding-top: 8rem;
+    padding-bottom: 5rem;
+  }
+}
+@media (min-width: 1024px) {
+  .hero-spacing {
+    padding-top: 9rem;
+    padding-bottom: 6rem;
+  }
+}
+
+/* Standardized Gold Accent Eyebrow */
+.eyebrow-accent {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
   font-family: "DM Mono", monospace;
-}
-
-.display-xl {
-  font-size: clamp(4rem, 10vw, 10rem);
-  line-height: 0.84;
-  letter-spacing: -0.075em;
-  font-weight: 500;
-}
-
-.display-lg {
-  font-size: clamp(3rem, 7vw, 7rem);
-  line-height: 0.9;
-  letter-spacing: -0.06em;
-  font-weight: 500;
-}
-
-.display-md {
-  font-size: clamp(2.2rem, 4vw, 4.5rem);
-  line-height: 0.94;
-  letter-spacing: -0.045em;
-}
-
-.eyebrow {
-  font-family: "DM Mono", monospace;
-  font-size: 10px;
-  letter-spacing: 0.25em;
+  font-size: 0.5625rem; /* 9px */
   text-transform: uppercase;
-  color: var(--gold);
+  letter-spacing: 0.3em;
+  color: #c7a15c;
+}
+.eyebrow-accent::before {
+  content: "";
+  display: inline-block;
+  width: 2rem;
+  height: 1px;
+  background-color: #c7a15c;
+}
+
+/* Standardized Buttons */
+.btn-gold {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  background-color: #c7a15c;
+  color: #0b0c0c;
+  font-family: "DM Mono", monospace;
+  font-size: 0.625rem; /* 10px */
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  padding: 0.875rem 1.75rem;
+  border-radius: 9999px;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.btn-gold:hover {
+  background-color: #dfbb78;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(199, 161, 92, 0.25);
+}
+
+.btn-outline-white {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background-color: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+  font-family: "DM Mono", monospace;
+  font-size: 0.625rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  padding: 0.875rem 1.75rem;
+  border-radius: 9999px;
+  backdrop-filter: blur(8px);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.btn-outline-white:hover {
+  border-color: #c7a15c;
+  color: #dfbb78;
+  transform: translateY(-2px);
+}
+
+/* Luxury Card Surface */
+.luxury-surface {
+  background-color: rgba(21, 23, 21, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(16px);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.luxury-surface:hover {
+  border-color: rgba(199, 161, 92, 0.35);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
 }
 
 
