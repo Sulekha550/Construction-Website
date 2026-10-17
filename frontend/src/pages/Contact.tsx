@@ -1,4 +1,5 @@
-import { useState } from "react";
+
+import { useState, type ChangeEvent, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import {
   AlertCircle,
@@ -19,17 +20,17 @@ import {
   Sparkles,
   User,
 } from "lucide-react";
+
 import {
   submitContactInquiry,
   type ContactInquiryRecord,
 } from "../services/contact.service";
 
-// Default WhatsApp Business Number (Replace via VITE_WHATSAPP_NUMBER in frontend/.env)
 const DEFAULT_WHATSAPP_NUMBER = "919999999999";
+
 const RAW_WHATSAPP_NUMBER =
-  (typeof import.meta !== "undefined" && import.meta.env?.VITE_WHATSAPP_NUMBER) ||
-  DEFAULT_WHATSAPP_NUMBER;
-// Sanitize: remove any non-digits for standard wa.me URL format
+  import.meta.env.VITE_WHATSAPP_NUMBER || DEFAULT_WHATSAPP_NUMBER;
+
 const WHATSAPP_NUMBER = RAW_WHATSAPP_NUMBER.replace(/\D/g, "");
 
 const inquiryTypes = [
@@ -77,80 +78,67 @@ const inquiryTypes = [
   },
 ];
 
+const initialForm = {
+  name: "",
+  phone: "",
+  email: "",
+  inquiry: "Business Inquiry",
+  message: "",
+};
+
 export default function Contact() {
-  const [selected, setSelected] = useState("business");
-
-  const [form, setForm] = useState({
-    name: "",
-    phone: "",
-    email: "",
-    inquiry: "Business Inquiry",
-    message: "",
-  });
-
-  // Submission state tracking
+  const [selected, setSelected] = useState<string>("business");
+  const [form, setForm] = useState(initialForm);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [savedInquiry, setSavedInquiry] = useState<ContactInquiryRecord | null>(
-    null
-  );
+  const [savedInquiry, setSavedInquiry] =
+    useState<ContactInquiryRecord | null>(null);
 
   const active =
     inquiryTypes.find((item) => item.id === selected) ?? inquiryTypes[0];
 
-  // Handler for quick category selection in the Hero section
   const handleSelectInquiry = (id: string, label: string) => {
     setSelected(id);
-    setForm((prev) => ({
-      ...prev,
-      inquiry: label,
-    }));
+    setForm((prev) => ({ ...prev, inquiry: label }));
+    setErrorMessage(null);
   };
 
-  // Direct WhatsApp chat from hero greeting button (User-initiated only)
-  const openHeroWhatsApp = () => {
-    const message = encodeURIComponent(active.message);
-    window.open(
-      `https://wa.me/${WHATSAPP_NUMBER}?text=${message}`,
-      "_blank",
-      "noopener,noreferrer"
-    );
-  };
-
-  // Form field change handler
   const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
+
     setForm((prev) => ({
       ...prev,
       [name]: value,
     }));
 
-    // If changing the inquiry select dropdown, also sync the hero category button
     if (name === "inquiry") {
       const match = inquiryTypes.find((item) => item.label === value);
-      if (match) {
-        setSelected(match.id);
-      }
+      if (match) setSelected(match.id);
     }
 
-    // Clear error message when user starts typing again
-    if (errorMessage) {
-      setErrorMessage(null);
-    }
+    setErrorMessage(null);
   };
 
-  // Client-side validation before dispatching to API
+  const openWhatsApp = (message: string) => {
+    if (!WHATSAPP_NUMBER) {
+      setErrorMessage("Please configure your WhatsApp business number.");
+      return;
+    }
+
+    const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
+
+  const openHeroWhatsApp = () => openWhatsApp(active.message);
+
   const validateForm = (): string | null => {
-    if (!form.name.trim() || form.name.trim().length < 2) {
+    if (form.name.trim().length < 2) {
       return "Please enter your name (at least 2 characters).";
     }
 
-    const phoneDigits = form.phone.replace(/\D/g, "");
-    if (!form.phone.trim() || phoneDigits.length < 7) {
+    if (form.phone.replace(/\D/g, "").length < 7) {
       return "Please enter a valid phone number (at least 7 digits).";
     }
 
@@ -161,21 +149,17 @@ export default function Contact() {
       }
     }
 
-    if (!form.message.trim() || form.message.trim().length < 5) {
+    if (form.message.trim().length < 5) {
       return "Please enter your message (at least 5 characters).";
     }
 
     return null;
   };
 
-  // Handle Form Submission -> Save to MongoDB via backend API
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
-    // Prevent duplicate submission while in progress
     if (isSubmitting) return;
 
-    // Client-side input validation
     const validationError = validateForm();
     if (validationError) {
       setErrorMessage(validationError);
@@ -186,46 +170,47 @@ export default function Contact() {
     setErrorMessage(null);
 
     try {
-      // 1. Send form data to the backend API and wait for MongoDB confirmation
-      const response = await submitContactInquiry(form);
+      const response = await submitContactInquiry({
+        name: form.name.trim(),
+        phone: form.phone.trim(),
+        email: form.email.trim(),
+        inquiry: form.inquiry,
+        message: form.message.trim(),
+      });
 
-      // 2. Only after confirmed storage, set saved record and show success
-      // CRITICAL: We DO NOT automatically open WhatsApp here.
       if (response.data) {
         setSavedInquiry(response.data);
       } else {
-        // Fallback representation if data object is partial
         setSavedInquiry({
           id: "",
           name: form.name.trim(),
           phone: form.phone.trim(),
           email: form.email.trim() || null,
-          inquiry: form.inquiry.trim(),
+          inquiry: form.inquiry,
           message: form.message.trim(),
           status: "new",
           createdAt: new Date().toISOString(),
         });
       }
-    } catch (err: any) {
-      // 3. Display user-friendly error message, preserve form inputs for retry
+    } catch (err: unknown) {
       console.error("Contact form submission error:", err);
       setErrorMessage(
-        err.message ||
-          "Failed to submit your inquiry. Please check your connection and try again."
+        err instanceof Error 
+          ? err.message
+          : "Failed to submit your inquiry. Please check your connection and try again."
       );
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // Explicit user click handler to open WhatsApp with saved inquiry details
   const handleOpenWhatsApp = () => {
     if (!savedInquiry) return;
 
-    const whatsappMessage = `
+    const message = `
 Hello Vardha Builders,
 
-I have submitted an inquiry on your website:
+I have submitted an inquiry on your website.
 
 Name: ${savedInquiry.name}
 Phone: ${savedInquiry.phone}
@@ -238,118 +223,101 @@ ${savedInquiry.message}
 Thank you.
     `.trim();
 
-    const encodedMessage = encodeURIComponent(whatsappMessage);
-
-    window.open(
-      `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMessage}`,
-      "_blank",
-      "noopener,noreferrer"
-    );
+    openWhatsApp(message);
   };
 
-  // Reset form to submit another inquiry
   const handleResetForm = () => {
     setSavedInquiry(null);
     setErrorMessage(null);
-    setForm({
-      name: "",
-      phone: "",
-      email: "",
-      inquiry: "Business Inquiry",
-      message: "",
-    });
+    setForm({ ...initialForm });
     setSelected("business");
   };
 
   return (
-    <main className="min-h-screen overflow-hidden bg-[#101110] text-[#f2eee7]">
-      {/* =========================================================
-          HERO / WHATSAPP CONTACT
-      ========================================================= */}
-      <section className="relative min-h-[calc(100vh-82px)] overflow-hidden">
+    <div className="contact-page min-h-screen overflow-hidden">
+      {/* HERO */}
+      <section className="contact-hero relative min-h-[calc(100vh-82px)] overflow-hidden">
         <div
-          className="absolute inset-0 opacity-[.055]"
+          className="pointer-events-none absolute inset-0 opacity-[.055]"
           style={{
-            backgroundImage: `
-              linear-gradient(rgba(255,255,255,.7) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(255,255,255,.7) 1px, transparent 1px)
-            `,
+            backgroundImage:
+              "linear-gradient(rgba(128,128,128,.7) 1px, transparent 1px), linear-gradient(90deg, rgba(128,128,128,.7) 1px, transparent 1px)",
             backgroundSize: "80px 80px",
           }}
         />
 
-        <div className="absolute left-1/2 top-1/3 h-[480px] w-[480px] -translate-x-1/2 rounded-full bg-[#c7a15c]/[.04] blur-[120px]" />
-
+        <div className="pointer-events-none absolute left-1/2 top-1/3 h-[480px] w-[480px] -translate-x-1/2 rounded-full bg-[#c7a15c]/[.06] blur-[120px]" />
         <div className="absolute right-0 top-0 hidden h-full w-[4px] bg-[#c7a15c] md:block" />
 
         <div className="relative mx-auto max-w-6xl px-5 py-16 md:px-8 lg:py-24">
           <div className="mb-12 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <span className="h-px w-8 bg-[#c7a15c]" />
-
-              <span className="font-mono text-[8px] uppercase tracking-[.3em] text-white/35">
+              <span className="font-mono text-[8px] uppercase tracking-[.3em] text-[var(--contact-muted)]">
                 Vardha / Contact
               </span>
             </div>
-
-            <span className="font-mono text-[8px] uppercase tracking-[.25em] text-white/25">
+            <span className="font-mono text-[8px] uppercase tracking-[.25em] text-[var(--contact-muted)]">
               Direct Connection
             </span>
           </div>
 
-          <div className="mx-auto max-w-4xl border border-white/10 bg-[#151715]/95 px-6 py-12 shadow-2xl backdrop-blur-xl md:px-12 md:py-16 lg:px-16">
+          <div className="contact-panel mx-auto max-w-4xl border px-6 py-12 shadow-2xl backdrop-blur-xl md:px-12 md:py-16 lg:px-16">
             <div className="text-center">
               <div className="mb-8 flex justify-center">
                 <div className="relative">
-                  <div className="absolute inset-[-14px] rounded-full border border-[#20d66b]/20" />
-
-                  <div className="absolute inset-[-25px] rounded-full border border-[#20d66b]/10" />
-
+                  <div className="pointer-events-none absolute inset-[-14px] rounded-full border border-[#20d66b]/20" />
+                  <div className="pointer-events-none absolute inset-[-25px] rounded-full border border-[#20d66b]/10" />
                   <div className="flex h-20 w-20 items-center justify-center rounded-full border border-[#20d66b]/50 bg-[#20d66b]/10 text-[#20d66b] shadow-[0_0_50px_rgba(32,214,107,.16)]">
                     <MessageCircle size={38} strokeWidth={1.7} />
                   </div>
-
                   <span className="absolute -right-1 -top-1 h-3 w-3 animate-pulse rounded-full bg-[#20d66b]" />
                 </div>
               </div>
 
               <div className="font-mono text-[8px] uppercase tracking-[.3em] text-[#c7a15c]">
-                Let's connect
+                Let&apos;s connect
               </div>
 
-              <h1 className="mt-5 font-sans text-[clamp(2.5rem,5vw,4.8rem)] font-semibold leading-[.95] tracking-[-.045em]">
-                Let's Build Something
+              <h1 className="contact-heading mt-5 font-sans text-[clamp(2.5rem,5vw,4.8rem)] font-semibold leading-[.95] tracking-[-.045em]">
+                Let&apos;s Build Something
               </h1>
 
               <h2 className="mt-3 font-display text-[clamp(2.7rem,5vw,4.8rem)] italic leading-none text-[#c7a15c]">
                 Great Together
               </h2>
 
-              <p className="mx-auto mt-7 max-w-xl text-[13px] leading-7 text-white/45 md:text-sm">
-                Select an inquiry type to automatically prepare your WhatsApp
-                message, or start a direct conversation with Vardha Builders.
+              <p className="mx-auto mt-7 max-w-xl text-[13px] leading-7 text-[var(--contact-muted)] md:text-sm">
+                Select an inquiry type to prepare your WhatsApp message, or
+                start a direct conversation with Vardha Builders.
               </p>
             </div>
 
-            {/* INQUIRY BUTTONS */}
             <div className="mx-auto mt-10 flex max-w-3xl flex-wrap justify-center gap-3">
               {inquiryTypes.map((item) => {
                 const Icon = item.icon;
-                const activeItem = selected === item.id;
+                const isActive = selected === item.id;
 
                 return (
                   <button
                     key={item.id}
                     type="button"
+                    aria-pressed={isActive}
                     onClick={() => handleSelectInquiry(item.id, item.label)}
-                    className={`flex items-center gap-2 rounded-full border px-4 py-3 font-mono text-[8px] font-semibold uppercase tracking-[.16em] transition-all md:px-5 ${
-                      activeItem
-                        ? "border-[#c7a15c] bg-[#c7a15c]/10 text-[#e2bf79]"
-                        : "border-white/15 text-white/45 hover:border-[#c7a15c]/60 hover:text-[#e2bf79]"
+                    className={`flex cursor-pointer items-center gap-2 rounded-full border px-4 py-3 font-mono text-[9px] font-semibold uppercase tracking-[.16em] transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c7a15c] md:px-5 ${
+                      isActive
+                        ? "border-[#c7a15c] bg-[#c7a15c]/20 text-[#a77a26] shadow-[0_0_24px_rgba(199,161,92,0.15)] dark:text-[#e2bf79]"
+                        : "contact-category border-[var(--contact-border)] bg-transparent text-[var(--contact-text)] hover:border-[#c7a15c]"
                     }`}
-                  >
-                    <Icon size={12} />
-                    {item.label}
+                  > 
+                    <Icon size={14} />
+                    <span>{item.label}</span>
+                    {isActive && (
+                      <span
+                        aria-hidden="true"
+                        className="ml-1 h-1.5 w-1.5 rounded-full bg-[#c7a15c]"
+                      />
+                    )}
                   </button>
                 );
               })}
@@ -357,15 +325,14 @@ Thank you.
 
             <div className="mt-8 flex items-center justify-center gap-3 text-center">
               <Sparkles size={13} className="text-[#c7a15c]" />
-
-              <span className="text-[11px] text-white/35">Selected:</span>
-
-              <span className="text-[11px] font-medium text-white/75">
+              <span className="text-[11px] text-[var(--contact-muted)]">
+                Selected:
+              </span>
+              <span className="text-[11px] font-medium text-[var(--contact-text)]">
                 {active.label}
               </span>
             </div>
 
-            {/* WHATSAPP DIRECT CHAT BUTTON */}
             <div className="mt-10 flex justify-center">
               <button
                 type="button"
@@ -379,207 +346,165 @@ Thank you.
             </div>
 
             <div className="mt-7 flex items-center justify-center gap-2">
-              <ShieldCheck size={13} className="text-white/30" />
-
-              <span className="font-mono text-[8px] uppercase tracking-[.24em] text-white/30">
+              <ShieldCheck size={13} className="text-[var(--contact-muted)]" />
+              <span className="font-mono text-[8px] uppercase tracking-[.24em] text-[var(--contact-muted)]">
                 Secure · Private · Instant Reply
               </span>
             </div>
 
-            {/* QUICK LINKS */}
-            <div className="mt-12 grid border-t border-white/10 pt-8 md:grid-cols-3">
-              <div className="border-b border-white/10 px-4 py-5 text-center md:border-b-0 md:border-r">
+            <div className="mt-12 grid border-t border-[var(--contact-border)] pt-8 md:grid-cols-3">
+              <div className="border-b border-[var(--contact-border)] px-4 py-5 text-center md:border-b-0 md:border-r">
                 <Building2 size={16} className="mx-auto text-[#c7a15c]" />
-
-                <div className="mt-3 font-mono text-[8px] uppercase tracking-[.18em] text-white/30">
+                <div className="mt-3 font-mono text-[8px] uppercase tracking-[.18em] text-[var(--contact-muted)]">
                   Portfolio
                 </div>
-
                 <Link
                   to="/portfolio"
-                  className="mt-2 inline-flex items-center gap-2 text-xs text-white/65 hover:text-[#c7a15c]"
+                  className="mt-2 inline-flex items-center gap-2 text-xs text-[var(--contact-text)] hover:text-[#c7a15c]"
                 >
-                  Explore Projects
-                  <ArrowUpRight size={12} />
+                  Explore Projects <ArrowUpRight size={12} />
                 </Link>
               </div>
 
-              <div className="border-b border-white/10 px-4 py-5 text-center md:border-b-0 md:border-r">
+              <div className="border-b border-[var(--contact-border)] px-4 py-5 text-center md:border-b-0 md:border-r">
                 <MapPin size={16} className="mx-auto text-[#c7a15c]" />
-
-                <div className="mt-3 font-mono text-[8px] uppercase tracking-[.18em] text-white/30">
+                <div className="mt-3 font-mono text-[8px] uppercase tracking-[.18em] text-[var(--contact-muted)]">
                   Visit
                 </div>
-
-                <div className="mt-2 text-xs text-white/65">
+                <button
+                  type="button"
+                  onClick={() =>
+                    document
+                      .getElementById("contact-form-section")
+                      ?.scrollIntoView({ behavior: "smooth" })
+                  }
+                  className="mt-2 text-xs text-[var(--contact-text)] transition-colors hover:text-[#c7a15c]"
+                >
                   Schedule a Site Visit
-                </div>
+                </button>
               </div>
 
               <div className="px-4 py-5 text-center">
                 <MessageCircle size={16} className="mx-auto text-[#c7a15c]" />
-
-                <div className="mt-3 font-mono text-[8px] uppercase tracking-[.18em] text-white/30">
+                <div className="mt-3 font-mono text-[8px] uppercase tracking-[.18em] text-[var(--contact-muted)]">
                   Direct
                 </div>
-
-                <div className="mt-2 text-xs text-white/65">
+                <button
+                  type="button"
+                  onClick={openHeroWhatsApp}
+                  className="mt-2 text-xs text-[var(--contact-text)] transition-colors hover:text-[#c7a15c]"
+                >
                   WhatsApp Conversation
-                </div>
+                </button>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* =========================================================
-          DROP US A MESSAGE (CONTACT FORM WITH MONGODB INTEGRATION)
-      ========================================================= */}
+      {/* CONTACT FORM */}
       <section
         id="contact-form-section"
-        className="relative overflow-hidden border-t border-white/10 bg-[#0b0c0c] px-5 py-24 md:px-8 lg:px-20 lg:py-32"
+        className="contact-form-section relative overflow-hidden border-t px-5 py-24 md:px-8 lg:px-20 lg:py-32"
       >
-        {/* Architectural grid */}
         <div
           className="pointer-events-none absolute inset-0 opacity-[.035]"
           style={{
-            backgroundImage: `
-              linear-gradient(rgba(255,255,255,.8) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(255,255,255,.8) 1px, transparent 1px)
-            `,
+            backgroundImage:
+              "linear-gradient(rgba(128,128,128,.8) 1px, transparent 1px), linear-gradient(90deg, rgba(128,128,128,.8) 1px, transparent 1px)",
             backgroundSize: "90px 90px",
           }}
         />
 
         <div className="relative mx-auto max-w-7xl">
-          {/* HEADER */}
           <div className="grid gap-10 lg:grid-cols-[.8fr_1.2fr] lg:gap-24">
             <div>
               <div className="flex items-center gap-3">
                 <span className="h-px w-10 bg-[#c7a15c]" />
-
                 <span className="font-mono text-[9px] uppercase tracking-[.35em] text-[#c7a15c]">
                   Direct Enquiry
                 </span>
               </div>
 
-              <h2 className="mt-7 max-w-xl font-display text-5xl leading-[.95] tracking-[-.03em] text-white md:text-6xl lg:text-7xl">
+              <h2 className="contact-heading mt-7 max-w-xl font-display text-5xl leading-[.95] tracking-[-.03em] md:text-6xl lg:text-7xl">
                 Drop us a <span className="italic text-[#c7a15c]">message.</span>
               </h2>
 
-              <p className="mt-7 max-w-md text-sm leading-7 text-white/45 md:text-base">
+              <p className="mt-7 max-w-md text-sm leading-7 text-[var(--contact-muted)] md:text-base">
                 Tell us what you are looking for. Share your requirements,
                 project interest, or any question and our team will connect
                 with you directly.
               </p>
 
               <div className="mt-10 space-y-5">
-                <div className="flex items-center gap-4">
-                  <div className="flex h-10 w-10 items-center justify-center border border-white/10 text-[#c7a15c]">
-                    <Phone size={16} />
-                  </div>
-
-                  <div>
-                    <div className="font-mono text-[8px] uppercase tracking-[.2em] text-white/25">
-                      Phone
+                {[
+                  { Icon: Phone, label: "Phone", text: "Contact Vardha Builders" },
+                  { Icon: Mail, label: "Email", text: "Send us your requirements" },
+                  { Icon: ShieldCheck, label: "Private Enquiry", text: "Your details stay with our team" },
+                ].map(({ Icon, label, text }) => (
+                  <div key={label} className="flex items-center gap-4">
+                    <div className="flex h-10 w-10 items-center justify-center border border-[var(--contact-border)] text-[#c7a15c]">
+                      <Icon size={16} />
                     </div>
-
-                    <div className="mt-1 text-sm text-white/70">
-                      Contact Vardha Builders
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-4">
-                  <div className="flex h-10 w-10 items-center justify-center border border-white/10 text-[#c7a15c]">
-                    <Mail size={16} />
-                  </div>
-
-                  <div>
-                    <div className="font-mono text-[8px] uppercase tracking-[.2em] text-white/25">
-                      Email
-                    </div>
-
-                    <div className="mt-1 text-sm text-white/70">
-                      Send us your requirements
+                    <div>
+                      <div className="font-mono text-[8px] uppercase tracking-[.2em] text-[var(--contact-muted)]">
+                        {label}
+                      </div>
+                      <div className="mt-1 text-sm text-[var(--contact-text)]">
+                        {text}
+                      </div>
                     </div>
                   </div>
-                </div>
-
-                <div className="flex items-center gap-4">
-                  <div className="flex h-10 w-10 items-center justify-center border border-white/10 text-[#c7a15c]">
-                    <ShieldCheck size={16} />
-                  </div>
-
-                  <div>
-                    <div className="font-mono text-[8px] uppercase tracking-[.2em] text-white/25">
-                      Private Enquiry
-                    </div>
-
-                    <div className="mt-1 text-sm text-white/70">
-                      Your details stay with our team
-                    </div>
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
 
-            {/* FORM CONTAINER */}
-            <div className="border border-white/10 bg-[#121413] p-6 md:p-8 lg:p-10">
+            <div className="contact-panel border p-6 md:p-8 lg:p-10">
               {savedInquiry ? (
-                /* =========================================================
-                    POST-SAVE CONFIRMATION VIEW
-                    Displays ONLY after MongoDB confirms successful storage.
-                    WhatsApp button is explicit and user-triggered only.
-                ========================================================= */
                 <div className="space-y-6">
-                  {/* Luxury Success Card */}
-                  <div className="border border-[#c7a15c]/40 bg-[#171a17] p-6 md:p-8">
+                  <div className="contact-success-panel border border-[#c7a15c]/40 p-6 md:p-8">
                     <div className="flex items-start gap-4">
                       <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-[#20d66b]/40 bg-[#20d66b]/10 text-[#20d66b]">
                         <CheckCircle2 size={26} />
                       </div>
-
                       <div className="space-y-1">
                         <span className="font-mono text-[9px] uppercase tracking-[.25em] text-[#c7a15c]">
                           Inquiry Successfully Saved
                         </span>
-                        <h3 className="text-xl font-semibold text-white">
+                        <h3 className="contact-heading text-xl font-semibold">
                           Thank you, {savedInquiry.name}
                         </h3>
-                        <p className="text-xs leading-5 text-white/60">
-                          Your inquiry has been safely recorded in our database.
-                          Our executive team will review your requirements and
-                          reach out shortly.
+                        <p className="text-xs leading-5 text-[var(--contact-muted)]">
+                          Your inquiry has been recorded. Our team will review
+                          your requirements and reach out shortly.
                         </p>
                       </div>
                     </div>
 
-                    {/* Inquiry Details Summary */}
-                    <div className="mt-6 border-t border-white/10 pt-4">
+                    <div className="mt-6 border-t border-[var(--contact-border)] pt-4">
                       <div className="grid grid-cols-2 gap-4 text-xs">
                         <div>
-                          <span className="font-mono text-[8px] uppercase tracking-[.2em] text-white/35">
+                          <span className="font-mono text-[8px] uppercase tracking-[.2em] text-[var(--contact-muted)]">
                             Category
                           </span>
-                          <p className="font-medium text-[#e2bf79]">
+                          <p className="font-medium text-[#c7a15c]">
                             {savedInquiry.inquiry}
                           </p>
                         </div>
                         <div>
-                          <span className="font-mono text-[8px] uppercase tracking-[.2em] text-white/35">
+                          <span className="font-mono text-[8px] uppercase tracking-[.2em] text-[var(--contact-muted)]">
                             Phone
                           </span>
-                          <p className="font-medium text-white/80">
+                          <p className="font-medium text-[var(--contact-text)]">
                             {savedInquiry.phone}
                           </p>
                         </div>
                         {savedInquiry.email && (
                           <div className="col-span-2">
-                            <span className="font-mono text-[8px] uppercase tracking-[.2em] text-white/35">
+                            <span className="font-mono text-[8px] uppercase tracking-[.2em] text-[var(--contact-muted)]">
                               Email
                             </span>
-                            <p className="font-medium text-white/80">
+                            <p className="font-medium text-[var(--contact-text)]">
                               {savedInquiry.email}
                             </p>
                           </div>
@@ -588,33 +513,21 @@ Thank you.
                     </div>
                   </div>
 
-                  {/* Explicit User-Initiated Open WhatsApp Button */}
-                  <div className="space-y-3">
-                    <button
-                      type="button"
-                      id="open-whatsapp-button"
-                      onClick={handleOpenWhatsApp}
-                      className="group flex w-full items-center justify-center gap-3 rounded-none bg-gradient-to-r from-[#20d66b] to-[#16a085] px-7 py-5 text-xs font-bold uppercase tracking-[.18em] text-white shadow-[0_0_35px_rgba(32,214,107,.2)] transition-all hover:-translate-y-0.5 hover:shadow-[0_0_50px_rgba(32,214,107,.35)]"
-                    >
-                      <MessageCircle size={18} fill="currentColor" />
-                      Open WhatsApp
-                      <ArrowUpRight
-                        size={16}
-                        className="transition-transform group-hover:translate-x-1 group-hover:-translate-y-0.5"
-                      />
-                    </button>
+                  <button
+                    type="button"
+                    onClick={handleOpenWhatsApp}
+                    className="group flex w-full items-center justify-center gap-3 bg-gradient-to-r from-[#20d66b] to-[#16a085] px-7 py-5 text-xs font-bold uppercase tracking-[.18em] text-white transition-all hover:-translate-y-0.5"
+                  >
+                    <MessageCircle size={18} fill="currentColor" />
+                    Open WhatsApp
+                    <ArrowUpRight size={16} className="transition-transform group-hover:translate-x-1 group-hover:-translate-y-0.5" />
+                  </button>
 
-                    <p className="text-center font-mono text-[8px] uppercase tracking-[.18em] text-white/35">
-                      Optional: Continue this discussion immediately on WhatsApp
-                    </p>
-                  </div>
-
-                  {/* Submit Another Inquiry Action */}
-                  <div className="border-t border-white/10 pt-4 text-center">
+                  <div className="border-t border-[var(--contact-border)] pt-4 text-center">
                     <button
                       type="button"
                       onClick={handleResetForm}
-                      className="inline-flex items-center gap-2 font-mono text-[9px] uppercase tracking-[.2em] text-white/45 transition-colors hover:text-[#c7a15c]"
+                      className="inline-flex items-center gap-2 font-mono text-[9px] uppercase tracking-[.2em] text-[var(--contact-muted)] transition-colors hover:text-[#c7a15c]"
                     >
                       <RefreshCw size={11} />
                       Submit Another Inquiry
@@ -622,37 +535,23 @@ Thank you.
                   </div>
                 </div>
               ) : (
-                /* =========================================================
-                    ACTIVE CONTACT FORM
-                ========================================================= */
                 <form onSubmit={handleSubmit} className="space-y-6">
-                  {/* Error Notification Alert */}
                   {errorMessage && (
                     <div
                       role="alert"
-                      className="flex items-start gap-3 border border-red-500/40 bg-red-950/30 p-4 text-xs text-red-200"
+                      className="flex items-start gap-3 border border-red-500/40 bg-red-500/10 p-4 text-xs text-red-700 dark:text-red-200"
                     >
-                      <AlertCircle
-                        size={16}
-                        className="mt-0.5 shrink-0 text-red-400"
-                      />
-                      <div className="flex-1">
-                        <span className="font-semibold">
-                          Submission Failed:
-                        </span>{" "}
-                        {errorMessage}
-                      </div>
+                      <AlertCircle size={16} className="mt-0.5 shrink-0 text-red-500" />
+                      <div className="flex-1">{errorMessage}</div>
                     </div>
                   )}
 
-                  {/* Name + Phone */}
                   <div className="grid gap-6 md:grid-cols-2">
                     <label className="block">
-                      <span className="mb-3 flex items-center gap-2 font-mono text-[8px] uppercase tracking-[.22em] text-white/35">
+                      <span className="contact-label mb-3 flex items-center gap-2 font-mono text-[8px] uppercase tracking-[.22em]">
                         <User size={12} />
                         Your Name <span className="text-[#c7a15c]">*</span>
                       </span>
-
                       <input
                         required
                         disabled={isSubmitting}
@@ -660,16 +559,16 @@ Thank you.
                         value={form.name}
                         onChange={handleChange}
                         placeholder="Enter your name"
-                        className="w-full border-b border-white/15 bg-transparent px-0 py-3 text-sm text-white outline-none transition-colors placeholder:text-white/20 focus:border-[#c7a15c] disabled:opacity-50"
+                        autoComplete="name"
+                        className="contact-input w-full border-b px-0 py-3 text-sm outline-none transition-colors focus:border-[#c7a15c] disabled:opacity-50"
                       />
                     </label>
 
                     <label className="block">
-                      <span className="mb-3 flex items-center gap-2 font-mono text-[8px] uppercase tracking-[.22em] text-white/35">
+                      <span className="contact-label mb-3 flex items-center gap-2 font-mono text-[8px] uppercase tracking-[.22em]">
                         <Phone size={12} />
                         Phone <span className="text-[#c7a15c]">*</span>
                       </span>
-
                       <input
                         required
                         disabled={isSubmitting}
@@ -678,19 +577,18 @@ Thank you.
                         value={form.phone}
                         onChange={handleChange}
                         placeholder="Enter phone number"
-                        className="w-full border-b border-white/15 bg-transparent px-0 py-3 text-sm text-white outline-none transition-colors placeholder:text-white/20 focus:border-[#c7a15c] disabled:opacity-50"
+                        autoComplete="tel"
+                        className="contact-input w-full border-b px-0 py-3 text-sm outline-none transition-colors focus:border-[#c7a15c] disabled:opacity-50"
                       />
                     </label>
                   </div>
 
-                  {/* Email + Inquiry */}
                   <div className="grid gap-6 md:grid-cols-2">
                     <label className="block">
-                      <span className="mb-3 flex items-center gap-2 font-mono text-[8px] uppercase tracking-[.22em] text-white/35">
+                      <span className="contact-label mb-3 flex items-center gap-2 font-mono text-[8px] uppercase tracking-[.22em]">
                         <Mail size={12} />
                         Email (Optional)
                       </span>
-
                       <input
                         disabled={isSubmitting}
                         name="email"
@@ -698,28 +596,24 @@ Thank you.
                         value={form.email}
                         onChange={handleChange}
                         placeholder="Enter email address"
-                        className="w-full border-b border-white/15 bg-transparent px-0 py-3 text-sm text-white outline-none transition-colors placeholder:text-white/20 focus:border-[#c7a15c] disabled:opacity-50"
+                        autoComplete="email"
+                        className="contact-input w-full border-b px-0 py-3 text-sm outline-none transition-colors focus:border-[#c7a15c] disabled:opacity-50"
                       />
                     </label>
 
                     <label className="block">
-                      <span className="mb-3 font-mono text-[8px] uppercase tracking-[.22em] text-white/35">
+                      <span className="contact-label mb-3 flex items-center gap-2 font-mono text-[8px] uppercase tracking-[.22em]">
                         Inquiry Type <span className="text-[#c7a15c]">*</span>
                       </span>
-
                       <select
                         disabled={isSubmitting}
                         name="inquiry"
                         value={form.inquiry}
                         onChange={handleChange}
-                        className="w-full border-b border-white/15 bg-transparent px-0 py-3 text-sm text-white outline-none transition-colors focus:border-[#c7a15c] disabled:opacity-50"
+                        className="contact-input w-full border-b px-0 py-3 text-sm outline-none transition-colors focus:border-[#c7a15c] disabled:opacity-50"
                       >
                         {inquiryTypes.map((item) => (
-                          <option
-                            key={item.id}
-                            value={item.label}
-                            className="bg-[#121413] text-white"
-                          >
+                          <option key={item.id} value={item.label}>
                             {item.label}
                           </option>
                         ))}
@@ -727,13 +621,11 @@ Thank you.
                     </label>
                   </div>
 
-                  {/* MESSAGE */}
                   <label className="block">
-                    <span className="mb-3 flex items-center gap-2 font-mono text-[8px] uppercase tracking-[.22em] text-white/35">
+                    <span className="contact-label mb-3 flex items-center gap-2 font-mono text-[8px] uppercase tracking-[.22em]">
                       <MessageCircle size={12} />
                       Your Message <span className="text-[#c7a15c]">*</span>
                     </span>
-
                     <textarea
                       required
                       disabled={isSubmitting}
@@ -742,15 +634,14 @@ Thank you.
                       onChange={handleChange}
                       placeholder="Tell us about your requirement..."
                       rows={6}
-                      className="w-full resize-none border-b border-white/15 bg-transparent px-0 py-3 text-sm leading-7 text-white outline-none transition-colors placeholder:text-white/20 focus:border-[#c7a15c] disabled:opacity-50"
+                      className="contact-input w-full resize-none border-b px-0 py-3 text-sm leading-7 outline-none transition-colors focus:border-[#c7a15c] disabled:opacity-50"
                     />
                   </label>
 
-                  {/* SUBMIT BUTTON */}
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="group flex w-full items-center justify-center gap-3 bg-[#c7a15c] px-7 py-5 text-[10px] font-bold uppercase tracking-[.2em] text-[#0b0c0c] transition-all hover:bg-[#dfbb78] hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0"
+                    className="group flex w-full items-center justify-center gap-3 bg-[#c7a15c] px-7 py-5 text-[10px] font-bold uppercase tracking-[.2em] text-[#0b0c0c] transition-all hover:-translate-y-0.5 hover:bg-[#dfbb78] disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0"
                   >
                     {isSubmitting ? (
                       <>
@@ -759,21 +650,15 @@ Thank you.
                       </>
                     ) : (
                       <>
-                        <Send
-                          size={15}
-                          className="transition-transform group-hover:translate-x-1"
-                        />
+                        <Send size={15} className="transition-transform group-hover:translate-x-1" />
                         <span>Send Message</span>
-                        <ArrowUpRight
-                          size={15}
-                          className="transition-transform group-hover:translate-x-1 group-hover:-translate-y-1"
-                        />
+                        <ArrowUpRight size={15} className="transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />
                       </>
                     )}
                   </button>
 
-                  <p className="text-center font-mono text-[8px] uppercase tracking-[.18em] text-white/25">
-                    Your inquiry will be securely saved before opening WhatsApp
+                  <p className="text-center font-mono text-[8px] uppercase tracking-[.18em] text-[var(--contact-muted)]">
+                    Your inquiry will be saved before opening WhatsApp
                   </p>
                 </form>
               )}
@@ -782,16 +667,14 @@ Thank you.
         </div>
       </section>
 
-      {/* =========================================================
-          FINAL CTA
-      ========================================================= */}
-      <section className="border-t border-white/10 bg-[#101110] px-5 py-24 text-center md:px-8 lg:py-32">
+      {/* FINAL CTA */}
+      <section className="contact-cta border-t px-5 py-24 text-center md:px-8 lg:py-32">
         <div className="mx-auto max-w-4xl">
           <div className="font-mono text-[9px] uppercase tracking-[.35em] text-[#c7a15c]">
             Vardha Builders
           </div>
 
-          <h3 className="mt-6 font-display text-5xl leading-none md:text-7xl lg:text-8xl">
+          <h3 className="contact-heading mt-6 font-display text-5xl leading-none md:text-7xl lg:text-8xl">
             Let&apos;s create
             <br />
             <span className="italic text-[#c7a15c]">something lasting.</span>
@@ -801,7 +684,7 @@ Thank you.
             <button
               type="button"
               onClick={openHeroWhatsApp}
-              className="flex items-center gap-3 border border-[#c7a15c]/50 px-7 py-4 text-[10px] uppercase tracking-[.2em] text-[#c7a15c] transition-all hover:bg-[#c7a15c] hover:text-[#0b0c0c]"
+              className="flex items-center gap-3 border border-[#c7a15c]/50 px-7 py-4 text-[10px] uppercase tracking-[.2em] text-[#a77a26] transition-all hover:bg-[#c7a15c] hover:text-[#0b0c0c] dark:text-[#c7a15c]"
             >
               Start a Conversation
               <ArrowUpRight size={15} />
@@ -809,6 +692,7 @@ Thank you.
           </div>
         </div>
       </section>
-    </main>
+    </div>
   );
 }
+ 

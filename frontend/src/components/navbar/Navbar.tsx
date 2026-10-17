@@ -7,7 +7,7 @@ import {
   Sun,
   Moon,
 } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, NavLink, useLocation } from "react-router-dom";
 
 const navItems = [
   { label: "Home", path: "/" },
@@ -171,44 +171,46 @@ export default function Navbar() {
               <div className="mt-1 flex items-center gap-2">
                 <span className="h-px w-4 bg-vardha-gold/70 sm:w-5" />
 
-                <span className="whitespace-nowrap text-[6px] font-medium uppercase tracking-[0.16em] text-white/50 sm:text-[7px] sm:tracking-[0.3em]">
+                <span className="truncate font-mono text-[10px] font-medium tracking-normal text-white/75 sm:text-xs">
                   Building Dreams Since 2014
                 </span>
               </div>
             </div>
           </Link>
 
-          {/* DESKTOP NAVIGATION */}
+          {/* DESKTOP NAVIGATION (Issue 11: Route-Aware Active Indicator) */}
           <nav
             aria-label="Main navigation"
-            className="hidden items-center gap-4 min-[1024px]:flex xl:gap-7"
+            className="hidden items-center gap-5 min-[1024px]:flex xl:gap-8"
           >
             {navItems.map((item) => {
-              const active = isActive(item.path);
-
               return (
-                <Link
+                <NavLink
                   key={item.path}
                   to={item.path}
-                  aria-current={active ? "page" : undefined}
-                  className="group relative py-2 text-[10px] font-medium uppercase tracking-[0.14em] xl:tracking-[0.18em]"
+                  end={item.path === "/"}
+                  className={({ isActive }) => `
+                    group relative py-2 font-mono text-xs font-semibold uppercase tracking-[0.14em] transition-colors duration-300
+                    ${
+                      isActive
+                        ? "text-[#dfbb78]"
+                        : "text-white/70 hover:text-white"
+                    }
+                  `}
                 >
-                  <span
-                    className={`transition-colors duration-300 ${
-                      active
-                        ? "text-vardha-gold"
-                        : "text-white/65 group-hover:text-white"
-                    }`}
-                  >
-                    {item.label}
-                  </span>
-
-                  <span
-                    className={`absolute bottom-0 left-0 h-px bg-vardha-gold transition-all duration-300 ${
-                      active ? "w-full" : "w-0 group-hover:w-full"
-                    }`}
-                  />
-                </Link>
+                  {({ isActive }) => (
+                    <>
+                      <span>{item.label}</span>
+                      <span
+                        className={`absolute bottom-0 left-0 h-0.5 bg-[#c7a15c] transition-all duration-300 ${
+                          isActive
+                            ? "w-full shadow-[0_0_8px_rgba(199,161,92,0.6)]"
+                            : "w-0 group-hover:w-full"
+                        }`}
+                      />
+                    </>
+                  )}
+                </NavLink>
               );
             })}
           </nav>
@@ -286,7 +288,7 @@ export default function Navbar() {
       {/* MOBILE MENU OVERLAY */}
       <div
         className={`fixed inset-0 z-[90] transition-[visibility] duration-500 ${
-          menuOpen ? "visible" : "invisible delay-500"
+          menuOpen ? "visible" : "invisible pointer-events-none delay-500"
         }`}
         aria-hidden={!menuOpen}
       >
@@ -355,70 +357,78 @@ export default function Navbar() {
               className="flex flex-1 flex-col justify-center gap-2.5 py-6 sm:gap-3 sm:py-8"
             >
               {navItems.map((item, index) => {
-                const active = isActive(item.path);
-
                 return (
-                  <Link
+                  <NavLink
                     key={item.path}
                     to={item.path}
+                    end={item.path === "/"}
                     tabIndex={menuOpen ? 0 : -1}
-                    aria-current={active ? "page" : undefined}
                     onClick={closeMenu}
-                    className="
+                    className={({ isActive }) => `
                       group relative flex w-full min-w-0
                       items-center justify-between gap-2
-                      overflow-hidden rounded-full border border-white/15
-                      bg-white/[0.025] px-3 py-3.5 text-white
-                      transition-all duration-500 hover:border-vardha-gold
-                      sm:px-4 sm:py-4
-                    "
+                      overflow-hidden rounded-full border
+                      px-4 py-3.5 text-white transition-all duration-300
+                      ${
+                        isActive
+                          ? "border-[#c7a15c] bg-[#c7a15c]/10 shadow-[0_0_20px_rgba(199,161,92,0.15)]"
+                          : "border-white/15 bg-white/[0.025] hover:border-[#c7a15c]"
+                      }
+                      sm:px-5 sm:py-4
+                    `}
                   >
-                    <span
-                      aria-hidden="true"
-                      className="absolute inset-0 origin-left scale-x-0 bg-vardha-gold transition-transform duration-500 group-hover:scale-x-100"
-                    />
+                    {({ isActive }) => (
+                      <>
+                        <span
+                          aria-hidden="true"
+                          className="absolute inset-0 origin-left scale-x-0 bg-vardha-gold transition-transform duration-500 group-hover:scale-x-100"
+                        />
 
-                    <span
-                      aria-hidden="true"
-                      className="absolute inset-y-0 -left-full w-1/3 skew-x-[-20deg] bg-white/20 transition-all duration-700 group-hover:left-[120%]"
-                    />
+                        <span
+                          aria-hidden="true"
+                          className="absolute inset-y-0 -left-full w-1/3 skew-x-[-20deg] bg-white/20 transition-all duration-700 group-hover:left-[120%]"
+                        />
 
-                    <span className="relative z-10 flex min-w-0 items-center gap-3 sm:gap-4">
-                      <span
-                        className={`w-5 shrink-0 font-mono text-[8px] tracking-[0.15em] transition-colors ${
-                          active
-                            ? "text-vardha-gold group-hover:text-black/60"
-                            : "text-vardha-gold/65 group-hover:text-black/60"
-                        }`}
-                      >
-                        0{index + 1}
-                      </span>
+                        <span className="relative z-10 flex min-w-0 items-center gap-3 sm:gap-4">
+                          <span
+                            className={`w-5 shrink-0 font-mono text-[10px] tracking-[0.15em] transition-colors ${
+                              isActive
+                                ? "text-[#c7a15c] font-bold group-hover:text-black"
+                                : "text-white/40 group-hover:text-black"
+                            }`}
+                          >
+                            0{index + 1}
+                          </span>
 
-                      <span
-                        className={`min-w-0 break-words font-display text-[clamp(15px,4.2vw,21px)] leading-tight tracking-[-0.035em] transition-all group-hover:translate-x-0.5 sm:text-[22px] ${
-                          active
-                            ? "text-vardha-gold group-hover:text-black"
-                            : "text-white/85 group-hover:text-black"
-                        }`}
-                      >
-                        {item.label}
-                      </span>
-                    </span>
+                          <span
+                            className={`min-w-0 break-words font-display text-[clamp(16px,4.5vw,22px)] leading-tight tracking-[-0.03em] transition-all group-hover:translate-x-1 sm:text-[23px] ${
+                              isActive
+                                ? "text-[#dfbb78] font-semibold group-hover:text-black"
+                                : "text-white/85 group-hover:text-black"
+                            }`}
+                          >
+                            {item.label}
+                          </span>
+                        </span>
 
-                    <span
-                      className="
-                        relative z-10 flex h-8 w-8 shrink-0
-                        items-center justify-center rounded-full
-                        border border-white/15 text-white/50
-                        transition-all duration-500
-                        group-hover:translate-x-0.5
-                        group-hover:-translate-y-0.5
-                        group-hover:border-black/20 group-hover:text-black
-                      "
-                    >
-                      <ArrowUpRight size={15} strokeWidth={1.2} />
-                    </span>
-                  </Link>
+                        <span
+                          className={`
+                            relative z-10 flex h-8 w-8 shrink-0
+                            items-center justify-center rounded-full border transition-all duration-500
+                            ${
+                              isActive
+                                ? "border-[#c7a15c] bg-[#c7a15c] text-black group-hover:border-black/30"
+                                : "border-white/20 text-white/50 group-hover:border-black/20 group-hover:text-black"
+                            }
+                            group-hover:translate-x-0.5
+                            group-hover:-translate-y-0.5
+                          `}
+                        >
+                          <ArrowUpRight size={15} strokeWidth={1.8} />
+                        </span>
+                      </>
+                    )}
+                  </NavLink>
                 );
               })}
             </nav>

@@ -15,7 +15,7 @@ export default function WhatsAppFloat() {
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Chat with Vardha Builders on WhatsApp"
-      className="fixed bottom-6 right-6 z-[100] flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-[0_10px_35px_rgba(0,0,0,0.2)] transition-all duration-300 hover:scale-110 hover:shadow-[0_15px_40px_rgba(0,0,0,0.28)]"
+      className="fixed bottom-6 right-6 z-[100] flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-[0_10px_35px_rgba(0,0,0,0.2)] transition-all duration-300 hover:scale-110 hover:shadow-[0_15px_40px_rgba(0,0,0,0.28)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#25D366] focus-visible:ring-offset-2 focus-visible:ring-offset-[#101110]"
     >
       <MessageCircle size={25} strokeWidth={1.8} />
 

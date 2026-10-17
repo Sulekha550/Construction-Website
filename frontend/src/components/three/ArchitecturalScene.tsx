@@ -19,6 +19,7 @@ type ArchitecturalSceneProps = {
   interactive?: boolean;
   onHotspotSelect?: (id: string) => void;
   className?: string;
+  showHud?: boolean;
 };
 
 type HotspotData = {
@@ -576,54 +577,109 @@ function Hotspot({
 }
 
 /* -------------------------------------------------------------------------- */
-/* Camera                                                                      */
+/* -------------------------------------------------------------------------- */
+/* Camera Controller                                                           */
 /* -------------------------------------------------------------------------- */
 
 function CameraController({
   target,
   night,
+  controlsRef,
 }: {
   target: [number, number, number] | null;
   night: boolean;
+  controlsRef: React.RefObject<any>;
 }) {
-  const { camera } = useThree();
+  const { camera, size } = useThree();
+  const aspect = size.width / Math.max(size.height, 1);
 
-  const destination = useRef(new THREE.Vector3(18, 11, 24));
-  const lookAt = useRef(new THREE.Vector3(0, 6, 0));
+  // Compute responsive default camera position based on viewport width:
+  // On mobile screens, move the camera back proportionately and center at (0, 7.2, 0)
+  // so the entire building, podium, and crown fit comfortably within the rounded showcase frame.
+  const defaultPosition = useMemo(() => {
+    if (size.width < 480) {
+      // Small mobile screens: position camera back to keep the entire building centered within the compact rounded viewer
+      return new THREE.Vector3(25, 15, 33);
+    } else if (size.width < 768) {
+      // Larger mobile screens
+      return new THREE.Vector3(23, 14, 30.5);
+    } else if (size.width < 1024) {
+      // Tablets
+      return new THREE.Vector3(20.5, 12.5, 27.5);
+    }
+    // Desktop wide — preserves original desktop framing
+    return new THREE.Vector3(18, 11, 24);
+  }, [size.width]);
 
+  const defaultLookAt = useMemo(() => {
+    if (size.width < 768) {
+      // Slightly higher center target on mobile to perfectly balance top/bottom HUD margins
+      return new THREE.Vector3(0, 7.2, 0);
+    }
+    return new THREE.Vector3(0, 6.8, 0);
+  }, [size.width]);
+
+  const destination = useRef(defaultPosition.clone());
+  const lookAt = useRef(defaultLookAt.clone());
+  const isTransitioning = useRef(true);
+
+  // When defaultPosition changes due to resize/rotation, update destination if not inspecting hotspot
   useEffect(() => {
     if (!target) {
-      destination.current.set(18, 11, 24);
-      lookAt.current.set(0, 6, 0);
+      destination.current.copy(defaultPosition);
+      lookAt.current.copy(defaultLookAt);
+      isTransitioning.current = true;
+    }
+  }, [defaultPosition, defaultLookAt, target]);
+
+  // When target changes (hotspot selected or cleared)
+  useEffect(() => {
+    if (!target) {
+      destination.current.copy(defaultPosition);
+      lookAt.current.copy(defaultLookAt);
+      isTransitioning.current = true;
       return;
     }
 
     const [x, y, z] = target;
-
-    destination.current.set(x + 7, y + 3, z + 9);
+    // Inspect target from an elevated viewing angle
+    destination.current.set(x + 7, y + 3.2, z + 9);
     lookAt.current.set(x, y, z);
-  }, [target]);
+    isTransitioning.current = true;
+  }, [target, defaultPosition, defaultLookAt]);
 
-  useFrame((state) => {
-    const t = state.clock.elapsedTime;
+  // Listen for vardha-reset-camera to trigger smooth return
+  useEffect(() => {
+    const handleReset = () => {
+      destination.current.copy(defaultPosition);
+      lookAt.current.copy(defaultLookAt);
+      isTransitioning.current = true;
+    };
+    window.addEventListener("vardha-reset-camera", handleReset);
+    return () => window.removeEventListener("vardha-reset-camera", handleReset);
+  }, [defaultPosition, defaultLookAt]);
 
-    const targetPosition = destination.current.clone();
+  useFrame(() => {
+    if (isTransitioning.current) {
+      camera.position.lerp(destination.current, 0.05);
 
-    if (!target) {
-      targetPosition.x += Math.sin(t * 0.15) * 0.7;
-      targetPosition.y += Math.sin(t * 0.2) * 0.18;
+      if (controlsRef.current) {
+        controlsRef.current.target.lerp(lookAt.current, 0.05);
+        controlsRef.current.update();
+      } else {
+        camera.lookAt(lookAt.current);
+      }
+
+      // Once arrived close to destination, stop lerping so OrbitControls has full control
+      if (camera.position.distanceTo(destination.current) < 0.1) {
+        camera.position.copy(destination.current);
+        if (controlsRef.current) {
+          controlsRef.current.target.copy(lookAt.current);
+          controlsRef.current.update();
+        }
+        isTransitioning.current = false;
+      }
     }
-
-    if (night) {
-      targetPosition.z += 0.25;
-    }
-
-    camera.position.lerp(targetPosition, 0.025);
-
-    const currentLook = new THREE.Vector3();
-    currentLook.copy(lookAt.current);
-
-    camera.lookAt(currentLook);
   });
 
   return null;
@@ -648,12 +704,25 @@ function Scene({
 }) {
   const [cameraTarget, setCameraTarget] =
     useState<[number, number, number] | null>(null);
+  const controlsRef = useRef<any>(null);
 
   const handleHotspot = (item: HotspotData) => {
     setActiveHotspot(item.id);
     setCameraTarget(item.position);
     onHotspotSelect?.(item.id);
   };
+
+  useEffect(() => {
+    const handleReset = () => {
+      setActiveHotspot(null);
+      setCameraTarget(null);
+    };
+
+    window.addEventListener("vardha-reset-camera", handleReset);
+    return () => {
+      window.removeEventListener("vardha-reset-camera", handleReset);
+    };
+  }, [setActiveHotspot]);
 
   return (
     <>
@@ -667,7 +736,11 @@ function Scene({
         far={200}
       />
 
-      <CameraController target={cameraTarget} night={night} />
+      <CameraController
+        target={cameraTarget}
+        night={night}
+        controlsRef={controlsRef}
+      />
 
       <ambientLight
         intensity={night ? 0.24 : 1.3}
@@ -732,14 +805,20 @@ function Scene({
       )}
 
       <OrbitControls
+        ref={controlsRef}
         enablePan={false}
         enableZoom={interactive}
-        minDistance={14}
-        maxDistance={38}
+        minDistance={12}
+        maxDistance={44}
         minPolarAngle={Math.PI * 0.28}
         maxPolarAngle={Math.PI * 0.46}
-        dampingFactor={0.04}
+        dampingFactor={0.05}
         enableDamping
+        target={[0, 6.8, 0]}
+        touches={{
+          ONE: THREE.TOUCH.ROTATE,
+          TWO: THREE.TOUCH.DOLLY_PAN,
+        }}
       />
     </>
   );
@@ -753,6 +832,7 @@ export default function ArchitecturalScene({
   interactive = true,
   onHotspotSelect,
   className = "",
+  showHud = false,
 }: ArchitecturalSceneProps) {
   const [night, setNight] = useState(false);
   const [activeHotspot, setActiveHotspot] = useState<string | null>(null);
@@ -776,14 +856,28 @@ export default function ArchitecturalScene({
     return () => observer.disconnect();
   }, []);
 
+  // Sync external reset camera events
+  useEffect(() => {
+    const handleReset = () => {
+      setActiveHotspot(null);
+    };
+
+    window.addEventListener("vardha-reset-camera", handleReset);
+    return () => {
+      window.removeEventListener("vardha-reset-camera", handleReset);
+    };
+  }, []);
+
   return (
     <div
-      className={`relative h-full min-h-[560px] w-full overflow-hidden ${className}`}
+      className={`relative h-full w-full overflow-hidden ${className}`}
+      style={{ touchAction: "pan-y" }}
     >
       {/* 3D Canvas */}
       <Canvas
         shadows
-        dpr={[1, 1.8]}
+        dpr={[1, Math.min(typeof window !== "undefined" ? window.devicePixelRatio : 1, 2)]}
+        style={{ touchAction: "pan-y", width: "100%", height: "100%" }}
         gl={{
           antialias: true,
           alpha: false,
@@ -799,61 +893,66 @@ export default function ArchitecturalScene({
         />
       </Canvas>
 
-      {/* Top architectural HUD */}
-      <div className="pointer-events-none absolute left-5 top-5 md:left-8 md:top-8">
-        <div className="border border-white/15 bg-black/20 px-4 py-3 backdrop-blur-md">
-          <div className="text-[9px] tracking-[0.28em] text-[#d5b06a]">
-            VARDHA / ARCHITECTURE
-          </div>
+      {/* Top architectural HUD (only rendered if showHud is true) */}
+      {showHud && (
+        <div className="pointer-events-none absolute left-3 top-3 sm:left-5 sm:top-5 md:left-8 md:top-8">
+          <div className="border border-white/15 bg-black/60 px-3 py-2 sm:px-4 sm:py-3 backdrop-blur-md">
+            <div className="text-[9px] tracking-[0.28em] text-[#d5b06a]">
+              VARDHA / ARCHITECTURE
+            </div>
 
-          <div className="mt-1 text-[11px] tracking-[0.18em] text-white/70">
-            {night ? "NIGHT EXPERIENCE" : "DAY EXPERIENCE"}
-          </div>
-        </div>
-      </div>
-
-      {/* Bottom HUD */}
-      <div className="pointer-events-none absolute bottom-5 left-5 right-5 flex items-end justify-between md:bottom-8 md:left-8 md:right-8">
-        <div>
-          <div className="text-[9px] tracking-[0.3em] text-white/45">
-            INTERACTIVE ARCHITECTURAL MODEL
-          </div>
-
-          <div className="mt-2 max-w-[320px] text-sm leading-6 text-white/70">
-            Explore the building, discover architectural zones and move
-            around the project.
+            <div className="mt-0.5 sm:mt-1 text-[10px] sm:text-[11px] tracking-[0.18em] text-white/70">
+              {night ? "NIGHT EXPERIENCE" : "DAY EXPERIENCE"}
+            </div>
           </div>
         </div>
+      )}
 
-        <div className="hidden text-right md:block">
-          <div className="text-[9px] tracking-[0.3em] text-[#d5b06a]">
-            DRAG TO EXPLORE
+      {/* Bottom HUD (only rendered if showHud is true) */}
+      {showHud && (
+        <div className="pointer-events-none absolute bottom-3 left-3 right-3 sm:bottom-5 sm:left-5 sm:right-5 flex items-end justify-between md:bottom-8 md:left-8 md:right-8">
+          <div>
+            <div className="text-[9px] tracking-[0.3em] text-white/45">
+              INTERACTIVE ARCHITECTURAL MODEL
+            </div>
+
+            <div className="mt-1 sm:mt-2 max-w-[320px] text-xs sm:text-sm leading-5 sm:leading-6 text-white/70">
+              Explore the building, discover architectural zones and move
+              around the project.
+            </div>
           </div>
 
-          <div className="mt-1 text-[9px] tracking-[0.2em] text-white/35">
-            SCROLL / ZOOM / DISCOVER
+          <div className="hidden text-right md:block">
+            <div className="text-[9px] tracking-[0.3em] text-[#d5b06a]">
+              DRAG TO EXPLORE
+            </div>
+
+            <div className="mt-1 text-[9px] tracking-[0.2em] text-white/35">
+              SCROLL / ZOOM / DISCOVER
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
-      {/* Active hotspot indicator */}
+      {/* Active hotspot indicator reset button */}
       {activeHotspot && (
-        <div className="absolute right-5 top-5 md:right-8 md:top-8">
+        <div className="absolute right-3 top-3 sm:right-5 sm:top-5 md:right-8 md:top-8 z-20">
           <button
             onClick={() => {
               setActiveHotspot(null);
               window.dispatchEvent(new Event("vardha-reset-camera"));
             }}
-            className="border border-white/15 bg-black/40 px-4 py-3 text-[9px] tracking-[0.22em] text-white/70 backdrop-blur-md transition hover:border-[#d5b06a]/50 hover:text-[#d5b06a]"
+            aria-label="Exit hotspot view"
+            className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center border border-white/20 bg-black/70 px-3.5 py-2 text-[10px] sm:text-[11px] font-mono tracking-[0.2em] text-white/90 backdrop-blur-md transition-all hover:border-[#d5b06a]/70 hover:text-[#d5b06a] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d5b06a]"
           >
             RESET VIEW
           </button>
         </div>
       )}
 
-      {/* Gold corner graphics */}
-      <div className="pointer-events-none absolute left-0 top-0 h-16 w-16 border-l border-t border-[#d5b06a]/30" />
-      <div className="pointer-events-none absolute bottom-0 right-0 h-16 w-16 border-b border-r border-[#d5b06a]/30" />
+      {/* Gold corner graphics (desktop only where corners are square) */}
+      <div className="hidden lg:block pointer-events-none absolute left-0 top-0 h-16 w-16 border-l border-t border-[#d5b06a]/30" />
+      <div className="hidden lg:block pointer-events-none absolute bottom-0 right-0 h-16 w-16 border-b border-r border-[#d5b06a]/30" />
     </div>
   );
 }

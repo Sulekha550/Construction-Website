@@ -21,7 +21,7 @@ function PublicLayout() {
     <>
       <Navbar />
 
-      <main className="relative overflow-hidden">
+      <main className="relative overflow-x-hidden">
         <PageTransition>
           <Routes>
             <Route path="/" element={<Home />} />

@@ -532,15 +532,10 @@ function GalleryPhoto({
       ) : (
 
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-[var(--gallery-surface)] text-[var(--gallery-accent)]">
-
           <Building2 size={30} strokeWidth={1} />
-
-          <span className="text-[9px] uppercase tracking-[0.2em] text-[var(--gallery-muted)]">
-
+          <span className="font-mono text-xs uppercase tracking-wider text-[var(--gallery-muted)]">
             Vardha Builders
-
           </span>
-
         </div>
 
       )}
@@ -982,137 +977,79 @@ export default function Gallery() {
         <div className="absolute inset-0 bg-gradient-to-r from-[#0d0e0d]/75 via-[#0d0e0d]/25 to-transparent" />
 
         {/* Hero content */}
-
         <div className="relative z-10 mx-auto flex min-h-[100svh] w-full max-w-[1800px] flex-col justify-end px-5 pb-7 pt-28 sm:px-7 sm:pb-9 sm:pt-32 md:px-10 md:pb-12 lg:px-16 lg:pb-14 xl:px-20">
-
           <div className="max-w-[900px]">
-
             <div className="gallery-hero-eyebrow mb-5 flex items-center gap-3 sm:mb-6">
-
               <span className="h-px w-8 bg-[var(--gallery-accent)]" />
-
-              <span className="text-[9px] uppercase tracking-[0.2em] text-[#ded1b8] sm:text-[10px] sm:tracking-[0.24em]">
-
+              <span className="font-mono text-xs uppercase tracking-wider text-[var(--gallery-accent)]">
                 Vardha Builders · Project Gallery
-
               </span>
-
             </div>
 
             <h1 className="font-display text-[clamp(3rem,8vw,7.5rem)] font-medium leading-[0.9] tracking-[-0.06em] text-white">
-
               <span className="block overflow-hidden pb-1">
-
                 <span className="gallery-hero-title-line block">
-
                   The Art of
-
                 </span>
-
               </span>
-
               <span className="block overflow-hidden pb-1">
-
                 <span className="gallery-hero-title-line block text-[var(--gallery-accent)]">
-
                   Building.
-
                 </span>
-
               </span>
-
             </h1>
 
-            <p className="gallery-hero-description mt-5 max-w-[470px] text-[12px] leading-6 text-white/80 sm:mt-6 sm:text-[13px] sm:leading-7 md:text-[14px]">
-
+            <p className="gallery-hero-description mt-5 max-w-[490px] text-xs leading-relaxed text-white/80 sm:mt-6 sm:text-sm sm:leading-7 md:text-base">
               A closer look at the process, people and precision behind
-
               creating spaces designed for the way we live.
-
             </p>
 
-            <div className="gallery-hero-meta mt-6 flex flex-wrap items-center gap-x-6 gap-y-4 sm:mt-8 sm:gap-x-8">
-
+            <div className="gallery-hero-meta mt-7 flex flex-col items-start gap-4 sm:mt-8">
               <button
-
                 type="button"
-
                 onClick={scrollToGallery}
-
-                className="group inline-flex min-h-12 items-center gap-4 border border-[var(--gallery-accent)] px-5 py-3 text-[9px] uppercase tracking-[0.15em] text-white transition-all duration-300 hover:bg-[var(--gallery-accent)] hover:text-[#171816] sm:px-6 sm:text-[10px]"
-
+                className="group inline-flex min-h-12 items-center gap-3.5 rounded-full bg-[var(--gallery-accent)] px-7 py-3.5 font-mono text-xs font-semibold uppercase tracking-wider text-white shadow-lg transition-all duration-300 hover:bg-[var(--gallery-accent)]/90 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--gallery-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0d0e0d]"
               >
-
-                Explore Gallery
-
+                <span>Explore Gallery</span>
                 <ArrowDown
-
-                  size={14}
-
+                  size={15}
                   className="transition-transform duration-300 group-hover:translate-y-1"
-
                 />
-
               </button>
 
-              <span className="text-[9px] tracking-[0.12em] text-white/70 sm:text-[10px]">
-
-                01 — 16 / Selected Moments
-
-              </span>
-
+              <div className="flex items-center gap-2.5 font-mono text-xs uppercase tracking-wider text-white/75">
+                <span className="h-1.5 w-1.5 rounded-full bg-[var(--gallery-accent)]" />
+                <span>01 — {String(galleryImages.length).padStart(2, "0")} / Visual Archive</span>
+              </div>
             </div>
-
           </div>
 
           {/* Bottom information */}
-
           <div className="mt-10 flex items-end justify-between border-t border-white/30 pt-4 sm:mt-12 sm:pt-5 lg:mt-14">
-
-            <span className="text-[8px] uppercase tracking-[0.16em] text-white/70 sm:text-[9px] sm:tracking-[0.2em]">
-
+            <span className="font-mono text-xs tracking-wider text-white/80">
               Built with intention
-
             </span>
-
-            <span className="text-right text-[8px] uppercase tracking-[0.16em] text-white/70 sm:text-[9px] sm:tracking-[0.2em]">
-
+            <span className="text-right font-mono text-xs tracking-wider text-white/80">
               Gorakhpur · India
-
             </span>
-
           </div>
-
         </div>
 
         {/* Vertical side label */}
-
         <div className="absolute right-7 top-1/2 hidden -translate-y-1/2 [writing-mode:vertical-rl] lg:block xl:right-10">
-
-          <span className="text-[9px] uppercase tracking-[0.24em] text-white/70">
-
+          <span className="font-mono text-xs uppercase tracking-wider text-white/70">
             Architecture in Motion · Vardha
-
           </span>
-
         </div>
 
         {/* Scroll indicator */}
-
         <button
-
           type="button"
-
           onClick={scrollToGallery}
-
           aria-label="Scroll to gallery"
-
-          className="absolute bottom-[115px] right-7 hidden h-11 w-11 items-center justify-center rounded-full border border-white/30 text-white/80 transition-all duration-300 hover:border-[var(--gallery-accent)] hover:text-[var(--gallery-accent)] lg:flex xl:right-10"
-
+          className="absolute bottom-[115px] right-7 hidden h-11 w-11 items-center justify-center rounded-full border border-white/30 text-white/80 transition-all duration-300 hover:border-[var(--gallery-accent)] hover:text-[var(--gallery-accent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--gallery-accent)] lg:flex xl:right-10"
         >
-
           <ArrowDown size={15} />
-
         </button>
 
       </section>

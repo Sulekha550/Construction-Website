@@ -20,7 +20,7 @@ export default function Footer() {
         {/* Top Callout */}
         <div className="mb-12 flex flex-col gap-6 border-b border-white/10 pb-12 md:flex-row md:items-end md:justify-between">
           <div>
-            <div className="mb-3 flex items-center gap-3 font-mono text-[9px] uppercase tracking-[0.3em] text-[#c7a15c]">
+            <div className="mb-3 flex items-center gap-3 font-mono text-xs font-semibold uppercase tracking-[0.22em] text-[#c7a15c]">
               <span className="h-px w-8 bg-[#c7a15c]" />
               <span>Vardha Builders</span>
             </div>
@@ -33,12 +33,13 @@ export default function Footer() {
 
           <Link
             to="/contact"
-            className="group inline-flex w-fit items-center gap-3 rounded-full border border-[#c7a15c]/40 bg-[#c7a15c]/5 px-6 py-3.5 font-mono text-[9px] font-semibold uppercase tracking-[0.2em] text-[#c7a15c] transition-all hover:border-[#c7a15c] hover:bg-[#c7a15c] hover:text-[#0b0c0c]"
+            className="btn-gold group text-xs sm:text-sm tracking-[0.14em]"
           >
-            Start a Conversation
+            <span>Start a Conversation</span>
             <ArrowUpRight
-              size={13}
-              className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+              size={15}
+              strokeWidth={2}
+              className="transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
             />
           </Link>
         </div>
@@ -57,14 +58,14 @@ export default function Footer() {
               architecture, structural engineering, and timeless craftsmanship.
             </p>
 
-            <div className="font-mono text-[8px] uppercase tracking-[0.25em] text-white/30">
+            <div className="font-mono text-xs uppercase tracking-wider text-white/50">
               Gorakhpur, Uttar Pradesh
             </div>
           </div>
 
           {/* Navigation */}
           <div>
-            <h3 className="mb-4 font-mono text-[9px] uppercase tracking-[0.25em] text-[#c7a15c]">
+            <h3 className="mb-4 font-mono text-xs font-semibold uppercase tracking-[0.2em] text-[#c7a15c]">
               Navigation
             </h3>
 
@@ -104,7 +105,7 @@ export default function Footer() {
 
           {/* Explore */}
           <div>
-            <h3 className="mb-4 font-mono text-[9px] uppercase tracking-[0.25em] text-[#c7a15c]">
+            <h3 className="mb-4 font-mono text-xs font-semibold uppercase tracking-[0.2em] text-[#c7a15c]">
               Explore
             </h3>
 
@@ -138,33 +139,46 @@ export default function Footer() {
 
           {/* Contact Details */}
           <div>
-            <h3 className="mb-4 font-mono text-[9px] uppercase tracking-[0.25em] text-[#c7a15c]">
+            <h3 className="mb-4 font-mono text-xs font-semibold uppercase tracking-[0.2em] text-[#c7a15c]">
               Direct Contact
             </h3>
 
-            <div className="space-y-2.5 text-xs text-white/60">
-              <p className="text-white/80">Vardha Builders Corporate Office</p>
-              <p>Gorakhpur, Uttar Pradesh, India</p>
-              <p className="font-mono text-[11px] text-white/50">
-                Direct WhatsApp Inquiries
-              </p>
-              <Link
-                to="/contact"
-                className="inline-block text-[#c7a15c] underline underline-offset-4 transition-colors hover:text-[#dfbb78]"
-              >
-                Submit an Online Inquiry →
-              </Link>
+            <div className="space-y-3 text-sm text-white/70">
+              <p className="font-medium text-white/90">Vardha Builders Corporate Office</p>
+              <p className="text-xs text-white/60">Gorakhpur, Uttar Pradesh, India</p>
+              <div className="pt-1">
+                <a
+                  href="https://wa.me/919999999999?text=Hello%20Vardha%20Builders%2C%20I%20would%20like%20to%20know%20more%20about%20your%20projects."
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group inline-flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3.5 py-2 text-xs font-medium text-emerald-300 transition-all hover:border-emerald-400 hover:bg-emerald-500/20"
+                >
+                  <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <span>Direct WhatsApp Inquiries</span>
+                  <span className="font-mono text-[11px] text-emerald-400/80">→</span>
+                </a>
+              </div>
+              <div>
+                <Link
+                  to="/contact"
+                  className="inline-flex items-center gap-1.5 text-xs font-medium text-[#c7a15c] underline underline-offset-4 transition-colors hover:text-[#dfbb78]"
+                >
+                  Submit an Online Inquiry →
+                </Link>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Bottom Credits */}
-        <div className="mt-14 flex flex-col gap-4 border-t border-white/10 pt-6 font-mono text-[9px] uppercase tracking-[0.16em] text-white/35 sm:flex-row sm:items-center sm:justify-between">
+        {/* Bottom Credits (Issues 6 & 7: Readable Text & Contrast) */}
+        <div className="mt-14 flex flex-col gap-4 border-t border-white/10 pt-6 font-mono text-xs text-white/60 sm:flex-row sm:items-center sm:justify-between">
           <p>© 2026 Vardha Builders. Building Dreams Since 2014.</p>
 
-          <div className="flex gap-6">
-            <span className="text-white/20">Architectural Excellence</span>
-            <span>All Rights Reserved</span>
+          <div className="flex items-center gap-6">
+            <span className="font-medium text-[#c7a15c]/90">
+              Architectural Excellence
+            </span>
+            <span className="text-white/40">All Rights Reserved</span>
           </div>
         </div>
       </div>
